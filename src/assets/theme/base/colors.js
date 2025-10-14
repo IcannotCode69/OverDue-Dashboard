@@ -116,4 +116,9 @@ export default {
     error: "#ef4444",
     success: "#10b981",
   },
+
+  // Tabs
+  tabs: {
+    indicator: { boxShadow: "#e5e7eb" },
+  },
 };

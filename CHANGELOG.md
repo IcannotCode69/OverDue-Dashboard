@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [2025-01-14 03:30] Runtime fixes and RTL removal
+- Files: src/App.js, src/assets/theme/base/colors.js, src/assets/theme/base/boxShadows.js, package.json
+- Summary: Fixed runtime error by adding missing tabs.indicator to colors.js, removed RTL support to eliminate warnings, simplified App.js structure
+- Reason: Resolve "Cannot read properties of undefined (reading 'indicator')" error and clean up unnecessary RTL dependencies
+- Notes: Development server now runs cleanly without errors, build size reduced to 136.62 kB, removed stylis-plugin-rtl dependency
+
 ## [2025-01-14 03:25] Final template cleanup completion
 - Files: src/assets/theme/base/colors.js, src/assets/theme/base/typography.js, src/components/*, src/examples/*, config files
 - Summary: Neutralized color palette to modern neutral theme, updated fonts to Inter/system fonts, removed non-essential Vui components, cleaned Configurator and unused examples, removed template config files
