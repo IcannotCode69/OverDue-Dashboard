@@ -83,6 +83,12 @@ export default {
   },
 
   gradients: {
+    card: {
+      main: "rgba(17, 24, 39, 0.9)",
+      state: "rgba(31, 41, 55, 0.7)",
+      deg: "135deg",
+    },
+
     cardDark: {
       main: "linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.8) 100%)",
     },
