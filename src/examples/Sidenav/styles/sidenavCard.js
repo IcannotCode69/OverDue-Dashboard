@@ -1,16 +1,14 @@
-// Images
-import backgroundImage from "assets/images/sidenav/sidenav-card-background.png";
-
 function card(theme, ownerState) {
-  const { borders, functions, transitions, breakpoints } = theme;
+  const { borders, functions, transitions, breakpoints, palette } = theme;
   const { miniSidenav } = ownerState;
 
   const { borderRadius } = borders;
   const { pxToRem } = functions;
+  const { gradients } = palette;
 
   return {
     minWidth: "auto",
-    backgroundImage: `url(${backgroundImage})`,
+    background: gradients.cardDark.main,
     backgroundPosition: "50%",
     backgroundSize: "cover",
     borderRadius: borderRadius.xl,
