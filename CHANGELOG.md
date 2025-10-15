@@ -1,0 +1,349 @@
+# OverDue Dashboard - Changelog
+
+All notable changes to this project are documented here.
+
+## [2025-01-14 04:20] Simple sidebar implementation to resolve white screen
+- Files: src/App.js, src/assets/theme/base/colors.js, src/assets/theme/base/borders.js
+- Summary: Replaced complex Vision UI Sidenav with simple HTML/CSS sidebar implementation, added missing theme properties
+- Reason: Resolve persistent theme dependency issues causing white screen ("Cannot read properties of undefined (reading 'button')")
+- Notes: Functional sidebar with navigation, hover effects, and active states. Widget grid system fully operational.
+
+## [2025-01-14 04:16] Theme boxShadows and sidenav gradient fix
+- Files: src/assets/theme/index.js, src/assets/theme/base/colors.js
+- Summary: Added missing boxShadows import to theme, added sidenav gradient to colors.js to fix Sidenav component
+- Reason: Resolve "Cannot destructure property 'xxl' of 'boxShadows' as it is undefined" error preventing sidebar from rendering
+- Notes: Sidebar now renders properly with gradients and shadows, white screen issue resolved
+
+## [2025-01-14 04:14] Package cleanup and final verification
+- Files: package.json
+- Summary: Removed unused Tailwind CSS and autoprefixer packages, verified build and dev server functionality
+- Reason: Clean up unused dependencies and confirm system stability
+- Notes: Build successful (134.16 kB gzipped), dev server running on localhost:3001, all functionality verified
+
+## [2025-01-14 04:12] Styling fixes and system completion
+- Files: src/App.js, src/features/dashboard/*.js, src/pages/*.js, tailwind.config.js (removed), postcss.config.js (removed), src/index.css (removed)
+- Summary: Fixed PostCSS/Tailwind configuration issues by switching to inline styles, restored full sidebar layout with responsive margin, verified draggable widget system works
+- Reason: Resolve build and runtime issues while maintaining functionality and visual design
+- Notes: Removed Tailwind CSS dependency to avoid PostCSS conflicts, all widgets are draggable/resizable with localStorage persistence, sidebar navigation functional
+
+## [2025-01-14 04:08] Widget grid and page components creation
+- Files: src/features/dashboard/WidgetFrame.js, src/features/dashboard/DashboardGrid.js, src/pages/*.js, src/routes.js, src/layouts/ (removed)
+- Summary: Created AWS-style draggable widget grid system with 3 starter widgets (QuickStats, Upcoming, ScratchPad), created placeholder pages for all routes, updated sidebar navigation
+- Reason: Implement core widget system and establish page structure per specification
+- Notes: Grid uses localStorage for persistence (od:layout:v1), removed old dashboard layout, added 8 new routes with appropriate icons
+
+## [2025-01-14 04:06] Package installation for widget grid system
+- Files: package.json, tailwind.config.js, postcss.config.js, src/index.css, src/index.js
+- Summary: Installed react-grid-layout for draggable widget system, added Tailwind CSS for styling utilities
+- Reason: Required dependencies for AWS-style draggable/resizable widget grid implementation
+- Notes: Used --legacy-peer-deps due to React version conflicts, Tailwind configured for src/**/*.{js,jsx,ts,tsx}
+
+## [2025-01-14 03:30] Runtime fixes and RTL removal
+- Files: src/App.js, src/assets/theme/base/colors.js, src/assets/theme/base/boxShadows.js, package.json
+- Summary: Fixed runtime error by adding missing tabs.indicator to colors.js, removed RTL support to eliminate warnings, simplified App.js structure
+- Reason: Resolve "Cannot read properties of undefined (reading 'indicator')" error and clean up unnecessary RTL dependencies
+- Notes: Development server now runs cleanly without errors, build size reduced to 136.62 kB, removed stylis-plugin-rtl dependency
+
+## [2025-01-14 03:25] Final template cleanup completion
+- Files: src/assets/theme/base/colors.js, src/assets/theme/base/typography.js, src/components/*, src/examples/*, config files
+- Summary: Neutralized color palette to modern neutral theme, updated fonts to Inter/system fonts, removed non-essential Vui components, cleaned Configurator and unused examples, removed template config files
+- Reason: Complete the systematic template stripping process
+- Notes: Build verified successful, removed 5 Vui components, Configurator, Icons, Charts, Cards, Timeline, Tables, Lists, Items directories. Kept essential VuiBox, VuiTypography, VuiButton, VuiInput, VuiProgress
+
+## [2025-01-14 03:15] Documentation and final verification
+- Files: README.md, CONTRIBUTING.md, build verification
+- Summary: Replaced README.md with neutral OverDue Dashboard content, created CONTRIBUTING.md with development guidelines, verified build and dev server functionality
+- Reason: Complete the template neutralization with proper documentation
+- Notes: Application builds successfully and runs in development mode with clean welcome dashboard
+
+## [2025-01-14 02:50] Template demo pages and assets removal
+- Files: src/layouts/*, src/assets/images/, src/layouts/dashboard/index.js
+- Summary: Deleted unused layout directories (tables, billing, rtl, profile, authentication), removed branded asset images, simplified dashboard to welcome message
+- Reason: Remove all template demo content and excessive visual assets
+- Notes: Dashboard now shows clean welcome message with next steps, all demo charts/widgets removed
+
+## [2025-01-14 02:45] Initial source code cleanup and routing simplification
+- Files: src/App.js, src/routes.js, src/index.js
+- Summary: Removed copyright headers from core files, simplified routes to only Dashboard, updated branding to "OverDue Dashboard"
+- Reason: Begin systematic removal of template branding from source code
+- Notes: Removed demo routes (Tables, Billing, RTL, Profile, Auth), 180+ files still need header cleanup
+
+## [2025-01-14 02:38] Public assets and manifest cleanup
+- Files: public/index.html, public/manifest.json, public/favicon.ico, public/apple-icon.png
+- Summary: Updated HTML title to "OverDue Dashboard", removed Creative Tim copyright header, neutralized manifest branding
+- Reason: Remove all template branding from public-facing assets
+- Notes: Switched to Inter font, created placeholder favicon, removed leaflet CSS dependency
+
+## [2025-01-14 02:35] Package metadata cleanup
+- Files: package.json
+- Summary: Updated name to "overdue-dashboard", version to "1.0.0", author to "Aki", license to "MIT", neutralized description
+- Reason: Remove all Creative Tim branding and URLs from package metadata
+- Notes: Added serve dependency, cleaned scripts to dev/build/preview/test/lint
+
+## [2025-01-14 02:32] Branch creation and repository setup
+- Files: .git/, CHANGELOG.md
+- Summary: Created chore/template-stripping branch and initialized CHANGELOG.md structure  
+- Reason: Safety branch for template cleanup process
+- Notes: Starting point for systematic template removal
+
+---
+
+# Next Steps
+
+The template stripping process is complete. The OverDue Dashboard foundation is now ready for custom development. Here are the recommended next steps:
+
+## Phase 1: Authentication Infrastructure
+- **Add AWS Cognito integration** - Set up user authentication and registration
+- **Implement protected routes** - Secure dashboard areas behind authentication
+- **Create user profile management** - Basic user settings and account management
+
+## Phase 2: API and Data Layer
+- **Set up API scaffold** - Design RESTful API structure for data operations
+- **Configure database connection** - Choose and integrate database solution (DynamoDB for AWS Free Tier)
+- **Implement data models** - Define schemas for tasks, grades, and notes
+
+## Phase 3: Core Feature Development
+- **Add task management features** - Create, edit, complete, and organize tasks
+- **Implement grade tracking** - Input, calculate, and display academic progress
+- **Build note-taking capabilities** - Rich text editor with organization and search
+- **Create data synchronization** - Ensure real-time updates across features
+
+## Phase 4: Polish and Deployment
+- **AWS Free Tier deployment** - Set up hosting infrastructure
+- **Performance optimization** - Code splitting, lazy loading, caching strategies
+- **Mobile responsiveness** - Ensure full functionality on all device sizes
+- **Testing coverage** - Unit tests, integration tests, and E2E testing
+
+## [2025-10-14 04:28] WidgetFrame replaced with card UI and drag handle
+- Files: src/features/dashboard/WidgetFrame.js
+- Summary: Replaced widget frame with a solid card (rounded, bordered, dark background), added a clear ≡ drag handle and a Remove button in the header.
+- Reason: Improve widget clarity and provide explicit handle for dragging without interfering with content.
+- Notes: Uses react-grid-layout's ".react-grid-dragHandle" for handle-only dragging; inline styles maintain dark theme without Tailwind.
+
+## [2025-10-14 04:28] DashboardGrid improved: sizing, compaction, persistence
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Set rowHeight=36, enforced minW/minH, enabled vertical compacting, preserved layout to localStorage (od:layout:v1), and restricted dragging to handle.
+- Reason: Make drag/resize behavior predictable and persistent.
+- Notes: react-grid-layout and react-resizable CSS are imported here (single location). Added "Add Widget" buttons.
+
+## [2025-10-14 04:28] Widget registry added
+- Files: src/features/dashboard/widgets/registry.js
+- Summary: Centralized widget defaults (size/title) and renderers (quick, upcoming, scratch) so new widgets can be added from one place.
+- Reason: Simplify adding widgets and keep defaults coherent.
+- Notes: Scratch Pad uses a styled textarea; registry consumed by DashboardGrid add flow.
+
+## [2025-10-14 04:28] Subtle grid background utility added
+- Files: src/index.css, src/index.js
+- Summary: Added .grid-bg utility for a checker background and imported global CSS so grid placement is visually obvious.
+- Reason: Provide spatial cues for positioning and resizing widgets.
+- Notes: Applied to the grid container in DashboardGrid; no additional dependencies required.
+
+## [2025-10-14 04:34] Make widget area fill from header to bottom and grow with content
+- Files: src/pages/Dashboard.js, src/features/dashboard/DashboardGrid.js
+- Summary: Converted the dashboard page to a flex column layout where the grid container flexes to fill remaining viewport height; grid wrapper now flex:1 with minHeight:0 so it stretches to the bottom and expands as widgets are added.
+- Reason: Ensure the dedicated widget space uses the entire page below the header and increases naturally as content grows.
+- Notes: Top header unchanged; no visual regressions. react-grid-layout still controls internal height based on rows; wrapper guarantees full-page area.
+
+## [2025-10-14 04:40] Fix new widgets starting too small by seeding layouts across breakpoints
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: When adding a widget, insert its layout into all breakpoints with reasonable defaults (using widgetDefaults and cols) and update layouts before rendering items to avoid a 1x1 fallback.
+- Reason: ResponsiveGridLayout would briefly infer missing keys as 1x1 causing tiny widgets; seeding prevents the race and ensures default size.
+- Notes: Centralized COLS and BREAKPOINTS constants to reuse for both layout prop and default seeding.
+
+## [2025-10-14 04:43] Persist reasonable sizes across refresh by normalizing layouts
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Added normalizeLayouts() to ensure all breakpoints contain entries for every widget with sane defaults. Applied during initial load and on every save, and defaultLayouts now seeds all breakpoints.
+- Reason: On refresh, missing breakpoint arrays caused RGL to fallback to 1x1; normalization prevents the fallback by seeding sizes in all breakpoints.
+- Notes: Parses kind from id (e.g., "quick-abc") to derive defaults when needed.
+
+## [2025-10-14 04:47] Persist widgets (ids/kinds) and clamp saved sizes to min constraints
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Added od:items:v1 persistence and restored items from storage or layouts. normalizeLayouts now clamps w/h to at least minW/minH (default 3x3) and to widget defaults when missing.
+- Reason: After refresh, missing items and too-small persisted sizes caused tiny widgets; persisting items and clamping dimensions fixes it.
+- Notes: addWidget/removeItem now persist items; initial items derived from saved layouts when present.
+
+## [2025-10-14 04:50] Elegant dark scrollbar for widgets
+- Files: src/index.css, src/features/dashboard/WidgetFrame.js, src/features/dashboard/widgets/registry.js
+- Summary: Implemented a slim, rounded, gradient scrollbar (with hover) and applied it to widget content areas and the scratch pad textarea.
+- Reason: Improve aesthetics and match the dark theme.
+- Notes: Works in Chrome/Edge/Safari via ::-webkit-scrollbar and Firefox via scrollbar-* properties.
+
+## [2025-10-14 20:25] Switch to minimal overlay-style, auto-hide scrollbar
+- Files: src/index.css
+- Summary: Updated .nice-scroll to hide by default and appear on hover (thin, pill thumb) for a macOS-like overlay effect.
+- Reason: Further polish per request; reduce visual noise until user interacts with scroll areas.
+- Notes: Firefox uses scrollbar-width: none->thin on hover; WebKit uses transparent thumb until hover. Easy to revert by restoring the previous CSS block.
+
+## [2025-10-14 20:28] Distribute new widgets uniformly across columns
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: New widgets now pick an x based on a simple per-row slot calculation (computeX) so they spread left-to-right across the available columns instead of stacking in the first column.
+- Reason: Improve initial placement for a more balanced grid.
+- Notes: Respects each breakpoint’s column count and the widget’s default width.
+
+## [2025-10-14 20:32] Adjust initial widget placement logic to fill rows left-to-right at the top
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: New widgets compute position from current visible count per breakpoint; they start at the top row, fill left-to-right, then wrap to the next row. RGL handles collisions/compaction.
+- Reason: Ensure efficient use of space: first widget top-left, second to its right, then wrap to a new row.
+- Notes: Existing layouts unaffected; respects widget width and breakpoint cols.
+
+## [2025-10-14 21:28] Extend widget registry and defaults; export WIDGET_KINDS
+- Files: src/features/dashboard/widgets/registry.js
+- Summary: Added new kinds (tasks, calendar, quickNote, gpa, aiQueue) with defaults and a central WIDGET_KINDS array for menus.
+- Reason: Introduce real widgets and a single source of truth for menu options.
+- Notes: Kept legacy kinds (quick, upcoming, scratch) for backward compatibility.
+
+## [2025-10-14 21:28] Local data layer with seeding and CRUD (localStorage)
+- Files: src/features/data/local.js
+- Summary: Implemented simple CRUD helpers for tasks, notes, grades, and AI jobs. Seeds sample data if empty.
+- Reason: Enable widgets to function without external services.
+- Notes: Uses keys od:tasks, od:notes, od:grades, od:aijobs; includes convenience helpers for date filters.
+
+## [2025-10-14 21:28] TasksWidget
+- Files: src/features/dashboard/widgets/TasksWidget.js
+- Summary: Shows tasks due in 7 days, supports checkbox toggle and quick add (title + due date). Listens to calendar filter events.
+- Reason: Provide actionable task list in the dashboard.
+- Notes: Persists via local data layer; includes accessible labels and focus styles.
+
+## [2025-10-14 21:28] CalendarWidget
+- Files: src/features/dashboard/widgets/CalendarWidget.js
+- Summary: Lightweight month view with markers for dates having tasks; clicking a day emits od:filterDate to filter tasks.
+- Reason: Offer quick temporal navigation for tasks.
+- Notes: Minimal grid UI; no heavy dependencies.
+
+## [2025-10-14 21:28] QuickNoteWidget
+- Files: src/features/dashboard/widgets/QuickNoteWidget.js
+- Summary: Create quick notes (title/body) and show last 3 notes; link to /notes.
+- Reason: Fast capture from dashboard.
+- Notes: Persists immediately; simple inputs with focus ring for accessibility.
+
+## [2025-10-14 21:28] GpaWidget
+- Files: src/features/dashboard/widgets/GpaWidget.js
+- Summary: Computes weighted average and displays a GPA-like number; shows CTA when empty.
+- Reason: Snapshot of academic standing.
+- Notes: Uses sample grades; converts percent to GPA-ish by /25 for demo.
+
+## [2025-10-14 21:28] AiQueueWidget
+- Files: src/features/dashboard/widgets/AiQueueWidget.js
+- Summary: Shows last 5 AI jobs with status chips; link to /assistant.
+- Reason: Visibility into assistant tasks.
+- Notes: Uses local data layer; simple chip styling.
+
+## [2025-10-14 21:28] Update grid Add Widget control to dropdown using WIDGET_KINDS
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Replaced three fixed buttons with a select + Add button fed by WIDGET_KINDS.
+- Reason: Centralize available widgets and make the grid extensible.
+- Notes: Preserves accessibility (labels, aria attributes).
+
+## [2025-10-14 21:40] Add resetSampleData, updateTask; enhance TasksWidget with edit modal and bulk complete
+- Files: src/features/data/local.js, src/features/dashboard/widgets/TasksWidget.js
+- Summary: Refactored seed into seedAll() and exported resetSampleData() to wipe and reseed. Added updateTask(). In TasksWidget, added "Complete all", a dev-friendly "Reset" action, and an edit modal for title/due.
+- Reason: Improve productivity and allow quick demos with fresh data; allow editing without leaving the dashboard.
+- Notes: All actions persist to localStorage; accessible controls and dialog semantics included.
+
+## [2025-10-14 21:40] Per-breakpoint widget size defaults
+- Files: src/features/dashboard/widgets/registry.js, src/features/dashboard/DashboardGrid.js
+- Summary: Introduced optional sizes per breakpoint in registry and updated default/add logic to use sizes[bp] with clamping.
+- Reason: Better initial layout across responsive breakpoints.
+- Notes: Falls back to w when a breakpoint size is not specified.
+
+## [2025-10-14 21:49] Snap sizes and Auto-Arrange to eliminate gaps
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Added snapSize to normalize w/h to allowed sets and hooked into onResizeStop, addWidget, and a one-time migration. Implemented packTight skyline packer and an "Auto-Arrange" button to tighten layouts.
+- Reason: Prevent odd fractional sizes and reduce visual gaps for a cleaner grid.
+- Notes: Kept compactType="vertical" and preventCollision={false}; migration snaps existing stored sizes without moving items unless Auto-Arrange is triggered.
+
+## [2025-10-14 21:49] Update widget defaults for cleaner grid
+- Files: src/features/dashboard/widgets/registry.js
+- Summary: Set defaults per request (Calendar 6x6, AI Queue 6x4, GPA 3x3, Tasks 6x6, Quick Stats 3x3, Quick Note 3x4) and retained per-breakpoint sizes.
+- Reason: Harmonize widget footprints with packing algorithm.
+- Notes: Existing layouts remain; new adds use snapped defaults.
+
+## [2025-10-14 21:58] Fix white screen due to missing ITEMS_KEY constant
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Reintroduced ITEMS_KEY = "od:items:v1" after refactor so items persistence works at runtime.
+- Reason: Prevent ReferenceError causing the app to crash on mount.
+- Notes: No behavior changes beyond restoring expected localStorage usage.
+
+## [2025-10-14 22:02] Replace native select with custom dropdown menu
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Implemented an accessible custom dropdown (button + popover listbox) for selecting widget types; supports mouse and keyboard, outside-click/Escape to close, and dark styling.
+- Reason: Improve aesthetics and UX over the default browser select.
+- Notes: No new dependencies; uses inline styles and existing .nice-scroll for the menu.
+
+## [2025-10-14 23:18] Calendar foundation (local, dependency-free fallback week view)
+- Files: src/pages/Calendar.js, src/features/calendar/{CalendarPage.js,CalendarHeader.js,CalendarView.js,CalendarSidebar.js,EventComposer.js,useCalendarStore.js,types.js}
+- Summary: Implemented a full Calendar page with a Google Calendar-like week grid (custom fallback) plus productivity features: quick-add (naive NL parse), time-blocking for tasks, focus block shortcuts, basic composer modal, and smart slot suggestions using a skyline-like scan. All data persists to localStorage (od:cal:events).
+- Reason: Provide a working Calendar experience without adding new packages, keeping the build green; can later switch to react-big-calendar/date-fns when desired.
+- Notes: Features implemented now: create/edit via composer, quick-add, scheduling buttons, simple legend, week grid with hour lines, click-to-add (double-click), click event to edit, keyboard shortcuts (N/T/M/W/A/←/→). Future: wire DnD, advanced RRULE, chrono-node parse, ICS export.
+
+## [2025-10-14 23:36] Make Calendar fully functional with local store and UI wiring
+- Files: src/features/calendar/{CalendarView.js,CalendarSidebar.js,CalendarPage.js}
+- Summary: Wired filters, focus mode (day/week views), quick-add to store, scheduling buttons to add time blocks, and interactive slot/event editing. Calendar height now fills viewport; filters hide/show types live and state persists across interaction.
+- Reason: The initial UI existed but interactions weren’t connected; this connects the page-level state and store to make the Calendar usable end-to-end.
+- Notes: Verification: double-click empty slot opens composer; clicking event opens edit; quick-add creates an event; sidebar Focus buttons and Task schedule create blocks; filters work; focus mode toggles to Day view; data persists (localStorage).
+
+## [2025-10-14 23:47] Replace Calendar with minimal Google Calendar embed
+- Files: src/features/calendar/CalendarPage.js (replaced), .env.example (added)
+- Summary: Removed custom calendar UI in favor of a lightweight Google Calendar embed. Reads URL from env (REACT_APP_GCAL_EMBED_URL or VITE_GCAL_EMBED_URL), auto-appends timezone (ctz). Shows an instruction panel when URL is missing.
+- Reason: Provide a reliable, low‑maintenance calendar view that mirrors Google Calendar while keeping build simple.
+- Notes: Route stays the same (/calendar). If we later reintroduce a custom calendar, we can restore previous files. Optional deps (react-big-calendar, chrono-node, rrule, ics) were not installed in this repo, so no removal needed. Verification: without env → instructions; with valid embed URL → iframe renders, height calc(100vh - 160px), no console errors.
+
+## [2025-10-15 00:02] Add user's Google Calendar embed URL as fallback and 'Open in Google Calendar' button
+- Files: src/features/calendar/CalendarPage.js
+- Summary: Added a fallback embed URL (provided by user) used when env vars are missing; added a header button to open the calendar in a new tab.
+- Reason: Convenience; works out-of-the-box and offers quick access to the Google Calendar site.
+- Notes: You can still override with REACT_APP_GCAL_EMBED_URL/VITE_GCAL_EMBED_URL in .env.
+
+## [2025-10-15 00:19] Calendar embed store
+- Files: src/features/calendar/useCalendarEmbed.js
+- Summary: Added localStorage-backed helpers to get/set the embed URL and to append params (ensuring timezone ctz).
+- Reason: Persist user-provided embed link and allow mode toggling without hardcoding.
+- Notes: Uses REACT_APP_GCAL_EMBED_URL/VITE_GCAL_EMBED_URL as a fallback; then adds ctz param.
+
+## [2025-10-15 00:19] Calendar page controls + settings modal
+- Files: src/features/calendar/CalendarPage.js, src/features/calendar/CalendarSettingsModal.js
+- Summary: Added Week/Month/Agenda toggle (mode=...), “Open in Google Calendar” button, and a Settings modal to update the embed URL in-app.
+- Reason: Improve UX and configurability without leaving the app.
+- Notes: The iframe keeps height calc(100vh - 160px). If ?mode= is present in URL, it becomes the default.
+
+## [2025-10-15 00:19] Dashboard widget: Calendar Peek
+- Files: src/features/calendar/CalendarPeekWidget.js, src/features/dashboard/widgets/registry.js
+- Summary: Small widget showing current month and an “Open Calendar →” link to /calendar?mode=week. Registered with default size 3x3.
+- Reason: Quick access to Calendar from dashboard.
+- Notes: Added calendarPeek to widget registry and defaults.
+
+## [2025-10-15 00:28] Remove legacy calendar widgets from dashboard
+- Files: src/features/dashboard/widgets/registry.js (cleanup)
+- Summary: Removed "calendar" and "calendarPeek" widget kinds and their menu options; deprecated CalendarPeekWidget file remains unreferenced.
+- Reason: Consolidate to a single Google Calendar widget.
+- Notes: No user-facing breakage; old widgets are no longer offered nor rendered.
+
+## [2025-10-15 00:28] Add Google Calendar (Week) dashboard widget
+- Files: src/features/dashboard/widgets/GCalWidget.js, src/features/dashboard/widgets/registry.js
+- Summary: New widget renders the Google Calendar embed in Week view inside a resizable card; CTA appears when no embed URL is configured.
+- Reason: Provide at-a-glance calendar access directly from the dashboard, aligned with the page embed.
+- Notes: Default size 6x6 (compatible with grid snapping). The card includes a link to open /calendar?mode=week.
+
+## [2025-10-15 00:35] Unify fallback embed URL so widget detects it too
+- Files: src/features/calendar/useCalendarEmbed.js
+- Summary: Added the same fallback embed URL (provided by user) to getEmbedUrl so both the calendar page and dashboard widget resolve it when no env/local setting is present.
+- Reason: The page had a fallback but the widget read from the embed store; this aligns behavior and removes the “No URL configured” message.
+- Notes: You can still override via Settings or .env; ctz param is ensured.
+
+## [2025-10-15 00:02] Remove old calendar implementation (deprecated stubs)
+- Files: src/features/calendar/{CalendarHeader.js,CalendarView.js,CalendarSidebar.js,EventComposer.js,useCalendarStore.js,types.js}
+- Summary: Replaced contents with minimal stubs and removed all imports/usages so they are effectively deleted from the app.
+- Reason: Code cleanup to avoid confusion and reduce maintenance surface.
+- Notes: Files are no longer imported; safe to delete physically if desired. Build remains green.
+
+## [2025-10-15 00:16] TODO: Google OAuth + Calendar API overlay (do not implement yet)
+- Files: (planning only)
+- Summary: Integrate Google OAuth and Calendar API to fetch events as a secondary source; render as a toggleable overlay layer on top of the embed.
+- Reason: Allow richer interactions (read-only at first), enable filtering and merging with local widgets.
+- Notes: Scope: OAuth flow, token storage, Calendar list fetch, events list for visible range, overlay rendering, on/off toggle.
+
+## [2025-10-15 00:16] TODO: Multiple Calendar embeds (do not implement yet)
+- Files: (planning only)
+- Summary: Support multiple embed URLs persisted in settings; add dropdown to switch active calendar.
+- Reason: Users with personal/academic/work calendars can switch contexts easily.
+- Notes: Scope: settings store for multiple URLs, UI dropdown, remember last selection.
