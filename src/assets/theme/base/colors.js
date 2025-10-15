@@ -21,6 +21,7 @@ export default {
   white: {
     main: "#ffffff",
     focus: "#ffffff",
+    button: "#ffffff",
   },
 
   black: {
@@ -82,6 +83,17 @@ export default {
     body: "#111827",
   },
 
+  logo: {
+    main: "#ffffff",
+    focus: "#ffffff",
+  },
+
+  // Border colors for various UI components
+  borderCol: {
+    navbar: "rgba(226, 232, 240, 0.3)",
+    card: "rgba(226, 232, 240, 0.2)",
+  },
+
   gradients: {
     card: {
       main: "rgba(17, 24, 39, 0.9)",
@@ -90,28 +102,81 @@ export default {
     },
 
     cardDark: {
-      main: "linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.8) 100%)",
+      main: "rgba(17, 24, 39, 0.8)",
+      state: "rgba(31, 41, 55, 0.8)",
+      deg: "135deg",
     },
 
     primary: {
-      main: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+      main: "#3b82f6",
+      state: "#2563eb",
+      deg: "135deg",
+    },
+
+    secondary: {
+      main: "#6b7280",
+      state: "#4b5563",
+      deg: "135deg",
     },
 
     info: {
-      main: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+      main: "#3b82f6",
+      state: "#1d4ed8",
+      deg: "135deg",
     },
 
     success: {
-      main: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+      main: "#10b981",
+      state: "#059669",
+      deg: "135deg",
     },
 
     warning: {
-      main: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+      main: "#f59e0b",
+      state: "#d97706",
+      deg: "135deg",
     },
 
     error: {
-      main: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+      main: "#ef4444",
+      state: "#dc2626",
+      deg: "135deg",
     },
+
+    dark: {
+      main: "#374151",
+      state: "#1f2937",
+      deg: "135deg",
+    },
+
+    light: {
+      main: "#f9fafb",
+      state: "#f3f4f6",
+      deg: "135deg",
+    },
+
+    logo: {
+      main: "#ffffff",
+      state: "#f0f0f0",
+      deg: "135deg",
+    },
+
+    menu: {
+      main: "rgba(31, 41, 55, 0.9)",
+      state: "rgba(55, 65, 81, 0.9)",
+      deg: "135deg",
+    },
+
+    sidenav: {
+      main: "rgba(17, 24, 39, 0.9)",
+      state: "rgba(31, 41, 55, 0.8)",
+      deg: "127deg",
+    },
+  },
+
+  // Sidenav specific colors
+  sidenav: {
+    button: "rgba(55, 65, 81, 0.6)",
   },
 
   // Input field colors
@@ -121,6 +186,13 @@ export default {
     boxShadow: "#3b82f6",
     error: "#ef4444",
     success: "#10b981",
+  },
+
+  // Slider colors
+  sliderColors: {
+    thumb: {
+      borderColor: "rgba(226, 232, 240, 0.6)",
+    },
   },
 
   // Tabs

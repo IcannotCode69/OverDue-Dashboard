@@ -24,6 +24,7 @@
 		"react-dom": "^18.2.0",
 		"react-flatpickr": "3.10.7",
 		"react-github-btn": "1.2.1",
+		"react-grid-layout": "^1.5.2",
 		"react-icons": "^4.3.1",
 		"react-router-dom": "5.2.0",
 		"stylis": "4.0.10",
@@ -31,14 +32,17 @@
 		"web-vitals": "1.0.1"
 	},
 	"devDependencies": {
+		"@tailwindcss/postcss": "^4.1.14",
 		"@testing-library/jest-dom": "5.11.4",
 		"@testing-library/react": "11.1.0",
 		"@testing-library/user-event": "12.1.10",
 		"eslint": "^7.11.0",
+		"postcss": "^8.5.6",
 		"react-scripts": "5.0.1",
 		"serve": "^14.2.1"
 	},
 	"scripts": {
+		"start": "react-scripts start",
 		"dev": "react-scripts start",
 		"build": "react-scripts build",
 		"preview": "serve -s build",

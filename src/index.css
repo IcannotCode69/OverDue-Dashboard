@@ -1,0 +1,41 @@
+/* subtle grid background for the dashboard container */
+.grid-bg {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 1px, transparent 1px, transparent 24px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 1px, transparent 1px, transparent 24px);
+  background-size: 24px 24px;
+}
+
+/* Minimal overlay-style scrollbar (auto-hidden until hover) */
+.nice-scroll {
+  /* Hide in Firefox until hover; then switch to thin */
+  scrollbar-width: none;
+}
+.nice-scroll:hover {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,0.45) transparent; /* visible when hovering */
+}
+
+/* WebKit (Chrome/Edge/Safari) */
+.nice-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent; /* overlay feel */
+}
+.nice-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* Hidden by default (overlay look) */
+.nice-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.0);
+  border-radius: 999px;
+  border: 2px solid transparent;
+}
+/* Show on hover with soft accent */
+.nice-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.45); /* slate-400 */
+}
+/* Slightly stronger on active drag */
+.nice-scroll::-webkit-scrollbar-thumb:active {
+  background: rgba(148,163,184,0.6);
+}

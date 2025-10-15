@@ -207,36 +207,11 @@ function Sidenav({ color, brandName, routes, ...rest }) {
       </VuiBox>
       <Divider light />
       <List>{renderRoutes}</List>
-      <VuiBox
-        my={2}
-        mx={2}
-        mt="auto"
-        sx={({ breakpoints }) => ({
-          [breakpoints.up("xl")]: {
-            pt: 2,
-          },
-          [breakpoints.only("xl")]: {
-            pt: 1,
-          },
-          [breakpoints.down("xl")]: {
-            pt: 2,
-          },
-        })}
-      >
-        <SidenavCard color={color} />
-        <VuiBox mt={2}>
-          <VuiButton
-            component="a"
-            href="https://creative-tim.com/product/vision-ui-dashboard-pro-react"
-            target="_blank"
-            rel="noreferrer"
-            variant="gradient"
-            color={color}
-            fullWidth
-          >
-            Upgrade to PRO
-          </VuiButton>
-        </VuiBox>
+      {/* Simplified footer area */}
+      <VuiBox my={2} mx={2} mt="auto">
+        <VuiTypography variant="caption" color="text" textAlign="center">
+          OverDue Dashboard v1.0.0
+        </VuiTypography>
       </VuiBox>
     </SidenavRoot>
   );
