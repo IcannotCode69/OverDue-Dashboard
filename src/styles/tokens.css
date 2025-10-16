@@ -1,0 +1,21 @@
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --text-1: 0.95rem;
+  --text-2: 1.125rem;
+  --text-3: 1.25rem;
+  --text-4: 1.5rem;
+
+  --radius-lg: 1rem;
+  --panel-bg: rgba(15, 23, 42, 0.6);
+  --panel-bd: rgba(255,255,255,0.08);
+  --panel-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  --accent: 99 102 241;
+}
+
+html, body { font-family: var(--font-sans); font-size: var(--text-1); }
+.mono { font-family: var(--font-mono); }
+
+.notes-density .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+.notes-density .row { height: 40px; }

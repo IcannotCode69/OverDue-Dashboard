@@ -1,12 +1,12 @@
 // OverDue Dashboard Routes Configuration
-import DashboardPage from "pages/Dashboard";
-import CalendarPage from "pages/Calendar";
-import NotesPage from "pages/Notes";
-import AssistantPage from "pages/Assistant";
-import GradesPage from "pages/Grades";
-import ProfilePage from "pages/Profile";
-import SignInPage from "pages/SignIn";
-import SignUpPage from "pages/SignUp";
+import DashboardPage from "./pages/Dashboard";
+import CalendarPage from "./pages/Calendar";
+import NotesPage from "./pages/Notes";
+import AssistantPage from "./pages/Assistant";
+import GradesPage from "./pages/Grades";
+import ProfilePage from "./pages/Profile";
+import SignInPage from "./pages/SignIn";
+import SignUpPage from "./pages/SignUp";
 import { 
   IoHome,
   IoCalendarOutline,

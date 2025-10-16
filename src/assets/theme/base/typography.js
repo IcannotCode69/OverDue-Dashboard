@@ -3,9 +3,9 @@
  * Base typography configuration with system fonts
  */
 
-import colors from "assets/theme/base/colors";
+import colors from "../base/colors";
 import "./typography.css";
-import pxToRem from "assets/theme/functions/pxToRem";
+import pxToRem from "../functions/pxToRem";
 
 const { dark } = colors;
 

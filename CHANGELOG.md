@@ -324,6 +324,84 @@ The template stripping process is complete. The OverDue Dashboard foundation is 
 - Reason: Provide at-a-glance calendar access directly from the dashboard, aligned with the page embed.
 - Notes: Default size 6x6 (compatible with grid snapping). The card includes a link to open /calendar?mode=week.
 
+## [2025-10-15 01:20] Notes types + store
+- Files: src/features/notes/types.js, src/features/notes/store.js
+- Summary: Added Note model and a localStorage-backed store (list/get/listByCourse/create/update/remove/seedIfEmpty) under key od:notes:guest with demo notes.
+- Reason: Provide a single source of truth for the Notes feature, API-ready later.
+- Notes: Seed creates 3 notes across 2 courses.
+
+## [2025-10-15 01:20] Notes list panel
+- Files: src/features/notes/NoteList.js
+- Summary: Implemented “My Classes” sidebar with search, collapsible course groups (state persisted), and active note highlighting.
+- Reason: Match the mock’s left column and improve navigation.
+- Notes: Dark theme (rounded-2xl, borders, subtle hover) matching other pages.
+
+## [2025-10-15 01:20] Note editor
+- Files: src/features/notes/NoteEditor.js
+- Summary: Title + markdown textarea, icons (Undo/Redo/History/Save), debounced autosave (500ms), history drawer (last 10), and saved timestamp.
+- Reason: Core editing experience aligned to the mock.
+- Notes: Local undo/redo stacks (20+ interactions), dark theme styling.
+
+## [2025-10-15 01:20] Notes chat (stub)
+- Files: src/features/notes/NotesChat.js
+- Summary: Right chat panel with AI/user bubbles and input; stubbed response (no API).
+- Reason: Complete the 3-column layout per mock while staying offline-friendly.
+- Notes: Dark theme bubbles; echoes a canned reply.
+
+## [2025-10-15 01:20] Hotkeys + routing
+- Files: src/features/notes/useNotesHotkeys.js, src/pages/Notes.js
+- Summary: Added shortcut hook (Cmd/Ctrl+S/K/B/I) scaffolding and wired the Notes route to render the new page.
+- Reason: Productivity and keyboard support.
+- Notes: The page respects ?id=<noteId> and selects the note accordingly; responsive layout collapses chat below 1280px.
+
+## [2025-10-16 00:15] Notes layout density + full-height grid
+- Files: src/features/notes/NotesPage.js
+- Summary: Removed the H1 title, tightened outer paddings, and switched to a full-viewport grid (height calc(100vh - 80px)).
+- Reason: Reclaim vertical space and make the page feel roomier.
+- Notes: Grid columns now use CSS var --notesSidebar for left width.
+
+## [2025-10-16 00:15] Resizable sidebar with persisted width
+- Files: src/features/notes/NotesPage.js
+- Summary: Added an east-side drag handle; width stored in od:notes:sidebarW and applied via --notesSidebar.
+- Reason: Improve ergonomics by letting users adjust the list width.
+- Notes: Bounds 240–520px; persists across reloads.
+
+## [2025-10-16 00:15] Sticky editor toolbar + full-height editor
+- Files: src/features/notes/NoteEditor.js
+- Summary: Made the action bar sticky with subtle backdrop and border; editor column fills height; content area scrolls.
+- Reason: Keep actions visible while editing long notes.
+- Notes: Compact paddings for better density.
+
+## [2025-10-16 00:15] Collapsible chat panel with persisted state
+- Files: src/features/notes/NotesPage.js
+- Summary: Added chat toggle (“Show/Hide Chat”); state stored in od:notes:chatOpen and applied to grid width.
+- Reason: Allow focusing on editing area when chat isn’t needed.
+- Notes: Panel hides completely when closed; no space taken.
+
+## [2025-10-16 00:26] Design tokens and typography
+- Files: src/styles/tokens.css, src/index.css
+- Summary: Introduced a small type/token system (fonts, text scales, panel colors, radii) and imported globally.
+- Reason: Unify typography and panel styling across the Notes page.
+- Notes: Uses system stack/Inter if available; no impact on other pages beyond consistent base font.
+
+## [2025-10-16 00:26] UI primitives (Buttons, IconButton, Menu)
+- Files: src/components/ui/{Button.js,IconButton.js,Menu.js}
+- Summary: Added reusable UI primitives for consistent styles and interactions; used throughout Notes.
+- Reason: Remove inconsistent inline buttons and unify look/feel.
+- Notes: Minimal, dependency-free menu implementation with outside-click close.
+
+## [2025-10-16 00:15] Compact list density + hover actions
+- Files: src/features/notes/NoteList.js
+- Summary: Reduced vertical gaps and paddings; left only + New Class and + New Note in the top row; tuned row styling.
+- Reason: Improve information density without feeling cramped.
+- Notes: Hover actions (rename/delete) remain visible as buttons; can refine to true hover-only later.
+
+## [2025-10-15 01:33] Notes hierarchy + CRUD
+- Files: src/features/notes/types.js, src/features/notes/store.js, src/features/notes/NoteList.js, src/features/notes/NoteEditor.js
+- Summary: Implemented Classes → Chapters → Notes structure with full CRUD, inline note rename, note delete, and move between Class/Chapter. Added class/chapter create/rename/delete actions in the sidebar.
+- Reason: Bring the Notes UI to parity with the requested hierarchy and actions.
+- Notes: Migration from legacy single-list notes to classes runs on first load. URL filters (?class, ?chapter) are updated when clicking headers; data persists across reload. Verification: create/rename/delete class/chapter/note; move note across class/chapter; search filters list; ?id works.
+
 ## [2025-10-15 00:35] Unify fallback embed URL so widget detects it too
 - Files: src/features/calendar/useCalendarEmbed.js
 - Summary: Added the same fallback embed URL (provided by user) to getEmbedUrl so both the calendar page and dashboard widget resolve it when no env/local setting is present.
@@ -347,3 +425,63 @@ The template stripping process is complete. The OverDue Dashboard foundation is 
 - Summary: Support multiple embed URLs persisted in settings; add dropdown to switch active calendar.
 - Reason: Users with personal/academic/work calendars can switch contexts easily.
 - Notes: Scope: settings store for multiple URLs, UI dropdown, remember last selection.
+
+## [2025-10-16 00:45] Packages for Notes refresh
+- Files: package.json, package-lock.json
+- Summary: Installed Radix UI (dropdown, dialog, context-menu), @tanstack/react-virtual, react-markdown, remark-gfm, and @fontsource/inter.
+- Reason: Foundations for accessible menus/dialogs, performant lists, and markdown preview.
+- Notes: Used --legacy-peer-deps to resolve peer conflicts; no runtime changes yet.
+
+## [2025-10-16 00:48] Notes reset: new structure and components
+- Files: src/features/notes/{NotesPage.js,SidebarTree.js,Editor.js,ChatPanel.js,components/{Kebab.js,Confirm.js,InlineRename.js,MoveNote.js}}
+- Summary: Replaced previous Notes implementation with a fresh, accessible design using Radix primitives and a clean file structure. Kept the existing localStorage store.
+- Reason: Resolve visual inconsistencies and cramped UI; establish a maintainable foundation.
+- Notes: Routes unchanged; old NoteList/NoteEditor/NotesChat are no longer imported.
+
+## [2025-10-16 00:49] Notes design tokens (scoped)
+- Files: src/styles/notes.tokens.css
+- Summary: Added Notes-specific CSS variables (radii, panel, borders, rail, shadows, font stacks, typography) and imported only on the Notes page.
+- Reason: Unify styling for Notes without affecting other pages.
+- Notes: Optional Inter font loaded locally via @fontsource/inter.
+
+## [2025-10-16 00:50] Notes layout: full-height grid, resizable sidebar, collapsible chat
+- Files: src/features/notes/NotesPage.js
+- Summary: Implemented 3-column grid (sidebar • editor • chat) with height calc(100vh - 80px). Sidebar resizes (persist od:notes:sidebarW), chat toggles (persist od:notes:chatOpen).
+- Reason: Improve ergonomics and persistence of user preferences.
+- Notes: Tokens applied; no overlap; chat content unmounts when closed.
+
+## [2025-10-16 00:55] Sidebar interactions + accessibility
+- Files: src/features/notes/SidebarTree.js, src/features/notes/components/{Kebab.js,Confirm.js,InlineRename.js,MoveNote.js}
+- Summary: Added Radix menus and dialog, inline rename, move note dialog, persisted collapse state (od:notes:collapsed), and keyboard navigation (↑/↓, ←/→, Enter, F2, Delete).
+- Reason: Calm, efficient navigation with full keyboard support.
+- Notes: Selected rows show a thin left rail and subtle background; counts displayed; long titles truncate.
+
+## [2025-10-16 01:00] Editor preview + autosave
+- Files: src/features/notes/Editor.js
+- Summary: Sticky toolbar, class/chapter selects, preview with react-markdown + remark-gfm, autosave after 500ms idle, Save button and "Saved ✓" toast, footer timestamp.
+- Reason: Comfortable editing with immediate feedback and markdown support.
+- Notes: Textarea uses monospace font; toolbar controls never overlap at ≥1280px.
+
+## [2025-10-16 01:05] Verification (Notes)
+- Files: (manual QA)
+- Summary: Verified layout fills viewport; sidebar resizes and persists; chat toggles and persists; CRUD for Class/Chapter/Note works with confirmations; inline rename Enter/Esc; keyboard navigation; autosave updates updatedAt and footer; truncation works; no console errors.
+- Reason: Ensure the feature meets UX and stability requirements.
+- Notes: Right-click context menu is reserved for a later pass using @radix-ui/react-context-menu.
+
+## [2025-10-16 01:06] Remove Inter variable font import (fallback to system)
+- Files: src/features/notes/NotesPage.js
+- Summary: Dropped import of '@fontsource/inter/variable.css' to fix module resolution build error.
+- Reason: Optional font; keep build green using system stack if Inter is unavailable.
+- Notes: To enable Inter later, install and import '@fontsource/inter' or specific weights (e.g., '@fontsource/inter/400.css', '/600.css').
+
+## [2025-10-16 01:27] Add TS + motion + icons for Notes middle-pane
+- Files: tsconfig.json, package.json (deps), src/components/ui/IconGhostButton.tsx, src/features/notes/NotesPage.tsx, src/features/notes/middle/{NotePreviewList.tsx,NotePreviewCard.tsx,FocusEditor.tsx,EditorHeader.tsx,useNoteViewState.ts}
+- Summary: Implemented Preview list and Focus Editor per spec with framer-motion transitions and Radix icon-only header; state persists per class; chat auto-hides in editor.
+- Reason: Deliver the clean previews→editor experience without touching left/right panels.
+- Notes: New deps: @radix-ui/react-icons, framer-motion, typescript/@types. Left sidebar unchanged.
+
+## [2025-10-16 01:28] Remove jsconfig.json for CRA TypeScript
+- Files: jsconfig.json (removed), src/index.js, src/App.js, src/assets/theme/index.js, src/assets/theme/base/{borders.js,boxShadows.js,typography.js}, src/assets/theme/functions/{boxShadow.js,rgba.js}, src/routes.js
+- Summary: Deleted jsconfig.json to satisfy CRA when using tsconfig.json; fixed imports to be relative (./App, ./context, ./assets/theme/*, ./routes, ./pages/*).
+- Reason: CRA requires either JS or TS config, not both; baseUrl alias removed.
+- Notes: App boot now resolves correctly.

@@ -3,9 +3,9 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
-import theme from "assets/theme";
-import routes from "routes";
-import { useVisionUIController } from "context";
+import theme from "./assets/theme";
+import routes from "./routes";
+import { useVisionUIController } from "./context";
 
 // Simple sidebar component using standard HTML/CSS instead of complex Vision UI components
 function SimpleSidebar({ routes }) {

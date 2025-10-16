@@ -20,15 +20,15 @@
 import { createTheme } from "@mui/material/styles";
 
 // Vision UI Dashboard React base styles
-import colors from "assets/theme/base/colors";
-import breakpoints from "assets/theme/base/breakpoints";
-import typography from "assets/theme/base/typography";
-import boxShadows from "assets/theme/base/boxShadows";
-import borders from "assets/theme/base/borders";
+import colors from "./base/colors";
+import breakpoints from "./base/breakpoints";
+import typography from "./base/typography";
+import boxShadows from "./base/boxShadows";
+import borders from "./base/borders";
 
 // Vision UI Dashboard React helper functions
-import pxToRem from "assets/theme/functions/pxToRem";
-import linearGradient from "assets/theme/functions/linearGradient";
+import pxToRem from "./functions/pxToRem";
+import linearGradient from "./functions/linearGradient";
 
 export default createTheme({
   breakpoints: { ...breakpoints },
