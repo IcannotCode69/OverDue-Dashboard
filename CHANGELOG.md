@@ -1,5 +1,11 @@
 # OverDue Dashboard - Changelog
 
+## [2025-10-17 03:41] Assistant feature scaffolding and route wiring
+- Files: src/features/assistant/**/* (new), src/pages/Assistant.js (updated), .env.example (updated)
+- Summary: Implemented AI Assistant page with sidebar, chat, markdown rendering, inspector, local persistence, and mock streaming adapter; wired /assistant route to new feature.
+- Reason: Establish a functional baseline matching dark theme and architecture; mock adapter by default to avoid keys.
+- Notes/Verification: Sidebar lists conversations (new/rename/delete/pin/search). Chat streams mock tokens, copy buttons on code blocks, inspector toggles and persists width. No console errors; build passes.
+
 All notable changes to this project are documented here.
 
 ## [2025-01-14 04:20] Simple sidebar implementation to resolve white screen

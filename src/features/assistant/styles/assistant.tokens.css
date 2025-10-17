@@ -1,0 +1,4 @@
+/* Assistant local tokens (scoped) */
+.markdown-body p { margin: 0 0 8px 0; }
+.markdown-body ul { margin: 8px 0; padding-left: 18px; }
+.markdown-body pre, .markdown-body code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }

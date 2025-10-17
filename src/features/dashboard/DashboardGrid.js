@@ -14,33 +14,8 @@ const ALLOWED_H = [3, 4, 5, 6, 8];
 const nearest = (list, v) => list.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a), list[0]);
 const snapSize = (w, h) => ({ w: nearest(ALLOWED_W, w), h: nearest(ALLOWED_H, h) });
 
-// Simple skyline packer to reduce gaps (lg breakpoint)
-function packTight(items, cols = 12) {
-  const skyline = new Array(cols).fill(0);
-  const out = [];
-  const sorted = [...items].sort((a, b) => b.h - a.h || b.w - a.w || a.i.localeCompare(b.i));
-  const spanMax = (start, width) => {
-    let m = 0;
-    for (let c = start; c < start + width; c++) m = Math.max(m, skyline[c] ?? Infinity);
-    return m;
-  };
-  for (const it of sorted) {
-    let bestX = 0,
-      bestY = Infinity;
-    for (let x = 0; x <= cols - it.w; x++) {
-      const y = spanMax(x, it.w);
-      if (y < bestY) {
-        bestY = y;
-        bestX = x;
-      }
-    }
-    const placed = { ...it, x: bestX, y: bestY };
-    for (let c = bestX; c < bestX + it.w; c++) skyline[c] = bestY + it.h;
-    out.push(placed);
-  }
-  const map = new Map(out.map((l) => [l.i, l]));
-  return items.map((i) => ({ ...i, x: map.get(i.i).x, y: map.get(i.i).y }));
-}
+// MaxRects-based tight packer (delegates to TS module)
+import { autoArrange } from "./layout/packing";
 
 const COLS = { lg: 12, md: 12, sm: 8, xs: 4, xxs: 2 };
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
@@ -141,6 +116,7 @@ export default function DashboardGrid() {
     const base = saved ? JSON.parse(saved) : defaultLayouts();
     return normalizeLayouts(base);
   });
+  const savedInitiallyRef = React.useRef(!!localStorage.getItem(LAYOUT_KEY));
 
   const [items, setItems] = React.useState(() => {
     const savedItems = localStorage.getItem(ITEMS_KEY);
@@ -187,6 +163,28 @@ export default function DashboardGrid() {
       });
     });
     if (changed) onLayoutsChange(next);
+  }, []);
+
+  // On fresh load (no saved layouts), tightly pack per breakpoint once
+  React.useEffect(() => {
+    if (savedInitiallyRef.current) return;
+    const next = { ...layouts };
+    let changed = false;
+    Object.keys(COLS).forEach((bp) => {
+      const arr = next[bp] ?? [];
+      const items = arr.map((it) => ({ id: it.i, w: snapSize(it.w, it.h).w, h: snapSize(it.w, it.h).h }));
+      const placed = autoArrange(items, COLS[bp]);
+      const posMap = new Map(placed.map((p) => [p.id, p]));
+      next[bp] = arr.map((it) => {
+        const p = posMap.get(it.i);
+        if (!p) return it;
+        if (it.x !== p.x || it.y !== p.y) changed = true;
+        return { ...it, x: p.x, y: p.y };
+      });
+    });
+    if (changed) onLayoutsChange(next);
+    // mark as handled
+    savedInitiallyRef.current = true;
   }, []);
 
   const removeItem = (id) => {
@@ -272,6 +270,17 @@ export default function DashboardGrid() {
     };
   }, []);
 
+  // Animate grid item moves via CSS transform transition
+  React.useEffect(() => {
+    const styleId = "grid-anim-style";
+    if (!document.getElementById(styleId)) {
+      const tag = document.createElement("style");
+      tag.id = styleId;
+      tag.textContent = ".react-grid-item{transition:transform 220ms ease,height 220ms ease,width 220ms ease;}";
+      document.head.appendChild(tag);
+    }
+  }, []);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, height: "100%" }}>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
@@ -331,12 +340,18 @@ export default function DashboardGrid() {
           className="px-3 py-1 rounded bg-white/10 hover:bg-white/15"
           style={buttonStyle}
           onClick={() => {
-            const lg = (layouts.lg ?? []);
-            const snapped = lg.map((it) => ({ ...it, ...snapSize(it.w, it.h) }));
-            const packed = packTight(snapped);
-            const next = { ...layouts, lg: packed };
+            const next = { ...layouts };
+            Object.keys(COLS).forEach((bp) => {
+              const arr = (next[bp] ?? []);
+              const items = arr.map((it) => ({ id: it.i, w: snapSize(it.w, it.h).w, h: snapSize(it.w, it.h).h }));
+              const placed = autoArrange(items, COLS[bp]);
+              const posMap = new Map(placed.map((p) => [p.id, p]));
+              next[bp] = arr.map((it) => {
+                const p = posMap.get(it.i) || { x: it.x || 0, y: it.y || 0 };
+                return { ...it, x: p.x, y: p.y };
+              });
+            });
             onLayoutsChange(next);
-            // toast substitute
             // eslint-disable-next-line no-console
             console.info("Auto-Arrange applied", next.lg);
           }}
