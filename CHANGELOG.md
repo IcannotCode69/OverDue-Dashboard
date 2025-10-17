@@ -18,6 +18,12 @@
 - Reason: Provide stable API for layout actions.
 - Notes/Verification: TypeScript compiles.
 
+## [2025-10-17 04:13] feat(dashboard): store action helper
+- Files: src/features/dashboard/layout/store.ts
+- Summary: Added autoArrangeLayouts() to apply MaxRects packing across breakpoints and return next layouts (persistence-ready).
+- Reason: Prepare wiring without touching UI yet.
+- Notes/Verification: Compiles; not invoked yet.
+
 ## [2025-10-17 03:41] Assistant feature scaffolding and route wiring
 - Files: src/features/assistant/**/* (new), src/pages/Assistant.js (updated), .env.example (updated)
 - Summary: Implemented AI Assistant page with sidebar, chat, markdown rendering, inspector, local persistence, and mock streaming adapter; wired /assistant route to new feature.
