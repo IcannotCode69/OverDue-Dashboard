@@ -12,6 +12,12 @@
 - Reason: Ensure correctness and determinism of the packer.
 - Notes/Verification: vitest run passes (4 tests).
 
+## [2025-10-17 04:12] feat(dashboard): packing integration wrapper
+- Files: src/features/dashboard/layout/packing/index.ts
+- Summary: Exposed autoArrange() wrapper delegating to MaxRects core; ready for store wiring.
+- Reason: Provide stable API for layout actions.
+- Notes/Verification: TypeScript compiles.
+
 ## [2025-10-17 03:41] Assistant feature scaffolding and route wiring
 - Files: src/features/assistant/**/* (new), src/pages/Assistant.js (updated), .env.example (updated)
 - Summary: Implemented AI Assistant page with sidebar, chat, markdown rendering, inspector, local persistence, and mock streaming adapter; wired /assistant route to new feature.
