@@ -51,7 +51,8 @@
 		"eslint": "^7.11.0",
 		"postcss": "^8.5.6",
 		"react-scripts": "5.0.1",
-		"serve": "^14.2.1"
+		"serve": "^14.2.1",
+		"vitest": "^1.6.0"
 	},
 	"scripts": {
 		"start": "react-scripts start",
@@ -59,6 +60,7 @@
 		"build": "react-scripts build",
 		"preview": "serve -s build",
 		"test": "react-scripts test",
+		"test:unit": "vitest run",
 		"lint": "eslint src --ext .js,.jsx --fix"
 	},
 	"eslintConfig": {
