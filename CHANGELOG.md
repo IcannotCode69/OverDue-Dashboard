@@ -1,5 +1,11 @@
 # OverDue Dashboard - Changelog
 
+## [2025-10-17 04:08] feat(dashboard): add MaxRects packer (core only)
+- Files: src/features/dashboard/layout/packing/maxrects.ts
+- Summary: Implemented MaxRects BSSF with top-left tie-breakers and a compaction pass (slide up/left). No wiring yet.
+- Reason: Prepare tight top-left packing to replace skyline packer.
+- Notes/Verification: TypeScript compiles; no runtime integration in this step.
+
 ## [2025-10-17 03:41] Assistant feature scaffolding and route wiring
 - Files: src/features/assistant/**/* (new), src/pages/Assistant.js (updated), .env.example (updated)
 - Summary: Implemented AI Assistant page with sidebar, chat, markdown rendering, inspector, local persistence, and mock streaming adapter; wired /assistant route to new feature.
