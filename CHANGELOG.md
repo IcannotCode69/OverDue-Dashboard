@@ -1,5 +1,11 @@
 # OverDue Dashboard - Changelog
 
+## [2025-10-17 04:24] feat(dashboard): widget sizing registry + sensible defaults
+- Files: src/features/dashboard/widgets/registry.ts, src/features/dashboard/DashboardGrid.js
+- Summary: Introduced content-aware sizing with min/preferred per kind; clamp sizes and use registry when seeding/repairing sizes before packing.
+- Reason: Prevent oversized spawns and give Calendar a wide-but-not-full default.
+- Notes/Verification: New widgets adopt better defaults; invalid sizes repaired.
+
 ## [2025-10-17 04:15] feat(dashboard): pack on initial load when no saved positions
 - Files: src/features/dashboard/DashboardGrid.js
 - Summary: If no saved layouts, apply MaxRects packing per breakpoint after normalization.
