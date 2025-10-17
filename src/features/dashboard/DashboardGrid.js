@@ -1,6 +1,7 @@
 import React from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { renderWidget, widgetDefaults, WIDGET_KINDS } from "./widgets/registry";
+import { getDefaultSize, clampToMin } from "./widgets/registry.ts";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
@@ -29,13 +30,14 @@ function parseKind(id) {
 
 function makeDefaultLayout(id, bp) {
   const kind = parseKind(id);
-  const def = widgetDefaults[kind] || { w: 4, h: 4 };
+  const pref = getDefaultSize(kind === 'gcal' ? 'calendarWeek' : kind, { cols: COLS[bp] });
+  const clamped = clampToMin(kind === 'gcal' ? 'calendarWeek' : kind, pref, { cols: COLS[bp] });
   return {
     i: id,
     x: 0,
     y: Infinity,
-    w: Math.min(def.w, COLS[bp]),
-    h: def.h,
+    w: Math.min(clamped.w, COLS[bp]),
+    h: clamped.h,
     minW: 3,
     minH: 3,
   };
@@ -172,10 +174,18 @@ export default function DashboardGrid() {
     let changed = false;
     Object.keys(COLS).forEach((bp) => {
       const arr = next[bp] ?? [];
-      const items = arr.map((it) => ({ id: it.i, w: snapSize(it.w, it.h).w, h: snapSize(it.w, it.h).h }));
+      const norm = arr.map((it) => {
+        const kind = parseKind(it.i);
+        const kindKey = kind === 'gcal' ? 'calendarWeek' : kind;
+        const pref = getDefaultSize(kindKey, { cols: COLS[bp] });
+        const clamped = clampToMin(kindKey, { w: it.w || pref.w, h: it.h || pref.h }, { cols: COLS[bp] });
+        const s = snapSize(clamped.w, clamped.h);
+        return { ...it, w: s.w, h: s.h };
+      });
+      const items = norm.map((it) => ({ id: it.i, w: it.w, h: it.h }));
       const placed = autoArrange(items, COLS[bp]);
       const posMap = new Map(placed.map((p) => [p.id, p]));
-      next[bp] = arr.map((it) => {
+      next[bp] = norm.map((it) => {
         const p = posMap.get(it.i);
         if (!p) return it;
         if (it.x !== p.x || it.y !== p.y) changed = true;
@@ -183,7 +193,6 @@ export default function DashboardGrid() {
       });
     });
     if (changed) onLayoutsChange(next);
-    // mark as handled
     savedInitiallyRef.current = true;
   }, []);
 
@@ -223,9 +232,10 @@ export default function DashboardGrid() {
     Object.keys(COLS).forEach((bp) => {
       const arr = next[bp] ?? (next[bp] = []);
       if (!arr.some((l) => l.i === id)) {
-        const w0 = Math.min((def.sizes?.[bp] ?? def.w), COLS[bp]);
-        const s = snapSize(w0, def.h);
-        arr.push({ i: id, x: 0, y: Infinity, w: s.w, h: s.h, minW: 3, minH: 3 });
+        const kindKey = kind === 'gcal' ? 'calendarWeek' : kind;
+        const pref = getDefaultSize(kindKey, { cols: COLS[bp] });
+        const clamped = clampToMin(kindKey, pref, { cols: COLS[bp] });
+        arr.push({ i: id, x: 0, y: Infinity, w: clamped.w, h: clamped.h, minW: 3, minH: 3 });
       }
     });
 
@@ -343,14 +353,32 @@ export default function DashboardGrid() {
             const next = { ...layouts };
             Object.keys(COLS).forEach((bp) => {
               const arr = (next[bp] ?? []);
-              const items = arr.map((it) => ({ id: it.i, w: snapSize(it.w, it.h).w, h: snapSize(it.w, it.h).h }));
+              // Normalize sizes via registry (repair invalid)
+              const norm = arr.map((it) => {
+                const kind = parseKind(it.i);
+                const kindKey = kind === 'gcal' ? 'calendarWeek' : kind;
+                const pref = getDefaultSize(kindKey, { cols: COLS[bp] });
+                const clamped = clampToMin(kindKey, { w: it.w || pref.w, h: it.h || pref.h }, { cols: COLS[bp] });
+                const s = snapSize(clamped.w, clamped.h);
+                return { ...it, w: s.w, h: s.h };
+              });
+              const items = norm.map((it) => ({ id: it.i, w: it.w, h: it.h }));
               const placed = autoArrange(items, COLS[bp]);
               const posMap = new Map(placed.map((p) => [p.id, p]));
-              next[bp] = arr.map((it) => {
+              next[bp] = norm.map((it) => {
                 const p = posMap.get(it.i) || { x: it.x || 0, y: it.y || 0 };
                 return { ...it, x: p.x, y: p.y };
               });
             });
+            // Dev assertions: no overlaps and bounds
+            if (process.env.NODE_ENV !== 'production') {
+              const arr = next.lg ?? [];
+              const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+              arr.forEach((a, i) => {
+                if (a.x < 0 || a.y < 0 || a.x + a.w > COLS.lg) console.warn('pack bounds', a);
+                for (let j = i + 1; j < arr.length; j++) if (overlaps(a, arr[j])) console.warn('pack overlap', a, arr[j]);
+              });
+            }
             onLayoutsChange(next);
             // eslint-disable-next-line no-console
             console.info("Auto-Arrange applied", next.lg);

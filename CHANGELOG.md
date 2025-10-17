@@ -6,6 +6,16 @@
 - Reason: Default experience starts tightly packed.
 - Notes/Verification: Fresh load produces compact layout; persisted layouts unchanged.
 
+## [2025-10-17 04:23] fix(dashboard): universal MaxRects packing; remove legacy path; include calendar
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: Unified packing to MaxRects on auto-arrange and first-load; normalize sizes; calendar participates; added dev assertions and transform animation retained.
+- Reason: Calendar skipped tight pack and some widgets spawned too large; normalize + pack fixes.
+- Notes/Verification: Auto arrange packs all widgets tightly (including calendar); fresh load tight; no overlaps/out-of-bounds in dev logs.
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: If no saved layouts, apply MaxRects packing per breakpoint after normalization.
+- Reason: Default experience starts tightly packed.
+- Notes/Verification: Fresh load produces compact layout; persisted layouts unchanged.
+
 ## [2025-10-17 04:08] feat(dashboard): add MaxRects packer (core only)
 - Files: src/features/dashboard/layout/packing/maxrects.ts
 - Summary: Implemented MaxRects BSSF with top-left tie-breakers and a compaction pass (slide up/left). No wiring yet.
