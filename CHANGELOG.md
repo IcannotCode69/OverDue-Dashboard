@@ -1,5 +1,11 @@
 # OverDue Dashboard - Changelog
 
+## [2025-10-17 04:15] feat(dashboard): pack on initial load when no saved positions
+- Files: src/features/dashboard/DashboardGrid.js
+- Summary: If no saved layouts, apply MaxRects packing per breakpoint after normalization.
+- Reason: Default experience starts tightly packed.
+- Notes/Verification: Fresh load produces compact layout; persisted layouts unchanged.
+
 ## [2025-10-17 04:08] feat(dashboard): add MaxRects packer (core only)
 - Files: src/features/dashboard/layout/packing/maxrects.ts
 - Summary: Implemented MaxRects BSSF with top-left tie-breakers and a compaction pass (slide up/left). No wiring yet.
@@ -19,6 +25,20 @@
 - Notes/Verification: TypeScript compiles.
 
 ## [2025-10-17 04:13] feat(dashboard): store action helper
+- Files: src/features/dashboard/layout/store.ts
+- Summary: Added autoArrangeLayouts() to apply MaxRects packing across breakpoints and return next layouts (persistence-ready).
+- Reason: Prepare wiring without touching UI yet.
+- Notes/Verification: Compiles; not invoked yet.
+
+## [2025-10-17 04:14] fix(dashboard): correct packing index import/export for CRA build
+- Files: src/features/dashboard/DashboardGrid.js, src/features/dashboard/layout/packing/index.ts
+- Summary: Hooked Auto-Arrange button to MaxRects packer and added smooth transform-based reflow; fixed index import/export for CRA.
+- Reason: Replace skyline path and ensure animation.
+- Notes/Verification: Button packs tightly; items animate to new positions; build passes.
+- Files: src/features/dashboard/layout/packing/index.ts
+- Summary: Switched to local import and re-export to satisfy CRA/TS build.
+- Reason: Re-export only was not in local scope for usage.
+- Notes/Verification: Build passes.
 - Files: src/features/dashboard/layout/store.ts
 - Summary: Added autoArrangeLayouts() to apply MaxRects packing across breakpoints and return next layouts (persistence-ready).
 - Reason: Prepare wiring without touching UI yet.
