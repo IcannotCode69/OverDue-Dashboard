@@ -6,6 +6,12 @@
 - Reason: Prepare tight top-left packing to replace skyline packer.
 - Notes/Verification: TypeScript compiles; no runtime integration in this step.
 
+## [2025-10-17 04:11] test(dashboard): maxrects packer tests
+- Files: src/features/dashboard/layout/packing/__tests__/maxrects.test.ts, package.json
+- Summary: Added Vitest tests covering tightness, determinism, locked support, and bounds/overlap; added vitest dev script.
+- Reason: Ensure correctness and determinism of the packer.
+- Notes/Verification: vitest run passes (4 tests).
+
 ## [2025-10-17 03:41] Assistant feature scaffolding and route wiring
 - Files: src/features/assistant/**/* (new), src/pages/Assistant.js (updated), .env.example (updated)
 - Summary: Implemented AI Assistant page with sidebar, chat, markdown rendering, inspector, local persistence, and mock streaming adapter; wired /assistant route to new feature.
