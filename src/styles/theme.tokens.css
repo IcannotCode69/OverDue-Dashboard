@@ -1,0 +1,52 @@
+/* Design tokens for midnight glass theme */
+:root {
+  /* Palette – midnight theme */
+  --bg-0: #0b1220;          /* base */
+  --bg-1: #0f1a2e;          /* panel */
+  --bg-2: #11203a;          /* raised */
+  --ink-0: rgba(255,255,255,0.92);
+  --ink-1: rgba(255,255,255,0.72);
+  --ink-2: rgba(255,255,255,0.54);
+  --muted: rgba(255,255,255,0.12);
+
+  /* Accents */
+  --acc-1: #4aa8ff; /* primary blue glow */
+  --acc-2: #8855ff; /* secondary purple */
+  --acc-3: #1ec8a5; /* green for positive deltas */
+  --acc-red: #ff5d7a; /* negative deltas */
+
+  /* Radii */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-2xl: 24px;
+
+  /* Shadows / glow */
+  --shadow-1: 0 6px 20px rgba(0,0,0,0.35);
+  --shadow-2: 0 12px 30px rgba(0,0,0,0.45);
+  --glow-acc: 0 0 0 1px rgba(74,168,255,0.2), 0 8px 30px rgba(74,168,255,0.25);
+
+  /* Strokes */
+  --stroke-outer: rgba(255,255,255,0.06);
+  --stroke-inner: rgba(255,255,255,0.12);
+
+  /* Blur */
+  --blur: 10px;
+
+  /* Spacing */
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Fonts */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --h1: 28px;
+  --h2: 20px;
+  --h3: 16px;
+  --body: 14px;
+  --kpi: 24px;
+}

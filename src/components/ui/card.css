@@ -1,0 +1,30 @@
+.od-card {
+  position: relative;
+  border-radius: var(--r-2xl);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--stroke-outer);
+  box-shadow: var(--shadow-1);
+  color: var(--ink-0);
+}
+
+.od-card::before {
+  /* inner stroke */
+  content: "";
+  position: absolute; 
+  inset: 0; 
+  border-radius: inherit;
+  border: 1px solid var(--stroke-inner);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.od-card__header {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  font-size: var(--h3); 
+  color: var(--ink-1);
+}
+
+.od-card__body {
+  padding: 0 var(--space-5) var(--space-5);
+}

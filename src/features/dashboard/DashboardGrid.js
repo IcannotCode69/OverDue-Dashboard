@@ -1,286 +1,115 @@
 import React from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
+import Card from "../../components/ui/Card";
 import { renderWidget, widgetDefaults, WIDGET_KINDS } from "./widgets/registry";
-import { getDefaultSize, clampToMin } from "./widgets/registry.ts";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
-const LAYOUT_KEY = "od:layout:v1";
-const ITEMS_KEY = "od:items:v1";
-
-// Allowed snapped sizes
-const ALLOWED_W = [3, 4, 6, 12];
-const ALLOWED_H = [3, 4, 5, 6, 8];
-const nearest = (list, v) => list.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a), list[0]);
-const snapSize = (w, h) => ({ w: nearest(ALLOWED_W, w), h: nearest(ALLOWED_H, h) });
-
-// MaxRects-based tight packer (delegates to TS module)
-import { autoArrange } from "./layout/packing";
-
+const LAYOUT_KEY = "od:layout:v2";
+const ITEMS_KEY = "od:items:v2";
 const COLS = { lg: 12, md: 12, sm: 8, xs: 4, xxs: 2 };
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
-const ALL_BPS = Object.keys(COLS);
 
-function parseKind(id) {
-  if (id === "quick" || id === "upcoming" || id === "scratch") return id;
-  const idx = id.indexOf("-");
-  return idx > 0 ? id.slice(0, idx) : "quick";
-}
-
-function makeDefaultLayout(id, bp) {
-  const kind = parseKind(id);
-  const pref = getDefaultSize(kind === 'gcal' ? 'calendarWeek' : kind, { cols: COLS[bp] });
-  const clamped = clampToMin(kind === 'gcal' ? 'calendarWeek' : kind, pref, { cols: COLS[bp] });
-  return {
-    i: id,
-    x: 0,
-    y: Infinity,
-    w: Math.min(clamped.w, COLS[bp]),
-    h: clamped.h,
-    minW: 3,
-    minH: 3,
-  };
-}
-
-function normalizeLayouts(input) {
-  const l = input || {};
-  const out = {};
-  const ids = new Set();
-
-  // Copy known arrays and collect ids
-  ALL_BPS.forEach((bp) => {
-    const arr = Array.isArray(l[bp]) ? l[bp] : [];
-    out[bp] = arr.map((lay) => {
-      ids.add(lay.i);
-      const def = widgetDefaults[parseKind(lay.i)] || { w: 4, h: 4 };
-      const minW = lay.minW ?? 3;
-      const minH = lay.minH ?? 3;
-      const wVal = lay.w ?? def.w;
-      const hVal = lay.h ?? def.h;
-      return {
-        i: lay.i,
-        x: lay.x ?? 0,
-        y: lay.y ?? Infinity,
-        w: Math.max(minW, Math.min(wVal, COLS[bp])),
-        h: Math.max(minH, hVal),
-        minW,
-        minH,
-      };
+// Generate default layouts for widget items
+function generateDefaultLayouts(items) {
+  console.log('Generating default layouts for items:', items);
+  console.log('Widget defaults:', widgetDefaults);
+  const layouts = { lg: [], md: [], sm: [], xs: [], xxs: [] };
+  let position = { x: 0, y: 0 };
+  
+  items.forEach((item) => {
+    const kind = item.kind || 'default';
+    const defaults = widgetDefaults[kind] || { lg: { w: 4, h: 4 } };
+    
+    Object.keys(BREAKPOINTS).forEach((breakpoint) => {
+      const size = defaults[breakpoint] || defaults.lg || { w: 4, h: 4 };
+      console.log(`Layout for ${breakpoint}:`, size);
+      
+      layouts[breakpoint].push({
+        i: item.i,
+        x: position.x,
+        y: position.y,
+        w: size.w,
+        h: size.h
+      });
     });
+    
+    // Update position for next item (simple left-to-right, top-to-bottom packing)
+    position.x += (defaults.lg?.w || 4);
+    if (position.x >= COLS.lg) {
+      position.x = 0;
+      position.y += (defaults.lg?.h || 4);
+    }
   });
-
-  // Seed with defaults if nothing present
-  if ([...ids].length === 0) {
-    defaultItems().forEach((it) => ids.add(it.i));
-  }
-
-  // Ensure each breakpoint has entries for all ids
-  ALL_BPS.forEach((bp) => {
-    const arr = out[bp] ?? (out[bp] = []);
-    ids.forEach((id) => {
-      if (!arr.some((lay) => lay.i === id)) arr.push(makeDefaultLayout(id, bp));
-    });
-  });
-
-  return out;
-}
-
-function defaultItems() {
-  return [
-    { i: "quick", kind: "quick" },
-    { i: "upcoming", kind: "upcoming" },
-    { i: "scratch", kind: "scratch" },
-  ];
-}
-
-function defaultLayouts() {
-  const base = [
-    { i: "quick", kind: "quick" },
-    { i: "upcoming", kind: "upcoming" },
-    { i: "scratch", kind: "scratch" },
-  ];
-  const result = {};
-  ALL_BPS.forEach((bp) => {
-    result[bp] = base.map(({ i, kind }, idx) => {
-      const def = widgetDefaults[kind];
-      const w = Math.min((def.sizes?.[bp] ?? def.w), COLS[bp]);
-      const h = def.h;
-      return { i, x: (idx * w) % COLS[bp], y: 0, w, h, minW: 3, minH: 3 };
-    });
-  });
-  return result;
+  
+  return layouts;
 }
 
 export default function DashboardGrid() {
-  const [layouts, setLayouts] = React.useState(() => {
-    const saved = localStorage.getItem(LAYOUT_KEY);
-    const base = saved ? JSON.parse(saved) : defaultLayouts();
-    return normalizeLayouts(base);
-  });
-  const savedInitiallyRef = React.useRef(!!localStorage.getItem(LAYOUT_KEY));
-
   const [items, setItems] = React.useState(() => {
-    const savedItems = localStorage.getItem(ITEMS_KEY);
-    if (savedItems) {
-      try {
-        const parsed = JSON.parse(savedItems);
-        if (Array.isArray(parsed) && parsed.every((p) => p && typeof p.i === "string" && typeof parseKind(p.i) === "string")) {
-          return parsed.map((p) => ({ i: p.i, kind: p.kind || parseKind(p.i) }));
-        }
-      } catch {}
-    }
-    // Derive from saved layouts if present
     try {
-      const savedLayouts = JSON.parse(localStorage.getItem(LAYOUT_KEY) || "null");
-      if (savedLayouts) {
-        const ids = new Set();
-        ALL_BPS.forEach((bp) => (Array.isArray(savedLayouts[bp]) ? savedLayouts[bp] : []).forEach((l) => ids.add(l.i)));
-        const list = [...ids].map((id) => ({ i: id, kind: parseKind(id) }));
-        if (list.length) return list;
+      const saved = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]");
+      if (Array.isArray(saved) && saved.length > 0) {
+        // Validate saved items have valid widget kinds
+        const validItems = saved.filter(item => 
+          item && typeof item.i === "string" && 
+          (item.kind && WIDGET_KINDS.includes(item.kind))
+        );
+        if (validItems.length > 0) {
+          return validItems;
+        }
       }
-    } catch {}
-    return defaultItems();
+      
+      // Initialize with default calendar widget if no valid saved items
+      const defaultItem = {
+        i: `calendarCard-${Date.now()}`,
+        kind: 'calendarCard'
+      };
+      
+      return [defaultItem];
+    } catch { 
+      localStorage.removeItem(LAYOUT_KEY);
+      localStorage.removeItem(ITEMS_KEY);
+      
+      // Initialize with default calendar widget on error
+      const defaultItem = {
+        i: `calendarCard-${Date.now()}`,
+        kind: 'calendarCard'
+      };
+      
+      return [defaultItem]; 
+    }
+  });
+
+  const [layouts, setLayouts] = React.useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(LAYOUT_KEY) || "null");
+      if (saved && Object.keys(saved).length > 0) {
+        return saved;
+      }
+    } catch { /* ignore */ }
+    
+    // Generate default layouts for current items
+    return generateDefaultLayouts(items);
   });
 
   const onLayoutsChange = (l) => {
-    const normalized = normalizeLayouts(l);
-    setLayouts(normalized);
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify(normalized));
+    setLayouts(l);
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(l));
   };
-
-  // One-time migration: snap any persisted sizes to the allowed set
-  const migratedRef = React.useRef(false);
-  React.useEffect(() => {
-    if (migratedRef.current) return;
-    migratedRef.current = true;
-    const next = { ...layouts };
-    let changed = false;
-    Object.keys(next).forEach((bp) => {
-      const arr = Array.isArray(next[bp]) ? next[bp] : [];
-      next[bp] = arr.map((it) => {
-        const s = snapSize(it.w, it.h);
-        if (s.w !== it.w || s.h !== it.h) changed = true;
-        return { ...it, w: s.w, h: s.h };
-      });
-    });
-    if (changed) onLayoutsChange(next);
-  }, []);
-
-  // On fresh load (no saved layouts), tightly pack per breakpoint once
-  React.useEffect(() => {
-    if (savedInitiallyRef.current) return;
-    const next = { ...layouts };
-    let changed = false;
-    Object.keys(COLS).forEach((bp) => {
-      const arr = next[bp] ?? [];
-      const norm = arr.map((it) => {
-        const kind = parseKind(it.i);
-        const kindKey = kind === 'gcal' ? 'calendarWeek' : kind;
-        const pref = getDefaultSize(kindKey, { cols: COLS[bp] });
-        const clamped = clampToMin(kindKey, { w: it.w || pref.w, h: it.h || pref.h }, { cols: COLS[bp] });
-        const s = snapSize(clamped.w, clamped.h);
-        return { ...it, w: s.w, h: s.h };
-      });
-      const items = norm.map((it) => ({ id: it.i, w: it.w, h: it.h }));
-      const placed = autoArrange(items, COLS[bp]);
-      const posMap = new Map(placed.map((p) => [p.id, p]));
-      next[bp] = norm.map((it) => {
-        const p = posMap.get(it.i);
-        if (!p) return it;
-        if (it.x !== p.x || it.y !== p.y) changed = true;
-        return { ...it, x: p.x, y: p.y };
-      });
-    });
-    if (changed) onLayoutsChange(next);
-    savedInitiallyRef.current = true;
-  }, []);
 
   const removeItem = (id) => {
     const nextItems = items.filter((i) => i.i !== id);
     setItems(nextItems);
     localStorage.setItem(ITEMS_KEY, JSON.stringify(nextItems));
-
-    const next = { ...layouts };
-    Object.keys(next).forEach((bp) => {
-      next[bp] = next[bp]?.filter((lay) => lay.i !== id) ?? [];
-    });
-    onLayoutsChange(next);
-  };
-
-  const addWidget = (kind) => {
-    const id = `${kind}-${crypto.randomUUID().slice(0, 6)}`;
-    const def = widgetDefaults[kind];
-
-    // Clone layouts deeply enough for arrays per breakpoint
-    const next = Object.fromEntries(
-      Object.entries(layouts).map(([bp, arr]) => [bp, Array.isArray(arr) ? [...arr] : []])
+    const nextLayouts = Object.fromEntries(
+      Object.entries(layouts).map(([bp, arr]) => [bp, (arr || []).filter(it => it.i !== id)])
     );
-
-    // Placement: fill rows left-to-right using current visible items; start at top
-    const computePlacement = (arr, bp, w) => {
-      const perRow = Math.max(1, Math.floor(COLS[bp] / w));
-      // consider only items that are actually rendered
-      const visibleIds = new Set(items.map((it) => it.i));
-      const visibleCount = (arr || []).filter((l) => visibleIds.has(l.i)).length;
-      const x = (visibleCount % perRow) * w;
-      const y = 0; // let RGL resolve collisions; vertical compaction will settle nicely
-      return { x, y };
-    };
-
-    // Ensure the item exists in all breakpoints with reasonable defaults
-    Object.keys(COLS).forEach((bp) => {
-      const arr = next[bp] ?? (next[bp] = []);
-      if (!arr.some((l) => l.i === id)) {
-        const kindKey = kind === 'gcal' ? 'calendarWeek' : kind;
-        const pref = getDefaultSize(kindKey, { cols: COLS[bp] });
-        const clamped = clampToMin(kindKey, pref, { cols: COLS[bp] });
-        arr.push({ i: id, x: 0, y: Infinity, w: clamped.w, h: clamped.h, minW: 3, minH: 3 });
-      }
-    });
-
-    // Apply layouts first to avoid a render where RGL guesses 1x1
-    setLayouts(next);
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify(next));
-
-    // Then add the item to the render list and persist items
-    const nextItems = [...items, { i: id, kind }];
-    setItems(nextItems);
-    localStorage.setItem(ITEMS_KEY, JSON.stringify(nextItems));
+    onLayoutsChange(nextLayouts);
   };
 
-  const buttonStyle = {
-    padding: "6px 12px",
-    borderRadius: 6,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    color: "rgba(255,255,255,0.9)",
-    border: "none",
-    fontSize: 14,
-    cursor: "pointer",
-  };
-
-  const [newKind, setNewKind] = React.useState(WIDGET_KINDS[0]);
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [highlight, setHighlight] = React.useState(0);
-  const menuRef = React.useRef(null);
-
-  React.useEffect(() => {
-    const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) setMenuOpen(false);
-    };
-    const onEsc = (e) => {
-      if (e.key === 'Escape') setMenuOpen(false);
-    };
-    document.addEventListener('mousedown', onDocClick);
-    document.addEventListener('keydown', onEsc);
-    return () => {
-      document.removeEventListener('mousedown', onDocClick);
-      document.removeEventListener('keydown', onEsc);
-    };
-  }, []);
-
-  // Animate grid item moves via CSS transform transition
+  // Enable CSS animation for grid items
   React.useEffect(() => {
     const styleId = "grid-anim-style";
     if (!document.getElementById(styleId)) {
@@ -292,113 +121,38 @@ export default function DashboardGrid() {
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, height: "100%" }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>Add widget:</span>
-        <div ref={menuRef} style={{ position: 'relative' }}>
-          <button
-            aria-haspopup="listbox"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
-            onKeyDown={(e) => {
-              if (e.key === 'ArrowDown') { e.preventDefault(); setMenuOpen(true); setHighlight((i)=> Math.min(i+1, WIDGET_KINDS.length-1)); }
-              if (e.key === 'ArrowUp') { e.preventDefault(); setMenuOpen(true); setHighlight((i)=> Math.max(i-1, 0)); }
-              if (e.key === 'Enter' && menuOpen) { setNewKind(WIDGET_KINDS[highlight]); setMenuOpen(false); }
-            }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.06)', color: '#fff',
-              border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
-              padding: '6px 10px', cursor: 'pointer'
-            }}
-          >
-            <span style={{ letterSpacing: 0.2 }}>{newKind}</span>
-            <span aria-hidden style={{ opacity: 0.7 }}>▾</span>
-          </button>
-          {menuOpen && (
-            <div role="listbox" aria-label="Widget types" className="nice-scroll" style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 20, minWidth: 160, maxHeight: 220, overflow: 'auto', background: 'rgba(2,6,23,0.98)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: 6, boxShadow: '0 10px 20px rgba(0,0,0,0.35)' }}>
-              {WIDGET_KINDS.map((k, idx) => (
-                <div
-                  key={k}
-                  role="option"
-                  aria-selected={k === newKind}
-                  onMouseEnter={() => setHighlight(idx)}
-                  onClick={() => { setNewKind(k); setMenuOpen(false); }}
-                  style={{
-                    padding: '8px 10px', borderRadius: 6,
-                    background: idx === highlight ? 'rgba(59,130,246,0.2)' : 'transparent',
-                    color: '#fff', cursor: 'pointer'
-                  }}
-                >
-                  {k}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <button
-          aria-label="Add selected widget"
-          style={buttonStyle}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)")}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}
-          onClick={() => addWidget(newKind)}
-        >
-          Add
-        </button>
-        <button
-          aria-label="Auto-Arrange layout"
-          className="px-3 py-1 rounded bg-white/10 hover:bg-white/15"
-          style={buttonStyle}
-          onClick={() => {
-            const next = { ...layouts };
-            Object.keys(COLS).forEach((bp) => {
-              const arr = (next[bp] ?? []);
-              // Normalize sizes via registry (repair invalid)
-              const norm = arr.map((it) => {
-                const kind = parseKind(it.i);
-                const kindKey = kind === 'gcal' ? 'calendarWeek' : kind;
-                const pref = getDefaultSize(kindKey, { cols: COLS[bp] });
-                const clamped = clampToMin(kindKey, { w: it.w || pref.w, h: it.h || pref.h }, { cols: COLS[bp] });
-                const s = snapSize(clamped.w, clamped.h);
-                return { ...it, w: s.w, h: s.h };
-              });
-              const items = norm.map((it) => ({ id: it.i, w: it.w, h: it.h }));
-              const placed = autoArrange(items, COLS[bp]);
-              const posMap = new Map(placed.map((p) => [p.id, p]));
-              next[bp] = norm.map((it) => {
-                const p = posMap.get(it.i) || { x: it.x || 0, y: it.y || 0 };
-                return { ...it, x: p.x, y: p.y };
-              });
-            });
-            // Dev assertions: no overlaps and bounds
-            if (process.env.NODE_ENV !== 'production') {
-              const arr = next.lg ?? [];
-              const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-              arr.forEach((a, i) => {
-                if (a.x < 0 || a.y < 0 || a.x + a.w > COLS.lg) console.warn('pack bounds', a);
-                for (let j = i + 1; j < arr.length; j++) if (overlaps(a, arr[j])) console.warn('pack overlap', a, arr[j]);
-              });
-            }
-            onLayoutsChange(next);
-            // eslint-disable-next-line no-console
-            console.info("Auto-Arrange applied", next.lg);
-          }}
-        >
-          Auto-Arrange
-        </button>
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)", height: "100%", padding: "var(--space-5)" }}>
 
-      <div
-        className="grid-bg"
-        style={{
-          borderRadius: 12,
-          border: "1px solid rgba(255,255,255,0.1)",
-          padding: 12,
-          backgroundColor: "rgba(15,23,42,0.6)", // slate-900/60
+      <div 
+        style={{ 
+          position: 'relative',
+          borderRadius: "var(--r-2xl)", 
+          padding: "var(--space-5)", 
+          background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))", 
+          border: "1px solid var(--stroke-outer)",
+          backdropFilter: "blur(var(--blur))",
+          minHeight: 420,
           flex: 1,
-          minHeight: 0,
         }}
       >
+        <div className="mesh-overlay" style={{ borderRadius: 'inherit' }} />
+        {items.length === 0 && (
+          <div style={{ 
+            color: "var(--ink-2)", 
+            textAlign: "center", 
+            padding: "var(--space-6)",
+            fontSize: "var(--h3)",
+            fontFamily: "var(--font-sans)",
+            position: "relative",
+            zIndex: 1
+          }}>
+            <div style={{ fontSize: 48, marginBottom: "var(--space-4)" }}>📊</div>
+            <div style={{ fontWeight: 500 }}>Dashboard is empty</div>
+            <div style={{ fontSize: "var(--body)", marginTop: "var(--space-2)", color: "var(--muted)" }}>
+              We'll add a curated set of default widgets next.
+            </div>
+          </div>
+        )}
         <ResponsiveGridLayout
           className="layout"
           layouts={layouts}
@@ -409,17 +163,76 @@ export default function DashboardGrid() {
           compactType="vertical"
           preventCollision={false}
           onLayoutsChange={onLayoutsChange}
-          onResizeStop={(_l, _old, item) => {
-            const s = snapSize(item.w, item.h);
-            item.w = s.w;
-            item.h = s.h;
-            onLayoutsChange(layouts);
-          }}
           draggableHandle=".react-grid-dragHandle"
         >
-          {items.map(({ i, kind }) => (
-            <div key={i}>{renderWidget(kind, i, () => removeItem(i))}</div>
-          ))}
+          {items.map((item) => {
+            const widgetContent = renderWidget(item.kind, item.i, () => removeItem(item.i));
+            
+            return (
+              <div key={item.i} style={{ height: '100%' }}>
+                {widgetContent || (
+                  <Card
+                    header={
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div 
+                          className="react-grid-dragHandle" 
+                          style={{ 
+                            cursor: 'grab', 
+                            opacity: 0.7,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "var(--space-2)",
+                            fontSize: "var(--body)",
+                            fontWeight: 500,
+                            color: "var(--ink-1)"
+                          }}
+                        >
+                          <span style={{ display: 'inline-block', width: 18 }}>
+                            <span style={{ display: 'block', height: 2, background: 'var(--muted)', margin: '3px 0', borderRadius: 2 }} />
+                            <span style={{ display: 'block', height: 2, background: 'var(--muted)', margin: '3px 0', borderRadius: 2 }} />
+                            <span style={{ display: 'block', height: 2, background: 'var(--muted)', margin: '3px 0', borderRadius: 2 }} />
+                          </span>
+                          Unknown widget: {item.kind}
+                        </div>
+                        <button 
+                          onClick={() => removeItem(item.i)} 
+                          style={{ 
+                            background: "transparent", 
+                            border: "none", 
+                            color: "var(--ink-2)", 
+                            cursor: "pointer",
+                            fontSize: 12,
+                            padding: "4px 8px",
+                            borderRadius: "var(--r-sm)",
+                            transition: "all 0.2s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "rgba(255,93,122,0.12)";
+                            e.currentTarget.style.color = "var(--acc-red)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.color = "var(--ink-2)";
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    }
+                  >
+                    <div style={{ 
+                      padding: "var(--space-3) 0", 
+                      color: "var(--ink-2)",
+                      fontSize: "var(--body)",
+                      fontFamily: "var(--font-sans)"
+                    }}>
+                      Widget kind '{item.kind}' not found
+                    </div>
+                  </Card>
+                )}
+              </div>
+            );
+          })}
         </ResponsiveGridLayout>
       </div>
     </div>
