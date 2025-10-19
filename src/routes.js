@@ -1,7 +1,7 @@
 // OverDue Dashboard Routes Configuration
 import DashboardPage from "./pages/Dashboard";
 import CalendarPage from "./pages/Calendar";
-import NotesPage from "./pages/Notes";
+import NotesPage from "./pages/NotesRoute";
 import AssistantPage from "./pages/Assistant";
 import GradesPage from "./pages/Grades";
 import ProfilePage from "./pages/Profile";
