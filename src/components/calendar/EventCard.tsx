@@ -1,42 +1,39 @@
-import React from 'react';
-import { format } from 'date-fns';
+import React from "react";
+import { format } from "date-fns";
 
-export type Event = {
-  id: string;
+export default function EventCard({
+  title,
+  start,
+  end,
+  color,
+}: {
   title: string;
   start: Date;
   end: Date;
-  categoryId: string;
-  location?: string;
-  description?: string;
-};
-
-type EventCardProps = {
-  event: Event;
-  categoryColor: string;
-  onClick: () => void;
-};
-
-export default function EventCard({ event, categoryColor, onClick }: EventCardProps) {
-  const startTime = format(event.start, 'h:mm a');
-  const endTime = format(event.end, 'h:mm a');
-  
+  color: string;
+}) {
   return (
-    <div 
-      className={`cal-event ${categoryColor}`}
-      onClick={onClick}
-    >
+    <div
+  className="cal-event"
+  style={{
+    background: `linear-gradient(180deg, ${color}33 0%, rgba(255,255,255,0.06) 100%)`,
+    borderColor: `${color}88`,
+    width: "92%",          // <<< keep chip inside the cell
+    margin: "6px auto",    // <<< centered, vertical spacing
+    boxSizing: "border-box",
+  }}
+>
+
+
+      <div className="cal-event-title">{title}</div>
       <div className="cal-event-time">
-        {startTime} - {endTime}
+        {format(start, "HH:mm")} – {format(end, "HH:mm")}
       </div>
-      <div className="cal-event-title">
-        {event.title}
+      <div className="cal-event-peers">
+        <span className="cal-badge" />
+        <span className="cal-badge" />
+        <span className="cal-badge" />
       </div>
-      {event.location && (
-        <div className="cal-event-location">
-          {event.location}
-        </div>
-      )}
     </div>
   );
 }

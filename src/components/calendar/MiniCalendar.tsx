@@ -1,118 +1,114 @@
-import React from 'react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React from "react";
+import {
+  addMonths,
+  subMonths,
+  startOfMonth,
+  startOfWeek,
+  addDays,
+  isSameMonth,
+  isSameDay,
+  format,
+} from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-type MiniCalendarProps = {
-  selectedDate: Date;
-  onDateChange: (date: Date) => void;
-  events: Array<{ start: Date; categoryId: string }>;
-  categoryColors: Record<string, string>;
+export type MiniCalendarProps = {
+  /** Controlled selected date (highlighted in the mini calendar) */
+  selectedDate?: Date;
+  /** Backward-compatible alias if other callers ever pass it */
+  date?: Date;
+  /** Fires when a day is picked */
+  onChange?: (d: Date) => void;
+  /** Backward-compatible alias */
+  onSelectDate?: (d: Date) => void;
+  className?: string;
 };
 
-export default function MiniCalendar({ selectedDate, onDateChange, events, categoryColors }: MiniCalendarProps) {
-  const [currentMonth, setCurrentMonth] = React.useState(new Date());
+export default function MiniCalendar({
+  selectedDate,
+  date,
+  onChange,
+  onSelectDate,
+  className,
+}: MiniCalendarProps) {
+  // normalize incoming selected date
+  const controlledSelected = selectedDate ?? date ?? new Date();
 
-  const prevMonth = () => {
-    setCurrentMonth(subMonths(currentMonth, 1));
+  const [monthCursor, setMonthCursor] = React.useState<Date>(
+    startOfMonth(controlledSelected)
+  );
+
+  // Keep visible month in sync if parent changes selected date
+  React.useEffect(() => {
+  setMonthCursor(startOfMonth(controlledSelected));
+}, [controlledSelected.getTime()]);
+
+
+  const weekStart = startOfWeek(monthCursor, { weekStartsOn: 0 });
+
+  const days: Date[] = React.useMemo(() => {
+    // 6 weeks * 7 days = 42 cells (standard mini calendar grid)
+    return Array.from({ length: 42 }, (_, i) => addDays(weekStart, i));
+  }, [weekStart]);
+
+  const pick = (d: Date) => {
+    onChange?.(d);
+    onSelectDate?.(d);
   };
 
-  const nextMonth = () => {
-    setCurrentMonth(addMonths(currentMonth, 1));
-  };
-
-  const renderHeader = () => {
-    return (
-      <div className="cal-mini-header">
+  return (
+    <div className={`mini-cal ${className ?? ""}`}>
+      <div className="mini-cal__header">
         <button
-          className="cal-btn cal-btn-icon"
-          onClick={prevMonth}
+          type="button"
+          aria-label="Previous month"
+          className="mini-cal__nav"
+          onClick={() => setMonthCursor((m) => subMonths(m, 1))}
         >
           <ChevronLeft size={16} />
         </button>
-        <h2 className="cal-mini-title">
-          {format(currentMonth, 'MMMM yyyy')}
-        </h2>
+        <div className="mini-cal__title">{format(monthCursor, "MMMM yyyy")}</div>
         <button
-          className="cal-btn cal-btn-icon"
-          onClick={nextMonth}
+          type="button"
+          aria-label="Next month"
+          className="mini-cal__nav"
+          onClick={() => setMonthCursor((m) => addMonths(m, 1))}
         >
           <ChevronRight size={16} />
         </button>
       </div>
-    );
-  };
 
-  const renderDays = () => {
-    const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-    return (
-      <div className="cal-mini-grid">
-        {days.map((day) => (
-          <div
-            key={day}
-            className="cal-mini-weekday"
-          >
-            {day}
+      <div className="mini-cal__dow">
+        {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+          <div key={d} className="mini-cal__dow-cell">
+            {d}
           </div>
         ))}
       </div>
-    );
-  };
 
-  const renderCells = () => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart);
-    const endDate = endOfWeek(monthEnd);
-
-    const rows = [];
-    let days = [];
-    let day = startDate;
-
-    while (day <= endDate) {
-      for (let i = 0; i < 7; i++) {
-        const cloneDay = day;
-        const isSelected = isSameDay(day, selectedDate);
-        const isCurrentMonth = isSameMonth(day, monthStart);
-        
-        // Check if there are events on this day
-        const dayEvents = events.filter(event => isSameDay(event.start, cloneDay));
-        
-        days.push(
-          <div
-            key={day.toString()}
-            className={`cal-mini-day ${isSelected ? 'cal-mini-day--selected' : ''} ${!isCurrentMonth ? 'cal-mini-day--disabled' : ''}`}
-            onClick={() => onDateChange(cloneDay)}
-          >
-            {format(day, 'd')}
-            {dayEvents.length > 0 && (
-              <div className="cal-mini-day-events">
-                {dayEvents.slice(0, 3).map((event, index) => (
-                  <div 
-                    key={index}
-                    className={`cal-mini-day-event ${categoryColors[event.categoryId] || 'cal-event-default'}`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        );
-        day = addDays(day, 1);
-      }
-      rows.push(
-        <div key={day.toString()} className="cal-mini-week">
-          {days}
-        </div>
-      );
-      days = [];
-    }
-    return <div className="cal-mini-body">{rows}</div>;
-  };
-
-  return (
-    <div className="cal-mini">
-      {renderHeader()}
-      {renderDays()}
-      {renderCells()}
+      <div className="mini-cal__grid">
+        {days.map((d) => {
+          const outside = !isSameMonth(d, monthCursor);
+          const selected = isSameDay(d, controlledSelected);
+          const today = isSameDay(d, new Date());
+          return (
+            <button
+              key={d.toISOString()}
+              type="button"
+              onClick={() => pick(d)}
+              className={[
+                "mini-cal__cell",
+                outside ? "is-outside" : "",
+                today ? "is-today" : "",
+                selected ? "is-selected" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {format(d, "d")}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

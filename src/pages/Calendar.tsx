@@ -1,332 +1,274 @@
-import React from 'react';
-import { format, addDays, startOfWeek, isSameDay, addWeeks, subWeeks, parseISO } from 'date-fns';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-
-import MiniCalendar from '../components/calendar/MiniCalendar';
-import CategoryList from '../components/calendar/CategoryList';
-import EventCard from '../components/calendar/EventCard';
-import EventDialog from '../components/calendar/EventDialog';
-import type { Event } from '../components/calendar/EventCard';
-import Button from '../components/ui/Button';
-
-// Import custom CSS
+import React from "react";
+import {
+  format,
+  startOfWeek,
+  addDays,
+  isSameDay,
+  addWeeks,
+  subWeeks,
+} from "date-fns";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import MiniCalendar from "../components/calendar/MiniCalendar";
+import EventCard from "../components/calendar/EventCard";
+import EventDialog from "../components/calendar/EventDialog";
+// add this import so all cal-* and mini-cal-* styles load
 import "../features/calendar/calendar.styles.css";
 
-// Sample data
-const SAMPLE_EVENTS: Event[] = [
+
+
+// -------------------- Types --------------------
+type Category = { id: string; name: string; color: string; enabled: boolean };
+
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  categoryId: string;
+  location?: string;
+  description?: string;
+};
+
+// -------------------- Seed (safe) --------------------
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: "personal", name: "Personal", color: "#7c5cff", enabled: true },
+  { id: "work", name: "Work", color: "#3b82f6", enabled: true },
+  { id: "health", name: "Health", color: "#22c55e", enabled: true },
+];
+
+// If you already have SAMPLE_EVENTS in this file, you can remove the below and reuse yours.
+const SEED_EVENTS: CalendarEvent[] = [
   {
-    id: '1',
-    title: 'Booking test app',
-    start: parseISO('2025-10-13T09:00:00'),
-    end: parseISO('2025-10-13T10:00:00'),
-    categoryId: 'work',
-    location: 'Office',
+    id: "e1",
+    title: "Booking taxi app",
+    start: new Date(2025, 9, 13, 6, 0),
+    end: new Date(2025, 9, 13, 7, 30),
+    categoryId: "work",
+    location: "",
   },
   {
-    id: '2',
-    title: 'Design onboarding',
-    start: parseISO('2025-10-13T11:00:00'),
-    end: parseISO('2025-10-13T12:30:00'),
-    categoryId: 'work',
+    id: "e2",
+    title: "Design onboarding",
+    start: new Date(2025, 9, 14, 6, 0),
+    end: new Date(2025, 9, 14, 7, 10),
+    categoryId: "work",
   },
   {
-    id: '3',
-    title: 'Development meet',
-    start: parseISO('2025-10-13T10:00:00'),
-    end: parseISO('2025-10-13T11:00:00'),
-    categoryId: 'work',
-    location: 'Room 3B',
+    id: "e3",
+    title: "Design session",
+    start: new Date(2025, 9, 14, 7, 50),
+    end: new Date(2025, 9, 14, 9, 20),
+    categoryId: "personal",
   },
   {
-    id: '4',
-    title: 'Design review',
-    start: parseISO('2025-10-16T15:00:00'),
-    end: parseISO('2025-10-16T16:00:00'),
-    categoryId: 'work',
-    location: 'Design Lab',
-  },
-  {
-    id: '5',
-    title: 'Meet Gabriel at the International Library',
-    start: parseISO('2025-10-12T12:00:00'),
-    end: parseISO('2025-10-12T13:30:00'),
-    categoryId: 'personal',
-    location: 'International Library',
+    id: "e4",
+    title: "Development meet",
+    start: new Date(2025, 9, 14, 8, 0),
+    end: new Date(2025, 9, 14, 8, 30),
+    categoryId: "work",
+    location: "Room 3B",
   },
 ];
 
-const CATEGORIES = [
-  { id: 'personal', name: 'Personal', color: 'bg-purple-500/80', enabled: true },
-  { id: 'work', name: 'Work', color: 'bg-blue-500/80', enabled: true },
-  { id: 'health', name: 'Health', color: 'bg-green-500/80', enabled: true },
-];
+// -------------------- Helpers --------------------
+const HOURS = Array.from({ length: 15 }, (_, i) => i + 6); // 6am–8pm
+function useWeek(startDate: Date) {
+  const start = startOfWeek(startDate, { weekStartsOn: 0 });
+  return Array.from({ length: 7 }).map((_, i) => addDays(start, i));
+}
 
-const HOURS = Array.from({ length: 12 }, (_, i) => i + 6); // 6am to 6pm
-
+// -------------------- Component --------------------
 export default function Calendar() {
-  const [selectedDate, setSelectedDate] = React.useState(new Date());
-  const [viewMode, setViewMode] = React.useState<'week' | 'day'>('week');
-  const [categories, setCategories] = React.useState(CATEGORIES);
-  const [events, setEvents] = React.useState(SAMPLE_EVENTS);
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [selectedEvent, setSelectedEvent] = React.useState<Event | undefined>(undefined);
+  // IMPORTANT: land on the week that has seed events so the grid is not empty
+  const initialDate = (SEED_EVENTS[0]?.start ?? new Date());
+  const [selectedDate, setSelectedDate] = React.useState<Date>(initialDate);
+  const [categories, setCategories] = React.useState<Category[]>(
+    DEFAULT_CATEGORIES
+  );
+  const [events, setEvents] = React.useState<CalendarEvent[]>(SEED_EVENTS);
+  const [openAdd, setOpenAdd] = React.useState(false);
 
-  const startDate = startOfWeek(selectedDate);
-  
-  const days = React.useMemo(() => {
-    if (viewMode === 'week') {
-      return Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
-    }
-    return [selectedDate];
-  }, [startDate, selectedDate, viewMode]);
-
-  const handlePrevious = () => {
-    if (viewMode === 'week') {
-      setSelectedDate(subWeeks(selectedDate, 1));
-    } else {
-      setSelectedDate(addDays(selectedDate, -1));
-    }
-  };
-
-  const handleNext = () => {
-    if (viewMode === 'week') {
-      setSelectedDate(addWeeks(selectedDate, 1));
-    } else {
-      setSelectedDate(addDays(selectedDate, 1));
-    }
-  };
-
-  const handleToday = () => {
-    setSelectedDate(new Date());
-  };
-
-  const toggleCategory = (id: string) => {
-    setCategories(
-      categories.map((cat) =>
-        cat.id === id ? { ...cat, enabled: !cat.enabled } : cat
-      )
-    );
-  };
-
-  const handleAddEvent = () => {
-    setSelectedEvent(undefined);
-    setIsDialogOpen(true);
-  };
-
-  const handleEditEvent = (event: Event) => {
-    setSelectedEvent(event);
-    setIsDialogOpen(true);
-  };
-
-  const handleSaveEvent = (eventData: Omit<Event, 'id'>) => {
-    if (selectedEvent) {
-      // Edit existing event
-      setEvents(
-        events.map((event) =>
-          event.id === selectedEvent.id
-            ? { ...event, ...eventData }
-            : event
-        )
-      );
-    } else {
-      // Add new event
-      const newEvent: Event = {
-        ...eventData,
-        id: `event-${Date.now()}`,
-      };
-      setEvents([...events, newEvent]);
-    }
-  };
-
-  const filteredEvents = events.filter(
-    (event) => categories.find((cat) => cat.id === event.categoryId)?.enabled
+  const days = useWeek(selectedDate);
+  const enabledCategoryIds = React.useMemo(
+    () => new Set(categories.filter((c) => c.enabled).map((c) => c.id)),
+    [categories]
   );
 
-  const categoryColors = categories.reduce(
-    (acc, cat) => ({ ...acc, [cat.id]: cat.color }),
-    {} as Record<string, string>
+  const filteredEvents = React.useMemo(
+    () => events.filter((e) => enabledCategoryIds.has(e.categoryId)),
+    [events, enabledCategoryIds]
   );
 
-  const getEventsForDayAndHour = (day: Date, hour: number) => {
-    return filteredEvents.filter((event) => {
-      const eventHour = event.start.getHours();
-      return isSameDay(event.start, day) && eventHour === hour;
-    });
-  };
-
-  const getUpcomingEvents = () => {
-    const now = new Date();
+  function eventsForDay(d: Date) {
     return filteredEvents
-      .filter((event) => event.start > now)
+      .filter((e) => isSameDay(e.start, d))
+      .sort((a, b) => a.start.getTime() - b.start.getTime());
+  }
+
+  function getUpcoming() {
+    const weekStart = startOfWeek(selectedDate);
+    return filteredEvents
+      .filter((e) => e.start >= weekStart)
       .sort((a, b) => a.start.getTime() - b.start.getTime())
-      .slice(0, 3);
-  };
+      .slice(0, 1); // Lovable mock shows a single featured upcoming card
+  }
+
+  function handleSaveEvent(payload: Omit<CalendarEvent, "id">) {
+    setEvents((prev) =>
+      prev.concat({ id: crypto.randomUUID(), ...payload })
+    );
+  }
 
   return (
-    <div className="cal-root">
-      {/* Left sidebar */}
-      <div className="cal-sidebar">
-        <MiniCalendar
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-          events={filteredEvents}
-          categoryColors={categoryColors}
-        />
-        
-        <div className="cal-upcoming">
-          <h3 className="cal-upcoming-title">Upcoming</h3>
-          <div>
-            {getUpcomingEvents().map((event) => (
-              <div
-                key={event.id}
-                className={`cal-upcoming-event cal-event--${event.categoryId}`}
-                onClick={() => handleEditEvent(event)}
-              >
-                <div className="cal-upcoming-time">
-                  {format(event.start, 'MMM d, h:mm a')}
+    <div className="cal-layout">
+      {/* LEFT SIDEBAR */}
+      <aside className="cal-sidebar">
+        <div className="cal-panel cal-panel--calendar">
+          <MiniCalendar
+            selectedDate={selectedDate}
+            onChange={(d: Date) => setSelectedDate(d)}
+          />
+        </div>
+
+        <div className="cal-panel cal-panel--upcoming">
+          <div className="cal-panel-title">Upcoming</div>
+          {getUpcoming().length === 0 ? (
+            <div className="cal-empty">No upcoming events</div>
+          ) : (
+            getUpcoming().map((e) => {
+              const cat = categories.find((c) => c.id === e.categoryId);
+              return (
+                <div key={e.id} className="cal-upcoming-card">
+                  <div className="cal-upcoming-time">
+                    {format(e.start, "HH:mm")} – {format(e.end, "HH:mm")}
+                  </div>
+                  <div className="cal-upcoming-title">{e.title}</div>
+                  {e.location ? (
+                    <div className="cal-upcoming-sub">{e.location}</div>
+                  ) : null}
+                  <div className="cal-upcoming-actions">
+                    <button className="cal-btn cal-btn-ghost">Later</button>
+                    <button className="cal-btn cal-btn-soft">Details</button>
+                  </div>
+                  <span
+                    className="cal-upcoming-dot"
+                    style={{ background: cat?.color || "#64748b" }}
+                  />
                 </div>
-                <div className="cal-upcoming-title">
-                  {event.title}
-                </div>
-              </div>
+              );
+            })
+          )}
+        </div>
+
+        <div className="cal-panel cal-panel--categories">
+          <div className="cal-panel-title">Categories</div>
+          <div className="cal-cat-list">
+            {categories.map((c) => (
+              <label key={c.id} className="cal-cat-item">
+                <span className="cal-cat-dot" style={{ background: c.color }} />
+                <span>{c.name}</span>
+                <input
+                  type="checkbox"
+                  checked={c.enabled}
+                  onChange={() =>
+                    setCategories((prev) =>
+                      prev.map((x) =>
+                        x.id === c.id ? { ...x, enabled: !x.enabled } : x
+                      )
+                    )
+                  }
+                />
+              </label>
             ))}
-            {getUpcomingEvents().length === 0 && (
-              <div className="cal-upcoming-event">No upcoming events</div>
-            )}
           </div>
         </div>
-        
-        <div className="cal-categories">
-          <h3 className="cal-upcoming-title">Categories</h3>
-          <CategoryList categories={categories} onToggle={toggleCategory} />
-        </div>
-      </div>
+      </aside>
 
-      {/* Main content */}
-      <div className="cal-main">
-        {/* Header */}
-        <div className="cal-header">
-          <div className="cal-header-left">
-            <h1 className="cal-header-title">
-              {format(selectedDate, 'MMMM yyyy')}
-            </h1>
-            <div className="cal-nav-buttons">
-              <button
-                onClick={handlePrevious}
-                className="cal-btn cal-btn-icon cal-btn-ghost"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <Button
-                onClick={handleToday}
-                variant="secondary"
-                size="xs"
-              >
-                Today
-              </Button>
-              <button
-                onClick={handleNext}
-                className="cal-btn cal-btn-icon cal-btn-ghost"
-              >
-                <ChevronRight size={20} />
-              </button>
+      {/* MAIN */}
+      <section className="cal-main">
+        <header className="cal-toolbar">
+          <div className="cal-toolbar-left">
+            <button
+              className="cal-icon-btn"
+              aria-label="Prev week"
+              onClick={() => setSelectedDate((d) => subWeeks(d, 1))}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              className="cal-btn cal-btn-soft"
+              onClick={() => setSelectedDate(new Date())}
+            >
+              Today
+            </button>
+            <button
+              className="cal-icon-btn"
+              aria-label="Next week"
+              onClick={() => setSelectedDate((d) => addWeeks(d, 1))}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+
+          <h1 className="cal-month-title">{format(selectedDate, "MMMM, yyyy")}</h1>
+
+          <div className="cal-segment">
+            <button className="cal-segment-item cal-segment-item--active">Week</button>
+            <button className="cal-segment-item">Day</button>
+          </div>
+        </header>
+
+        {/* Day headers */}
+        <div className="cal-week-headers">
+          {useWeek(selectedDate).map((d) => (
+            <div key={d.toISOString()} className="cal-day-header">
+              <div className="cal-day-name">{format(d, "EEEE")}</div>
+              <div className="cal-day-number">{format(d, "d")}</div>
             </div>
-          </div>
-          <div className="cal-btn-group">
-            <button
-              onClick={() => setViewMode('week')}
-              className={`cal-btn ${
-                viewMode === 'week'
-                  ? 'cal-btn-active'
-                  : 'cal-btn-ghost'
-              }`}
-            >
-              Week
-            </button>
-            <button
-              onClick={() => setViewMode('day')}
-              className={`cal-btn ${
-                viewMode === 'day'
-                  ? 'cal-btn-active'
-                  : 'cal-btn-ghost'
-              }`}
-            >
-              Day
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Calendar grid */}
-        <div className="cal-scroll">
-          <div className="cal-days">
-            {/* Time column header */}
-            <div></div>
-            
-            {/* Day headers */}
-            {days.map((day) => (
-              <div
-                key={day.toString()}
-                className={`cal-daychip ${
-                  isSameDay(day, new Date()) ? 'cal-daychip--today' : ''
-                }`}
-              >
-                <div className="cal-day-name">
-                  {format(day, 'EEEE')}
-                </div>
-                <div className="cal-day-number">
-                  {format(day, 'd')}
-                </div>
-              </div>
-            ))}
-            
-            {/* Time rows */}
-            {HOURS.map((hour) => (
-              <React.Fragment key={hour}>
-                {/* Time label */}
-                <div className="cal-time-label">
-                  {hour === 12 ? '12 PM' : hour < 12 ? `${hour} AM` : `${hour - 12} PM`}
-                </div>
-                
-                {/* Day slots */}
-                {days.map((day) => {
-                  const dayEvents = getEventsForDayAndHour(day, hour);
-                  return (
-                    <div
-                      key={`${day}-${hour}`}
-                      className="cal-slot"
-                    >
-                      {dayEvents.map((event) => (
+        {/* Grid */}
+        <div className="cal-week-grid">
+          {HOURS.map((hr) => (
+            <div key={hr} className="cal-hour-row">
+              {days.map((d) => (
+                <div key={`${d.toDateString()}-${hr}`} className="cal-hour-cell">
+                  {eventsForDay(d)
+                    .filter((e) => e.start.getHours() === hr)
+                    .map((e) => {
+                      const cat = categories.find((c) => c.id === e.categoryId);
+                      return (
                         <EventCard
-                          key={event.id}
-                          event={event}
-                          categoryColor={`cal-event--${event.categoryId}`}
-                          onClick={() => handleEditEvent(event)}
+                          key={e.id}
+                          title={e.title}
+                          start={e.start}
+                          end={e.end}
+                          color={cat?.color || "#6366f1"}
                         />
-                      ))}
-                    </div>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-          </div>
+                      );
+                    })}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
-      </div>
 
-      {/* Add Event button */}
-      <button
-        onClick={handleAddEvent}
-        className="cal-add-event"
-      >
-        <Plus size={20} />
-        <span>Add Event</span>
-      </button>
+        {/* Floating Add Button */}
+        <button className="cal-fab" onClick={() => setOpenAdd(true)}>
+          <Plus size={18} />
+          <span>Add Event</span>
+        </button>
+      </section>
 
-      {/* Event dialog */}
+      {/* ADD / EDIT DIALOG */}
       <EventDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onSave={handleSaveEvent}
-        event={selectedEvent}
+        isOpen={openAdd}
+        onClose={() => setOpenAdd(false)}
+        onSave={(payload) => {
+          handleSaveEvent(payload as Omit<CalendarEvent, "id">);
+          setOpenAdd(false);
+        }}
         categories={categories}
       />
     </div>
