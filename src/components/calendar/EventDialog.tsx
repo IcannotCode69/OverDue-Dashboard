@@ -19,6 +19,8 @@ type EventDialogProps = {
   // When editing we may pass an event-like object; keep it optional and compatible
   event?: Partial<CalendarEventInput> & { start?: Date; end?: Date };
   categories: Array<{ id: string; name: string; color: string }>;
+  // NEW (non-breaking): base date used when adding with time-only inputs
+  baseDate?: Date;
 };
 
 export default function EventDialog({
@@ -26,14 +28,16 @@ export default function EventDialog({
   onClose,
   onSave,
   event,
-  categories
+  categories,
+  baseDate,
 }: EventDialogProps) {
   const [title, setTitle] = React.useState(event?.title || '');
-  const [start, setStart] = React.useState(
-    event?.start ? format(event.start, "yyyy-MM-dd'T'HH:mm") : ''
+  // Time-only strings (HH:mm). For edit mode, derive from given dates
+  const [startTime, setStartTime] = React.useState(
+    event?.start ? format(event.start, 'HH:mm') : ''
   );
-  const [end, setEnd] = React.useState(
-    event?.end ? format(event.end, "yyyy-MM-dd'T'HH:mm") : ''
+  const [endTime, setEndTime] = React.useState(
+    event?.end ? format(event.end, 'HH:mm') : ''
   );
   const [categoryId, setCategoryId] = React.useState(event?.categoryId || categories[0]?.id || '');
   const [location, setLocation] = React.useState(event?.location || '');
@@ -42,8 +46,8 @@ export default function EventDialog({
   React.useEffect(() => {
     if (isOpen) {
       setTitle(event?.title || '');
-      setStart(event?.start ? format(event.start, "yyyy-MM-dd'T'HH:mm") : '');
-      setEnd(event?.end ? format(event.end, "yyyy-MM-dd'T'HH:mm") : '');
+      setStartTime(event?.start ? format(event.start, 'HH:mm') : '');
+      setEndTime(event?.end ? format(event.end, 'HH:mm') : '');
       setCategoryId(event?.categoryId || categories[0]?.id || '');
       setLocation(event?.location || '');
       setDescription(event?.description || '');
@@ -52,10 +56,16 @@ export default function EventDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Combine baseDate (selected day) with HH:mm time strings
+    const base = event?.start || baseDate || new Date();
+    const [sh, sm] = (startTime || '00:00').split(':').map(Number);
+    const [eh, em] = (endTime || '00:00').split(':').map(Number);
+    const s = new Date(base.getFullYear(), base.getMonth(), base.getDate(), sh || 0, sm || 0);
+    const en = new Date(base.getFullYear(), base.getMonth(), base.getDate(), eh || 0, em || 0);
     onSave({
       title,
-      start: new Date(start),
-      end: new Date(end),
+      start: s,
+      end: en,
       categoryId,
       location,
       description,
@@ -69,7 +79,7 @@ export default function EventDialog({
     <div className="cal-dialog-overlay">
       <div className="cal-dialog-content">
         <div className="cal-dialog-header">
-          <h2 className="cal-dialog-title">{event ? 'Add Event' : 'Add Event'}</h2>
+          <h2 className="cal-dialog-title">{event ? 'Edit Event' : 'Add New Event'}</h2>
           <button onClick={onClose} className="cal-dialog-close" aria-label="Close">
             <X size={18} />
           </button>
@@ -90,23 +100,23 @@ export default function EventDialog({
 
           <div className="cal-grid-2">
             <div>
-              <label htmlFor="start" className="cal-label">Start</label>
+              <label htmlFor="start" className="cal-label">Start Time</label>
               <input
                 id="start"
-                type="datetime-local"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
                 className="cal-input"
                 required
               />
             </div>
             <div>
-              <label htmlFor="end" className="cal-label">End</label>
+              <label htmlFor="end" className="cal-label">End Time</label>
               <input
                 id="end"
-                type="datetime-local"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
                 className="cal-input"
                 required
               />
@@ -150,7 +160,7 @@ export default function EventDialog({
 
           <div className="cal-dialog-footer">
             <button type="button" onClick={onClose} className="cal-btn cal-btn-ghost">Cancel</button>
-            <button type="submit" className="cal-btn cal-btn-primary">Save</button>
+            <button type="submit" className="cal-btn cal-btn-primary">{event ? 'Save' : 'Add Event'}</button>
           </div>
         </form>
       </div>

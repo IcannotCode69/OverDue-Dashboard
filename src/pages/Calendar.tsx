@@ -7,10 +7,14 @@ import {
   addWeeks,
   subWeeks,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Upload } from "lucide-react";
 import MiniCalendar from "../components/calendar/MiniCalendar";
 import EventCard from "../components/calendar/EventCard";
 import EventDialog from "../components/calendar/EventDialog";
+import ICSImportModal from "../components/calendar/ICSImportModal";
+import { IcsEvent } from "../features/calendar/ics";
+import { dedupeByUidThenTitleStart } from "../features/calendar/ics.dedupe";
+import { guessCategoryId } from "../features/calendar/ics.map";
 // add this import so all cal-* and mini-cal-* styles load
 import "../features/calendar/calendar.styles.css";
 
@@ -85,7 +89,17 @@ export default function Calendar() {
   const [categories, setCategories] = React.useState<Category[]>(
     DEFAULT_CATEGORIES
   );
-  const [events, setEvents] = React.useState<CalendarEvent[]>(SEED_EVENTS);
+  const STORAGE_KEY = 'od:calendar:events:v1';
+  const [events, setEvents] = React.useState<CalendarEvent[]>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return SEED_EVENTS;
+      const parsed = JSON.parse(raw) as any[];
+      return parsed.map((e) => ({ ...e, start: new Date(e.start), end: new Date(e.end) }));
+    } catch { return SEED_EVENTS; }
+  });
+  const [importOpen, setImportOpen] = React.useState(false);
+  const [toast, setToast] = React.useState<string | null>(null);
   const [openAdd, setOpenAdd] = React.useState(false);
 
   const days = useWeek(selectedDate);
@@ -98,6 +112,10 @@ export default function Calendar() {
     () => events.filter((e) => enabledCategoryIds.has(e.categoryId)),
     [events, enabledCategoryIds]
   );
+
+  React.useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch {}
+  }, [events]);
 
   function eventsForDay(d: Date) {
     return filteredEvents
@@ -117,6 +135,29 @@ export default function Calendar() {
     setEvents((prev) =>
       prev.concat({ id: crypto.randomUUID(), ...payload })
     );
+  }
+
+  function mapImported(items: IcsEvent[]): (CalendarEvent & { __icsUid?: string; __lastModified?: Date })[] {
+    return items.map((it) => ({
+      id: crypto.randomUUID(),
+      title: it.title,
+      start: new Date(it.start),
+      end: new Date(it.end),
+      categoryId: guessCategoryId(it.title, it.location, it.description),
+      location: it.location,
+      description: it.description,
+      __icsUid: it.uid,
+      __lastModified: it.lastModified ? new Date(it.lastModified) : undefined,
+    }));
+  }
+
+  function handleImport(items: IcsEvent[]) {
+    setEvents((prev) => {
+      const merged = dedupeByUidThenTitleStart(prev as any, mapImported(items) as any).sort((a, b) => a.start.getTime() - b.start.getTime());
+      return merged as CalendarEvent[];
+    });
+    setToast(`Imported ${items.length} event(s).`);
+    setTimeout(() => setToast(null), 2500);
   }
 
   return (
@@ -208,6 +249,9 @@ export default function Calendar() {
             >
               <ChevronRight size={18} />
             </button>
+            <button className="cal-btn cal-btn-ghost" onClick={() => setImportOpen(true)}>
+              <Upload size={16} style={{ marginRight: 6 }} /> Import .ics
+            </button>
           </div>
 
           <h1 className="cal-month-title">{format(selectedDate, "MMMM, yyyy")}</h1>
@@ -221,7 +265,7 @@ export default function Calendar() {
         {/* Day headers */}
         <div className="cal-week-headers">
           {useWeek(selectedDate).map((d) => (
-            <div key={d.toISOString()} className="cal-day-header">
+            <div key={d.toISOString()} className={`cal-day-header ${isSameDay(d, selectedDate) ? 'is-active' : ''}`}>
               <div className="cal-day-name">{format(d, "EEEE")}</div>
               <div className="cal-day-number">{format(d, "d")}</div>
             </div>
@@ -270,7 +314,16 @@ export default function Calendar() {
           setOpenAdd(false);
         }}
         categories={categories}
+        baseDate={selectedDate}
       />
+
+      {/* ICS Import */}
+      <ICSImportModal open={importOpen} onClose={() => setImportOpen(false)} onImport={handleImport} />
+      {toast && (
+        <div role="status" aria-live="polite" className="pf-toast" style={{ position:'fixed', right:24, bottom:24 }}>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

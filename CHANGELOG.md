@@ -48,6 +48,18 @@
 - Reason: Allow browsing additional metrics without vertical growth, with a clean look that shows the scrollbar only on intent (hover).
 - Notes/Verification: On /profile, hover over the Activity panel to reveal a thin horizontal scrollbar; you can scroll horizontally through KPI cards. Keyboard users can tab into the scroller and arrow-scroll.
 
+## [2025-10-22 02:05] feat(calendar): Brightspace .ics importer with parsing, dedupe, category mapping, and persistence
+- Files: src/features/calendar/ics.ts, src/features/calendar/ics.dedupe.ts, src/features/calendar/ics.map.ts, src/components/calendar/ICSImportModal.tsx, src/pages/Calendar.tsx, src/features/calendar/calendar.styles.css
+- Summary: Added a resilient .ics parser (folded lines, HTML entity decoding, DTSTART/DTEND handling) and wired an Import .ics modal into the Calendar toolbar. Imported events map to local CalendarEvent with category inference, deduplicate by UID or title+start with LAST-MODIFIED preference, sort, and persist to localStorage (key: od:calendar:events:v1). The UI updates immediately, and a toast confirms the import.
+- Reason: Enable quick import of Brightspace-exported calendars into the local weekly overlay while keeping the rest of the Calendar page intact.
+- Notes/Verification: Use the new "Import .ics" button. Re-importing the same file does not duplicate events. Storage survives reload; MiniCalendar markers and event list update. Build passes with `npm run build`.
+
+## [2025-10-22 02:20] feat(calendar): time-only Add Event dialog using selected day
+- Files: src/components/calendar/EventDialog.tsx, src/pages/Calendar.tsx
+- Summary: Updated EventDialog to use time-only inputs for Start/End and combine them with the currently selected day (passed as `baseDate`) when creating events. The header now reads “Add New Event” for create and “Edit Event” for edit, matching the mock. Logic stays the same; it still returns a Date for start/end.
+- Reason: Match the design where date is implied by the selected day and the dialog shows only time pickers.
+- Notes/Verification: Clicking “Add Event” opens the new dialog. Choosing times sets start/end on the selected day. Build passes; existing edit flows remain compatible.
+
 ## [2025-10-18 00:20] chore(dashboard): remove Widget Workshop & runtime/gallery widgets; reset Dashboard to clean empty grid
 - Files: Deleted src/features/widgets/ (builder, runtime, gallery, sizing), src/routes.js (removed Widget Workshop nav), src/features/dashboard/DashboardGrid.js (replaced with minimal version), src/App.js (removed runtime init)
 - Summary: Completely rolled back Widget Workshop implementation. Removed entire widgets feature folder including builder UI, runtime system, gallery widgets, templates, sizing registry, and all related components. Cleaned Widget Workshop route from navigation. Replaced DashboardGrid with minimal implementation showing empty state with clean localStorage migration. Removed auto-pack/MaxRects dependencies and gallery widget registry.

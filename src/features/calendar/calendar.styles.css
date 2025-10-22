@@ -150,8 +150,8 @@
 .cal-segment {
   justify-self: end;
   display: inline-flex;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -160,10 +160,12 @@
   padding: 8px 14px;
   font-size: 12px;
   opacity: .9;
+  color: #e6edff;
 }
 
 .cal-segment-item--active {
-  background: linear-gradient(180deg, rgba(96,92,253,0.65), rgba(96,92,253,0.35));
+  background: #ffffff;
+  color: #0a0f1c;
 }
 
 /* Week headers */
@@ -176,10 +178,12 @@
 
 .cal-day-header {
   text-align: center;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 16px;
-  padding: 10px 0;
+  padding: 12px 0;
+  color: #dfe7ff;
+  box-shadow: 0 6px 20px rgba(0,0,0,.18) inset;
 }
 
 .cal-day-name {
@@ -192,6 +196,15 @@
   font-size: 1.15rem;
   margin-top: 2px;
 }
+
+.cal-day-header.is-active {
+  background: #ffffff;
+  color: #0a0f1c;
+  border-color: #ffffff;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+}
+.cal-day-header.is-active .cal-day-name,
+.cal-day-header.is-active .cal-day-number { color: #0a0f1c; }
 
 /* Grid */
 .cal-week-grid {
@@ -210,6 +223,8 @@
   height: 86px;
   border-right: 1px solid rgba(255,255,255,0.06);
   border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
 }
 
 .cal-hour-row .cal-hour-cell:last-child {
@@ -259,10 +274,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: radial-gradient(120% 120% at 0% 100%, rgba(97,92,249,.35), rgba(255,255,255,.06));
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #f1f4ff;
+  color: #0a0f1c;
+  font-weight: 600;
 }
 
 /* MiniCalendar — self-contained styles */
@@ -450,10 +467,10 @@
 
 /* FAB readable text + subtle glow */
 .cal-fab {
-  color: #ffffff;                      /* text/icon color */
-  box-shadow: 0 10px 24px rgba(38,33,135,0.25);
-  background: radial-gradient(120% 120% at 0% 100%, rgba(97,92,249,.42), rgba(255,255,255,.08));
-  border: 1px solid rgba(255,255,255,0.16);
+  color: #0a0f1c;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+  background: #f1f4ff;
+  border: 1px solid rgba(0,0,0,0.12);
 }
 
 /* MiniCalendar: selected/today contrast parity */
@@ -500,3 +517,16 @@
 
 /* Upcoming buttons: slightly darker for better contrast */
 .cal-upcoming-actions .cal-btn.cal-btn-ghost { background: rgba(255,255,255,0.08); }
+
+/* ICS import helpers */
+.ics-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.ics-inline {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
