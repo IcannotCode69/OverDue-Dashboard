@@ -61,24 +61,16 @@ export default function DashboardGrid() {
         }
       }
       
-      // Initialize with default calendar widget if no valid saved items
-      const defaultItem = {
-        i: `calendarCard-${Date.now()}`,
-        kind: 'calendarCard'
-      };
-      
-      return [defaultItem];
+      // Initialize with default calendar widget only (flip clock hidden for now)
+      const itemB = { i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' };
+      return [itemB];
     } catch { 
       localStorage.removeItem(LAYOUT_KEY);
       localStorage.removeItem(ITEMS_KEY);
       
-      // Initialize with default calendar widget on error
-      const defaultItem = {
-        i: `calendarCard-${Date.now()}`,
-        kind: 'calendarCard'
-      };
-      
-      return [defaultItem]; 
+      // Initialize with calendar widget on error
+      const itemB = { i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' };
+      return [itemB]; 
     }
   });
 

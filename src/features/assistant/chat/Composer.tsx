@@ -1,4 +1,5 @@
 import React from "react";
+import { v4 as uuid } from "uuid";
 import { Conversation, Message } from "../state/assistant.store";
 import { ProviderAdapter } from "../adapters/types";
 
@@ -14,12 +15,14 @@ export function Composer({ conversation, adapter, onAddMessage, onUpdateMessage 
 
   const send = async () => {
     if(!conversation || !text.trim()) return;
-    const user: Message = { id: crypto.randomUUID(), role:'user', content: text.trim(), createdAt: Date.now() } as any;
+    const newId = (globalThis as any).crypto?.randomUUID ? (globalThis as any).crypto.randomUUID() : uuid();
+    const user: Message = { id: newId, role:'user', content: text.trim(), createdAt: Date.now() } as any;
     onAddMessage(conversation.id, user);
     setText("");
     setPending(true);
 
-    const assistant: Message = { id: crypto.randomUUID(), role:'assistant', content: "", createdAt: Date.now() } as any;
+    const aId = (globalThis as any).crypto?.randomUUID ? (globalThis as any).crypto.randomUUID() : uuid();
+    const assistant: Message = { id: aId, role:'assistant', content: "", createdAt: Date.now() } as any;
     onAddMessage(conversation.id, assistant);
 
     const ac = new AbortController(); abortRef.current = ac;
@@ -49,7 +52,8 @@ export function Composer({ conversation, adapter, onAddMessage, onUpdateMessage 
         value={text}
         onChange={(e)=>setText(e.target.value)}
         onKeyDown={(e)=>{
-          if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); send(); }
+          if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+          else if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); send(); }
         }}
         style={{ flex:1, minHeight:60, maxHeight:180, resize:'vertical', background:'transparent', color:'#fff', border:'1px solid rgba(255,255,255,0.15)', borderRadius:8, padding:'8px 10px' }}
       />

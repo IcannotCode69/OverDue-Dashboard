@@ -66,6 +66,18 @@
 - Reason: Unify event data across the app and eliminate hardcoded demo entries; ensure ICS imports and user-added events appear everywhere consistently.
 - Notes/Verification: Clear localStorage and reload — both Calendar “Upcoming” and the dashboard widget show empty states. Import an .ics, events appear in both places. Add an event via dialog for today — dashboard widget shows it immediately. Build passes.
 
+## [2025-10-22 03:05] feat(dashboard): Flip Clock widget with CSS flip animation + default placement
+- Files: src/features/dashboard/widgets/FlipClockWidget/FlipClockWidget.tsx, src/features/dashboard/widgets/FlipClockWidget/flipClockWidget.styles.css, src/features/dashboard/widgets/registry.js, src/features/dashboard/DashboardGrid.js
+- Summary: Added a retro flip clock widget (HH:MM with AM/PM) using pure React + CSS 3D transforms. Animates only when digits change. Registered as `flipClock` with sensible size constraints, and included in the default dashboard items alongside the Calendar card when no saved layout exists.
+- Reason: Match the Lovable design’s flip clock and provide a high-visibility time widget within the grid.
+- Notes/Verification: Fresh load (no od:layout:v2 / od:items:v2) seeds Flip Clock + Calendar Card. The clock flips at minute boundaries and updates AM/PM at noon/midnight. Build passes.
+
+## [2025-10-22 03:25] chore(widgets): hide Flip Clock from registry and defaults
+- Files: src/features/dashboard/widgets/registry.js, src/features/dashboard/DashboardGrid.js
+- Summary: Temporarily removed the Flip Clock widget from the exposed registry and default layout seeding. The widget code remains in the repo for later refinement, but it won’t appear in new dashboards or be selectable.
+- Reason: Current visuals/animation need more polish; avoid shipping a rough experience.
+- Notes/Verification: Fresh loads now only seed the Calendar Card; existing user layouts in localStorage remain untouched. Build passes.
+
 ## [2025-10-18 00:20] chore(dashboard): remove Widget Workshop & runtime/gallery widgets; reset Dashboard to clean empty grid
 - Files: Deleted src/features/widgets/ (builder, runtime, gallery, sizing), src/routes.js (removed Widget Workshop nav), src/features/dashboard/DashboardGrid.js (replaced with minimal version), src/App.js (removed runtime init)
 - Summary: Completely rolled back Widget Workshop implementation. Removed entire widgets feature folder including builder UI, runtime system, gallery widgets, templates, sizing registry, and all related components. Cleaned Widget Workshop route from navigation. Replaced DashboardGrid with minimal implementation showing empty state with clean localStorage migration. Removed auto-pack/MaxRects dependencies and gallery widget registry.

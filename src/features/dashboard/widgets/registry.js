@@ -38,6 +38,6 @@ export const widgetMetadata = {
   calendarCard: {
     name: 'Calendar Card',
     description: 'Daily schedule at a glance',
-    icon: '📅'
+    icon: 'dY".'
   }
 };
