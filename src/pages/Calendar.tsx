@@ -40,39 +40,8 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: "health", name: "Health", color: "#22c55e", enabled: true },
 ];
 
-// If you already have SAMPLE_EVENTS in this file, you can remove the below and reuse yours.
-const SEED_EVENTS: CalendarEvent[] = [
-  {
-    id: "e1",
-    title: "Booking taxi app",
-    start: new Date(2025, 9, 13, 6, 0),
-    end: new Date(2025, 9, 13, 7, 30),
-    categoryId: "work",
-    location: "",
-  },
-  {
-    id: "e2",
-    title: "Design onboarding",
-    start: new Date(2025, 9, 14, 6, 0),
-    end: new Date(2025, 9, 14, 7, 10),
-    categoryId: "work",
-  },
-  {
-    id: "e3",
-    title: "Design session",
-    start: new Date(2025, 9, 14, 7, 50),
-    end: new Date(2025, 9, 14, 9, 20),
-    categoryId: "personal",
-  },
-  {
-    id: "e4",
-    title: "Development meet",
-    start: new Date(2025, 9, 14, 8, 0),
-    end: new Date(2025, 9, 14, 8, 30),
-    categoryId: "work",
-    location: "Room 3B",
-  },
-];
+// Centralized events store
+import { readCalendarEvents, writeCalendarEvents } from "../features/calendar/storage";
 
 // -------------------- Helpers --------------------
 const HOURS = Array.from({ length: 15 }, (_, i) => i + 6); // 6am–8pm
@@ -83,21 +52,14 @@ function useWeek(startDate: Date) {
 
 // -------------------- Component --------------------
 export default function Calendar() {
-  // IMPORTANT: land on the week that has seed events so the grid is not empty
-  const initialDate = (SEED_EVENTS[0]?.start ?? new Date());
+  // Start on current week (seed removed); UI remains consistent
+  const initialDate = new Date();
   const [selectedDate, setSelectedDate] = React.useState<Date>(initialDate);
   const [categories, setCategories] = React.useState<Category[]>(
     DEFAULT_CATEGORIES
   );
   const STORAGE_KEY = 'od:calendar:events:v1';
-  const [events, setEvents] = React.useState<CalendarEvent[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return SEED_EVENTS;
-      const parsed = JSON.parse(raw) as any[];
-      return parsed.map((e) => ({ ...e, start: new Date(e.start), end: new Date(e.end) }));
-    } catch { return SEED_EVENTS; }
-  });
+  const [events, setEvents] = React.useState<CalendarEvent[]>(() => readCalendarEvents() as any);
   const [importOpen, setImportOpen] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
   const [openAdd, setOpenAdd] = React.useState(false);
@@ -113,9 +75,7 @@ export default function Calendar() {
     [events, enabledCategoryIds]
   );
 
-  React.useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch {}
-  }, [events]);
+  React.useEffect(() => { writeCalendarEvents(events as any); }, [events]);
 
   function eventsForDay(d: Date) {
     return filteredEvents

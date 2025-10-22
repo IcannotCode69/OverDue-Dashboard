@@ -60,6 +60,12 @@
 - Reason: Match the design where date is implied by the selected day and the dialog shows only time pickers.
 - Notes/Verification: Clicking “Add Event” opens the new dialog. Choosing times sets start/end on the selected day. Build passes; existing edit flows remain compatible.
 
+## [2025-10-22 02:40] refactor(calendar): single source of truth for events + widget uses same dataset
+- Files: src/features/calendar/storage.ts, src/pages/Calendar.tsx, src/features/dashboard/widgets/CalendarCardWidget.tsx
+- Summary: Added shared helpers to read/write calendar events from `od:calendar:events:v1` and to get events for a given day. Calendar page now initializes from storage (seed removed) and persists via the helper. Dashboard calendar card reads today’s events from the same store and listens for `calendar-events-updated` for live refresh. Empty states no longer reference sample data.
+- Reason: Unify event data across the app and eliminate hardcoded demo entries; ensure ICS imports and user-added events appear everywhere consistently.
+- Notes/Verification: Clear localStorage and reload — both Calendar “Upcoming” and the dashboard widget show empty states. Import an .ics, events appear in both places. Add an event via dialog for today — dashboard widget shows it immediately. Build passes.
+
 ## [2025-10-18 00:20] chore(dashboard): remove Widget Workshop & runtime/gallery widgets; reset Dashboard to clean empty grid
 - Files: Deleted src/features/widgets/ (builder, runtime, gallery, sizing), src/routes.js (removed Widget Workshop nav), src/features/dashboard/DashboardGrid.js (replaced with minimal version), src/App.js (removed runtime init)
 - Summary: Completely rolled back Widget Workshop implementation. Removed entire widgets feature folder including builder UI, runtime system, gallery widgets, templates, sizing registry, and all related components. Cleaned Widget Workshop route from navigation. Replaced DashboardGrid with minimal implementation showing empty state with clean localStorage migration. Removed auto-pack/MaxRects dependencies and gallery widget registry.

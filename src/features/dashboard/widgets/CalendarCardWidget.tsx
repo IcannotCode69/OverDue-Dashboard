@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { googleCalendarClient } from '../../calendar/api/googleClient';
 import { CalendarEvent } from '../../calendar/types';
+import { readCalendarEvents, getEventsForDate } from '../../calendar/storage';
 import CalendarCardSettings from './CalendarCardSettings';
 import './calendar-card.css';
 
@@ -15,32 +15,24 @@ export default function CalendarCardWidget({ onRemove }: CalendarCardWidgetProps
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    loadEvents(selectedDate);
-  }, [selectedDate]);
+  useEffect(() => { loadEvents(selectedDate); }, [selectedDate]);
 
   useEffect(() => {
-    // Listen for calendar connection events
-    const handleCalendarEvent = () => {
-      loadEvents(selectedDate);
-    };
-
-    window.addEventListener('calendar-connected', handleCalendarEvent);
-    window.addEventListener('calendar-disconnected', handleCalendarEvent);
-    window.addEventListener('calendar-settings-changed', handleCalendarEvent);
+    // Listen for local calendar data updates
+    const handleCalendarEvent = () => { loadEvents(selectedDate); };
+    window.addEventListener('calendar-events-updated', handleCalendarEvent as any);
 
     return () => {
-      window.removeEventListener('calendar-connected', handleCalendarEvent);
-      window.removeEventListener('calendar-disconnected', handleCalendarEvent);
-      window.removeEventListener('calendar-settings-changed', handleCalendarEvent);
+      window.removeEventListener('calendar-events-updated', handleCalendarEvent as any);
     };
   }, [selectedDate]);
 
-  const loadEvents = async (date: Date) => {
+  const loadEvents = (date: Date) => {
     setIsLoading(true);
     try {
-      const eventList = await googleCalendarClient.listEventsForDate(date);
-      setEvents(eventList);
+      const all = readCalendarEvents() as any as CalendarEvent[];
+      const todays = getEventsForDate(all as any, date) as any as CalendarEvent[];
+      setEvents(todays);
     } catch (error) {
       console.error('Failed to load events:', error);
       setEvents([]);
@@ -175,15 +167,8 @@ export default function CalendarCardWidget({ onRemove }: CalendarCardWidgetProps
       ) : events.length === 0 ? (
         <div className="calendar-card__empty">
           <div className="calendar-card__empty-icon">📅</div>
-          <div className="calendar-card__empty-text">
-            {isToday(selectedDate) ? 'No events today' : 'No events for this day'}
-          </div>
-          <div className="calendar-card__empty-subtext">
-            {googleCalendarClient.isConnected() 
-              ? 'Your calendar is clear!' 
-              : 'Showing sample events'
-            }
-          </div>
+          <div className="calendar-card__empty-text">{isToday(selectedDate) ? 'No events today' : 'No events for this day'}</div>
+          <div className="calendar-card__empty-subtext">Your calendar is clear!</div>
         </div>
       ) : (
         <div className="calendar-card__events nice-scroll">
