@@ -3,8 +3,8 @@ import DashboardPage from "./pages/Dashboard";
 import CalendarPage from "./pages/Calendar.tsx";
 import NotesPage from "./pages/NotesRoute";
 import AssistantPage from "./pages/Assistant";
-import GradesPage from "./pages/Grades";
-import ProfilePage from "./pages/Profile";
+import GradesPage from "./pages/Grades.tsx";
+import ProfilePage from "./pages/Profile.tsx";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
 import { 

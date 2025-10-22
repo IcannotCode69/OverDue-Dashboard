@@ -373,6 +373,23 @@
   padding: 20px;
 }
 
+/* Shared dialog + form primitives (used by Calendar + Grades) */
+.cal-dialog-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-dialog-title  { font-size: 18px; font-weight: 800; margin: 0; }
+.cal-dialog-close  { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: #e8ecff; }
+.cal-dialog-form   { display: grid; gap: 12px; }
+.cal-dialog-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+
+.cal-label { display: block; margin-bottom: 6px; font-weight: 600; opacity: .9; }
+.cal-input, .cal-textarea, select.cal-input { width: 100%; box-sizing: border-box; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: #e8ecff; padding: 10px 12px; }
+.cal-input:focus, .cal-textarea:focus, select.cal-input:focus { outline: 2px solid rgba(96,92,253,0.55); border-color: rgba(96,92,253,0.65); }
+.cal-textarea { min-height: 96px; resize: vertical; }
+.cal-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+@media (max-width: 900px) {
+  .cal-grid-2 { grid-template-columns: 1fr; }
+}
+
 /* ===== FIX: event fit, colors, pill contrast, fab text ===== */
 
 /* Hour cells: small internal padding for stacked spacing */
@@ -469,3 +486,17 @@
   margin: 2px auto;            /* vertical spacing between stacked events */
   box-sizing: border-box;
 }
+
+/* Slightly larger cells for breathing room with your current chip size */
+.cal-hour-cell { min-height: 130px; }
+
+.cal-segment, .cal-segment-item { border-radius: 12px; }
+.cal-segment-item { border-right: 1px solid rgba(0,0,0,0.25); }
+.cal-segment-item:last-child { border-right: 0; }
+
+/* Tighten mini-cal selected ring and today hint */
+.mini-cal__cell.is-selected { border-width: 1.5px; }
+.mini-cal__cell.is-today { outline-offset: 2px; }
+
+/* Upcoming buttons: slightly darker for better contrast */
+.cal-upcoming-actions .cal-btn.cal-btn-ghost { background: rgba(255,255,255,0.08); }

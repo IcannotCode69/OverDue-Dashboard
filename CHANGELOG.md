@@ -1,5 +1,53 @@
 # OverDue Dashboard - Changelog
 
+## [2025-10-21 00:00] feat(grades): add Grades page with CRUD, filtering, and local persistence
+- Files: src/pages/Grades.tsx, src/components/grades/GradeDialog.tsx, src/features/grades/grades.types.ts, src/features/grades/useLocalStorage.ts, src/features/grades/grades.styles.css, src/routes.js
+- Summary: Introduced a new Grades page featuring search, course filter, summary metrics, and a table with Add/Edit/Delete actions. Implemented a reusable GradeDialog that reuses existing calendar dialog styles for a native look. Data persists via localStorage using a simple hook.
+- Reason: Provide a demo-friendly grade tracking experience consistent with existing UI patterns, without adding dependencies.
+- Notes/Verification: Route available at /grades via routes.js. Local persistence key: "grades.items" (stable). Build with `npm run build` and run dev server; page shows summary pills, search/filter, and CRUD dialog. No new dependencies added.
+
+## [2025-10-21 00:15] style(grades): professional facelift, fix spacing and overlap; add shared cal-* form styles
+- Files: src/features/grades/grades.styles.css, src/features/calendar/calendar.styles.css
+- Summary: Added page padding and responsive layout to Grades, polished cards and table rows with proper radii/hover states, and ensured no overlapping by constraining widths and adding min-width handling. Introduced shared `.cal-label`, `.cal-input`, `.cal-textarea`, `.cal-grid-2`, and dialog header/footer styles so dialogs/inputs look consistent across Calendar and Grades.
+- Reason: The Grades page had cramped layout and unstyled inputs/dialog, causing overlap and unprofessional appearance.
+- Notes/Verification: Open /grades — left panel cards have spacing, toolbar aligns with an Add button on the right, table rows no longer overlap and have hover. Added higher z-index on the main column and larger column gap to eliminate any visual overlap from left card shadows. Dialog inputs have consistent styling. Tested window resize; at <1200px the layout collapses to single column.
+
+## [2025-10-21 00:45] feat(profile): full Profile page with header, forms, preferences, security, accounts, and mock API
+- Files: src/pages/Profile.tsx, src/components/profile/ProfileHeader.tsx, src/components/profile/ProfileForm.tsx, src/components/profile/PreferencesPanel.tsx, src/components/profile/SecurityPanel.tsx, src/components/profile/ConnectedAccounts.tsx, src/components/profile/ActivitySummary.tsx, src/features/profile/profile.styles.css, src/features/profile/types.ts, src/features/profile/mockApi.ts, src/routes.js
+- Summary: Implemented a production-ready Profile page with a sticky header (Save/Discard), avatar and cover upload with drag-and-drop and crop, activity KPIs, a validated profile form (react-hook-form + zod), preferences (toggles, category color palette with live chips), security tools (password change, 2FA placeholder with recovery codes and sessions management), and connected accounts (Google/Outlook/Brightspace) using a localStorage-backed mock API. Added a minimal toast for non-blocking feedback and responsive layout.
+- Reason: Provide a complete, modern, and accessible profile experience that fits the OverDue Dashboard aesthetic and works without a backend.
+- Notes/Verification: Route /profile now points to TSX page. LocalStorage keys used: overdue.profile.v1, overdue.preferences.v1, overdue.security.v1, overdue.connections.v1. Save is disabled until the form is both dirty and valid. Avatar/Cover file types png/jpeg/webp up to 5MB, with crop. Panels are fully keyboard navigable, inputs have focus rings, and layout collapses to one column on narrow screens. To run, install missing libs: react-hook-form, @hookform/resolvers, zod, react-dropzone, react-avatar-editor.
+
+## [2025-10-22 01:07] fix(profile): resolve AvatarEditor ref type error and install form/upload deps
+- Files: src/components/profile/ProfileHeader.tsx
+- Summary: Fixed TypeScript ref usage for react-avatar-editor by using a RefObject instead of a callback ref, eliminating TS2769. Installed required dependencies (react-hook-form, @hookform/resolvers, zod, react-dropzone, react-avatar-editor) and ran a clean production build.
+- Reason: Dev compile failed due to missing modules and a ref callback returning a value, which violates the expected Ref signature.
+- Notes/Verification: `npm run build` compiles successfully. Avatar/Cover cropper opens and applies correctly; no type errors.
+
+## [2025-10-22 01:15] fix(profile): resolve left/right column visual overlap and width bleed
+- Files: src/features/profile/profile.styles.css
+- Summary: Raised the right column stacking context over the left, added min-width constraints to grid children, increased grid gap, and clipped panel overflow to prevent translucent card backgrounds from painting over the adjacent column.
+- Reason: Activity panel on the left visually overlapped Profile form on the right due to stacking and overflow.
+- Notes/Verification: On /profile, Activity no longer overlays Profile. Resize to <1200px to see single-column layout without bleed.
+
+## [2025-10-22 01:25] style(profile): improve Activity layout and avatar placeholder positioning
+- Files: src/features/profile/profile.styles.css
+- Summary: Switched Activity KPI grid to be 2-up by default (3-up at >=1000px, 4-up at >=1400px) so it fits the narrow left column without clipping. Moved avatar inside the cover (bottom: 12px), increased size to 84px, and styled the camera icon for better contrast. Adjusted name block spacing to align with the new avatar position.
+- Reason: The Activity “Overall %” chip was clipped by the card edge; the avatar camera placeholder overlapped the rounded cover edge.
+- Notes/Verification: Open /profile — the Activity KPIs wrap cleanly within the card, and the avatar camera icon is fully visible inside the cover.
+
+## [2025-10-22 01:32] style(profile): widen Activity column and tighten grid gap
+- Files: src/features/profile/profile.styles.css
+- Summary: Increased left column width via `grid-template-columns: minmax(320px, 420px)` and reduced column gap to 22px so the Activity card visually aligns with the Profile card while maintaining breathing room.
+- Reason: Excess spacing between Activity and Profile cards made the left panel feel too narrow; this change balances the layout.
+- Notes/Verification: Reload /profile — the horizontal gap matches the top header’s padding more closely and the Activity panel is slightly wider without clipping.
+
+## [2025-10-22 01:38] feat(profile): horizontal scroll for Activity KPIs with hover-reveal scrollbar
+- Files: src/components/profile/ActivitySummary.tsx, src/features/profile/profile.styles.css
+- Summary: Wrapped KPI chips in a `.pf-kpis-scroll` container that enables horizontal scrolling. Scrollbar stays hidden by default and appears on hover (Firefox via `scrollbar-width`, WebKit via `::-webkit-scrollbar`). KPIs use inline-flex with `min-width: 160px` to ensure smooth horizontal scrolling on narrow columns.
+- Reason: Allow browsing additional metrics without vertical growth, with a clean look that shows the scrollbar only on intent (hover).
+- Notes/Verification: On /profile, hover over the Activity panel to reveal a thin horizontal scrollbar; you can scroll horizontally through KPI cards. Keyboard users can tab into the scroller and arrow-scroll.
+
 ## [2025-10-18 00:20] chore(dashboard): remove Widget Workshop & runtime/gallery widgets; reset Dashboard to clean empty grid
 - Files: Deleted src/features/widgets/ (builder, runtime, gallery, sizing), src/routes.js (removed Widget Workshop nav), src/features/dashboard/DashboardGrid.js (replaced with minimal version), src/App.js (removed runtime init)
 - Summary: Completely rolled back Widget Workshop implementation. Removed entire widgets feature folder including builder UI, runtime system, gallery widgets, templates, sizing registry, and all related components. Cleaned Widget Workshop route from navigation. Replaced DashboardGrid with minimal implementation showing empty state with clean localStorage migration. Removed auto-pack/MaxRects dependencies and gallery widget registry.
