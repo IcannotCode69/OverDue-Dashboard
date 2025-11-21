@@ -1,5 +1,11 @@
 # OverDue Dashboard - Changelog
 
+## [2025-11-20 21:30] chore(dashboard): remove demo widgets and toggles
+- Files: src/features/dashboard/widgets/registry.js, src/features/dashboard/DashboardGrid.js, src/pages/Dashboard.js, src/features/dashboard/widgets/Demo*.js
+- Summary: Deleted placeholder dashboard demo widgets and their registry/layout metadata, cleaned the grid initializer to keep only the real Calendar card, and removed the demo toggle/localStorage preference while filtering old saved layouts to drop demo IDs.
+- Reason: Demo widgets are no longer part of the shipped experience; keep the dashboard focused on real widgets.
+- Notes/Verification: Dashboard renders with the Calendar card only; saved layouts missing widgets fall back to defaults. `npx eslint` on dashboard files passes without unused imports.
+
 ## [2025-10-21 00:00] feat(grades): add Grades page with CRUD, filtering, and local persistence
 - Files: src/pages/Grades.tsx, src/components/grades/GradeDialog.tsx, src/features/grades/grades.types.ts, src/features/grades/useLocalStorage.ts, src/features/grades/grades.styles.css, src/routes.js
 - Summary: Introduced a new Grades page featuring search, course filter, summary metrics, and a table with Add/Edit/Delete actions. Implemented a reusable GradeDialog that reuses existing calendar dialog styles for a native look. Data persists via localStorage using a simple hook.

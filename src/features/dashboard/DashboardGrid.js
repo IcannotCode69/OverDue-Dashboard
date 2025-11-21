@@ -1,7 +1,7 @@
 import React from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import Card from "../../components/ui/Card";
-import { renderWidget, widgetDefaults, WIDGET_KINDS, DEMO_WIDGETS, DEMO_WIDGET_IDS } from "./widgets/registry";
+import { renderWidget, widgetDefaults, WIDGET_KINDS } from "./widgets/registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
@@ -11,21 +11,21 @@ const ITEMS_KEY = "od:items:v2";
 const COLS = { lg: 12, md: 12, sm: 8, xs: 4, xxs: 2 };
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
 
+const createBaseItems = () => [{ i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' }];
+const isValidItem = (item) =>
+  item && typeof item.i === "string" && item.kind && WIDGET_KINDS.includes(item.kind);
+
 // Generate default layouts for widget items
 function generateDefaultLayouts(items) {
-  console.log('Generating default layouts for items:', items);
-  console.log('Widget defaults:', widgetDefaults);
   const layouts = { lg: [], md: [], sm: [], xs: [], xxs: [] };
   let position = { x: 0, y: 0 };
-  
+
   items.forEach((item) => {
-    const kind = item.kind || 'default';
-    const defaults = widgetDefaults[kind] || { lg: { w: 4, h: 4 } };
-    
+    const defaults = widgetDefaults[item.kind] || { lg: { w: 4, h: 4 } };
+
     Object.keys(BREAKPOINTS).forEach((breakpoint) => {
       const size = defaults[breakpoint] || defaults.lg || { w: 4, h: 4 };
-      console.log(`Layout for ${breakpoint}:`, size);
-      
+
       layouts[breakpoint].push({
         i: item.i,
         x: position.x,
@@ -34,54 +34,60 @@ function generateDefaultLayouts(items) {
         h: size.h
       });
     });
-    
+
     // Update position for next item (simple left-to-right, top-to-bottom packing)
-    position.x += (defaults.lg?.w || 4);
+    position.x += defaults.lg?.w || 4;
     if (position.x >= COLS.lg) {
       position.x = 0;
-      position.y += (defaults.lg?.h || 4);
+      position.y += defaults.lg?.h || 4;
     }
   });
-  
+
   return layouts;
 }
 
-export default function DashboardGrid({ showDemoWidgets=true }) {
+function sanitizeLayouts(layouts, items) {
+  const itemIds = new Set(items.map((it) => it.i));
+  const result = {};
+
+  Object.keys(BREAKPOINTS).forEach((bp) => {
+    const arr = (layouts && Array.isArray(layouts[bp])) ? layouts[bp] : [];
+    result[bp] = arr.filter((it) => itemIds.has(it.i));
+  });
+
+  return result;
+}
+
+export default function DashboardGrid() {
   const [items, setItems] = React.useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]");
-      if (Array.isArray(saved) && saved.length > 0) {
-        // Validate saved items have valid widget kinds
-        const validItems = saved.filter(item => 
-          item && typeof item.i === "string" && 
-          (item.kind && WIDGET_KINDS.includes(item.kind))
-        );
+      if (Array.isArray(saved)) {
+        const validItems = saved.filter(isValidItem);
         if (validItems.length > 0) {
           return validItems;
         }
       }
-      
-      // Base widgets
-      const base = [{ i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' }];
-      if (showDemoWidgets) return [...DEMO_WIDGETS, ...base];
-      return base;
-    } catch { 
+    } catch {
       localStorage.removeItem(LAYOUT_KEY);
       localStorage.removeItem(ITEMS_KEY);
-      
-      const base = [{ i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' }];
-      return base; 
     }
+
+    return createBaseItems();
   });
 
   const [layouts, setLayouts] = React.useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(LAYOUT_KEY) || "null");
       if (saved && Object.keys(saved).length > 0) {
-        return saved;
+        const sanitized = sanitizeLayouts(saved, items);
+        const hasLayouts = Object.values(sanitized).some((arr) => (arr || []).length > 0);
+        if (hasLayouts) return sanitized;
       }
-    } catch { /* ignore */ }
-    
+    } catch {
+      localStorage.removeItem(LAYOUT_KEY);
+    }
+
     // Generate default layouts for current items
     return generateDefaultLayouts(items);
   });
@@ -100,44 +106,6 @@ export default function DashboardGrid({ showDemoWidgets=true }) {
     );
     onLayoutsChange(nextLayouts);
   };
-
-  // Respond to showDemoWidgets toggles by injecting or removing deterministic demo widgets
-  React.useEffect(() => {
-    const hasDemo = (id) => items.some(it => it.i === id);
-    if (showDemoWidgets) {
-      const missing = DEMO_WIDGETS.filter(w => !hasDemo(w.i));
-      if (missing.length > 0) {
-        const nextItems = [...missing, ...items];
-        setItems(nextItems);
-        // append new layouts at the bottom without moving existing
-        const nextLayouts = { ...layouts };
-        Object.keys(nextLayouts).forEach(bp => {
-          const arr = nextLayouts[bp] || [];
-          const maxY = arr.reduce((m, it) => Math.max(m, (it.y || 0) + (it.h || 0)), 0);
-          let cursor = { x: 0, y: maxY };
-          missing.forEach(mw => {
-            const sz = (widgetDefaults[mw.kind] && (widgetDefaults[mw.kind][bp] || widgetDefaults[mw.kind].lg)) || { w:4,h:4 };
-            arr.push({ i: mw.i, x: cursor.x, y: cursor.y, w: sz.w, h: sz.h });
-            cursor.x += sz.w;
-            if (cursor.x >= (bp==='lg'?12: bp==='md'?12: bp==='sm'?8: bp==='xs'?4:2)) { cursor.x = 0; cursor.y += sz.h; }
-          });
-          nextLayouts[bp] = arr;
-        });
-        setLayouts(nextLayouts);
-        localStorage.setItem(ITEMS_KEY, JSON.stringify(nextItems));
-        localStorage.setItem(LAYOUT_KEY, JSON.stringify(nextLayouts));
-      }
-    } else {
-      const filteredItems = items.filter(it => !DEMO_WIDGET_IDS.includes(it.i));
-      if (filteredItems.length !== items.length) {
-        setItems(filteredItems);
-        const filteredLayouts = Object.fromEntries(Object.entries(layouts).map(([bp, arr]) => [bp, (arr||[]).filter(it => !DEMO_WIDGET_IDS.includes(it.i))]));
-        setLayouts(filteredLayouts);
-        localStorage.setItem(ITEMS_KEY, JSON.stringify(filteredItems));
-        localStorage.setItem(LAYOUT_KEY, JSON.stringify(filteredLayouts));
-      }
-    }
-  }, [showDemoWidgets, items, layouts]);
 
   // Enable CSS animation for grid items
   React.useEffect(() => {
