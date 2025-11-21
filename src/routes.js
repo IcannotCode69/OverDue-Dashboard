@@ -48,7 +48,7 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "AI Assistant",
+    name: "Assistant",
     key: "assistant",
     route: "/assistant",
     icon: <IoChatbubbleEllipsesOutline size="15px" color="inherit" />,

@@ -78,7 +78,7 @@ export default function AIAssistant({ isOpen, onClose, noteContent }: AIAssistan
             }}
           >
             <span>🤖</span>
-            AI Assistant
+            Assistant
           </div>
           <button
             onClick={onClose}
@@ -129,10 +129,10 @@ export default function AIAssistant({ isOpen, onClose, noteContent }: AIAssistan
             }}
           >
             <div style={{ fontWeight: '500', marginBottom: 'var(--space-2)', color: 'var(--acc-2)' }}>
-              🤖 AI Assistant
+              🤖 Assistant
             </div>
             <div>
-              Hi! I'm your AI assistant. I can help you with your notes, answer questions, 
+              Hi! I'm your Assistant. I can help you with your notes, answer questions, 
               and provide explanations. Currently, I'm in demo mode - full AI integration 
               will be available soon.
             </div>
@@ -190,7 +190,7 @@ export default function AIAssistant({ isOpen, onClose, noteContent }: AIAssistan
               <button
                 onClick={() => {
                   // Placeholder for AI submission
-                  alert('AI integration coming soon! This would send your message to the AI model.');
+                  alert('Assistant integration coming soon! This would send your message for processing.');
                 }}
                 style={{
                   background: 'var(--acc-1)',

@@ -1,7 +1,7 @@
 import React from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import Card from "../../components/ui/Card";
-import { renderWidget, widgetDefaults, WIDGET_KINDS } from "./widgets/registry";
+import { renderWidget, widgetDefaults, WIDGET_KINDS, DEMO_WIDGETS, DEMO_WIDGET_IDS } from "./widgets/registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
@@ -46,7 +46,7 @@ function generateDefaultLayouts(items) {
   return layouts;
 }
 
-export default function DashboardGrid() {
+export default function DashboardGrid({ showDemoWidgets=true }) {
   const [items, setItems] = React.useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]");
@@ -61,16 +61,16 @@ export default function DashboardGrid() {
         }
       }
       
-      // Initialize with default calendar widget only (flip clock hidden for now)
-      const itemB = { i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' };
-      return [itemB];
+      // Base widgets
+      const base = [{ i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' }];
+      if (showDemoWidgets) return [...DEMO_WIDGETS, ...base];
+      return base;
     } catch { 
       localStorage.removeItem(LAYOUT_KEY);
       localStorage.removeItem(ITEMS_KEY);
       
-      // Initialize with calendar widget on error
-      const itemB = { i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' };
-      return [itemB]; 
+      const base = [{ i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' }];
+      return base; 
     }
   });
 
@@ -100,6 +100,44 @@ export default function DashboardGrid() {
     );
     onLayoutsChange(nextLayouts);
   };
+
+  // Respond to showDemoWidgets toggles by injecting or removing deterministic demo widgets
+  React.useEffect(() => {
+    const hasDemo = (id) => items.some(it => it.i === id);
+    if (showDemoWidgets) {
+      const missing = DEMO_WIDGETS.filter(w => !hasDemo(w.i));
+      if (missing.length > 0) {
+        const nextItems = [...missing, ...items];
+        setItems(nextItems);
+        // append new layouts at the bottom without moving existing
+        const nextLayouts = { ...layouts };
+        Object.keys(nextLayouts).forEach(bp => {
+          const arr = nextLayouts[bp] || [];
+          const maxY = arr.reduce((m, it) => Math.max(m, (it.y || 0) + (it.h || 0)), 0);
+          let cursor = { x: 0, y: maxY };
+          missing.forEach(mw => {
+            const sz = (widgetDefaults[mw.kind] && (widgetDefaults[mw.kind][bp] || widgetDefaults[mw.kind].lg)) || { w:4,h:4 };
+            arr.push({ i: mw.i, x: cursor.x, y: cursor.y, w: sz.w, h: sz.h });
+            cursor.x += sz.w;
+            if (cursor.x >= (bp==='lg'?12: bp==='md'?12: bp==='sm'?8: bp==='xs'?4:2)) { cursor.x = 0; cursor.y += sz.h; }
+          });
+          nextLayouts[bp] = arr;
+        });
+        setLayouts(nextLayouts);
+        localStorage.setItem(ITEMS_KEY, JSON.stringify(nextItems));
+        localStorage.setItem(LAYOUT_KEY, JSON.stringify(nextLayouts));
+      }
+    } else {
+      const filteredItems = items.filter(it => !DEMO_WIDGET_IDS.includes(it.i));
+      if (filteredItems.length !== items.length) {
+        setItems(filteredItems);
+        const filteredLayouts = Object.fromEntries(Object.entries(layouts).map(([bp, arr]) => [bp, (arr||[]).filter(it => !DEMO_WIDGET_IDS.includes(it.i))]));
+        setLayouts(filteredLayouts);
+        localStorage.setItem(ITEMS_KEY, JSON.stringify(filteredItems));
+        localStorage.setItem(LAYOUT_KEY, JSON.stringify(filteredLayouts));
+      }
+    }
+  }, [showDemoWidgets, items, layouts]);
 
   // Enable CSS animation for grid items
   React.useEffect(() => {

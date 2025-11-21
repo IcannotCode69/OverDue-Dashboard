@@ -1,118 +1,65 @@
 # OverDue Dashboard
 
-A clean, modern React dashboard foundation built for personal productivity tracking. This project serves as a neutral starting point for building custom dashboard features with React + Vite + Tailwind CSS, designed for eventual deployment on AWS Free Tier.
+Modern, local-first dashboard for personal productivity. Built with React 18, Create React App (react-scripts), Material-UI (dark theme), and react-grid-layout. Data is stored in the browser via localStorage: calendar events (with .ics import), notes/grades/tasks, and a mock Assistant.
 
-## 🚀 Quick Start
+## Quickstart
 
-### Prerequisites
-- Node.js 16+ 
-- npm or yarn
+Prerequisites
+- Node.js 16+
+- npm
 
-### Installation
-
+Install & run
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd overdue-dashboard
-
-# Install dependencies
 npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+npm run start   # starts CRA dev server
 ```
 
-## 📁 Project Structure
-
-```
-overdue-dashboard/
-├── public/
-│   ├── favicon.ico
-│   ├── index.html
-│   └── manifest.json
-├── src/
-│   ├── assets/
-│   │   └── theme/
-│   ├── components/
-│   ├── examples/
-│   ├── layouts/
-│   │   └── dashboard/
-│   ├── App.js
-│   ├── index.js
-│   └── routes.js
-├── package.json
-├── README.md
-└── CHANGELOG.md
+Build
+```bash
+npm run build   # outputs to ./build
 ```
 
-## 🎯 Features
+Lint (optional)
+```bash
+npm run lint
+```
 
-- ✅ Clean, template-free dashboard foundation
-- ✅ React 18 with Material-UI components
-- ✅ Responsive design with modern UI patterns
-- ✅ Production-ready build configuration
-- ✅ Neutral theme and styling
-- 🚧 Task management (planned)
-- 🚧 Grade tracking (planned)
-- 🚧 Note-taking capabilities (planned)
-- 🚧 AWS Cognito authentication (planned)
+## Routes & Features
+- Dashboard: grid of curated widgets persisted via localStorage
+- Calendar: week/day grid, Google Calendar embed, .ics importer (local persistence key: `od:calendar:events:v1`)
+- Notes: classes ? chapters ? notes, autosave, optional helper panel
+- Grades: simple tracker with summary and CRUD
+- Assistant: local mock chat with streaming adapter and conversation persistence
 
-## 🛠 Available Scripts
+## Project Structure
+```
+src/
+  assets/        # images, theme tokens
+  components/    # shared UI components
+  features/      # feature modules (calendar, dashboard, notes, assistant, ...)
+  pages/         # top-level routes
+```
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally  
-- `npm run test` - Run tests
-- `npm run lint` - Lint source code
+Key files
+- `src/routes.js` � central route/side-nav config
+- `src/features/calendar/` � calendar page + styles + .ics parser and modal
+- `src/features/dashboard/` � widget registry + grid host
+- `src/features/assistant/` � local-first assistant (store, adapters, UI)
 
-## 🎨 Customization
+## Architecture at a glance
+- CRA + React 18 + MUI dark theme
+- LocalStorage as primary persistence (no backend)
+- Pluggable adapters pattern (e.g., assistant providers)
+- React-Grid-Layout dashboard with per-breakpoint sizes and persisted layouts
 
-The dashboard uses a component-based architecture with Material-UI theming. Key customization points:
+## Scripts
+- `start` � CRA dev server
+- `build` � production build
+- `lint` � eslint over `src`
+- `preview` � `serve -s build` (optional for local preview)
 
-- **Theme**: `src/assets/theme/`
-- **Components**: `src/components/`
-- **Layouts**: `src/layouts/`
-- **Routes**: `src/routes.js`
+## License
+MIT � see LICENSE
 
-## 🏗 Roadmap
-
-See [CHANGELOG.md](./CHANGELOG.md) for detailed progress and next steps.
-
-### Phase 1: Foundation ✅
-- [x] Template cleanup and neutralization
-- [x] Basic dashboard structure
-- [x] Build and development environment
-
-### Phase 2: Authentication (Next)
-- [ ] AWS Cognito integration
-- [ ] Protected routes
-- [ ] User profile management
-
-### Phase 3: Core Features
-- [ ] Task management system
-- [ ] Grade tracking
-- [ ] Note-taking interface
-- [ ] Data persistence
-
-### Phase 4: Deployment
-- [ ] AWS Free Tier deployment
-- [ ] CI/CD pipeline
-- [ ] Environment configuration
-
-## 📄 License
-
-MIT License - see [LICENSE.md](./LICENSE.md) for details.
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
-
----
-
-**Note**: This project was created by stripping and neutralizing a Creative Tim template to create a clean foundation for custom development.
+## Contributing
+See CONTRIBUTING.md for guidelines.

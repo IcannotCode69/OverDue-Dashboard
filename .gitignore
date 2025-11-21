@@ -9,6 +9,9 @@
 # production
 /build
 
+# internal archives (not part of runtime)
+internal/_ai-artifacts
+
 # misc
 .DS_Store
 .env.local

@@ -1,4 +1,4 @@
-/* ====== POLISH PACK — Lovable parity (no Tailwind, no deps) ====== */
+/* ====== Calendar layout and polish (no Tailwind, no deps) ====== */
 
 .cal-layout {
   display: grid;
@@ -347,7 +347,7 @@
   position: relative;
 }
 
-/* Button tones to match the Lovable mock */
+/* Button tones */
 .cal-btn-soft {
   background: rgba(99,102,241,0.18);
   border-color: rgba(99,102,241,0.28);

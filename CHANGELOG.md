@@ -78,6 +78,12 @@
 - Reason: Current visuals/animation need more polish; avoid shipping a rough experience.
 - Notes/Verification: Fresh loads now only seed the Calendar Card; existing user layouts in localStorage remain untouched. Build passes.
 
+## [2025-10-22 03:40] chore(repo): de‑AI scrub, docs polish, and ignores
+- Files: README.md, src/routes.js, src/features/calendar/calendar.styles.css, src/components/notes/AIAssistant.tsx, .gitignore, internal/_ai-artifacts/README.md
+- Summary: Removed tool and vendor references from comments/UI copy, renamed “AI Assistant” to “Assistant” in nav and notes helper, softened calendar CSS comments, added internal/_ai-artifacts/ for quarantined non‑runtime material, and updated .gitignore. README rewritten to reflect CRA + MUI + local‑first architecture with accurate scripts and structure.
+- Reason: Prepare repository for public review with neutral documentation and without external tool branding while preserving behavior.
+- Notes/Verification: App routes unchanged; Calendar + ICS importer, Assistant page, widgets continue to work. `npm run build` passes.
+
 ## [2025-10-18 00:20] chore(dashboard): remove Widget Workshop & runtime/gallery widgets; reset Dashboard to clean empty grid
 - Files: Deleted src/features/widgets/ (builder, runtime, gallery, sizing), src/routes.js (removed Widget Workshop nav), src/features/dashboard/DashboardGrid.js (replaced with minimal version), src/App.js (removed runtime init)
 - Summary: Completely rolled back Widget Workshop implementation. Removed entire widgets feature folder including builder UI, runtime system, gallery widgets, templates, sizing registry, and all related components. Cleaned Widget Workshop route from navigation. Replaced DashboardGrid with minimal implementation showing empty state with clean localStorage migration. Removed auto-pack/MaxRects dependencies and gallery widget registry.

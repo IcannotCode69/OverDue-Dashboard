@@ -42,6 +42,16 @@ function AssistantContent(){
   const conv = conversations.find(c => c.id === selectedId) || null;
   const adapter = getAdapter();
 
+  // Ensure there is always an active conversation to receive messages
+  React.useEffect(() => {
+    if (conversations.length === 0) {
+      const id = newConversation({ title: 'New chat' });
+      selectConversation(id);
+    } else if (!selectedId) {
+      selectConversation(conversations[0].id);
+    }
+  }, [conversations, selectedId, newConversation, selectConversation]);
+
   return (
     <AssistantLayout
       sidebar={
