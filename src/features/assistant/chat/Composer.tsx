@@ -3,41 +3,70 @@ import { v4 as uuid } from "uuid";
 import { Conversation, Message } from "../state/assistant.store";
 import { ProviderAdapter } from "../adapters/types";
 
-export function Composer({ conversation, adapter, onAddMessage, onUpdateMessage }: {
+export function Composer({
+  conversation,
+  adapter,
+  onAddMessage,
+  onUpdateMessage,
+}: {
   conversation: Conversation | null;
   adapter: ProviderAdapter;
   onAddMessage: (convId: string, msg: Message) => void;
   onUpdateMessage: (convId: string, msgId: string, patch: Partial<Message>) => void;
-}){
+}) {
   const [text, setText] = React.useState("");
   const [pending, setPending] = React.useState(false);
   const abortRef = React.useRef<AbortController | null>(null);
 
   const send = async () => {
-    if(!conversation || !text.trim()) return;
-    const newId = (globalThis as any).crypto?.randomUUID ? (globalThis as any).crypto.randomUUID() : uuid();
-    const user: Message = { id: newId, role:'user', content: text.trim(), createdAt: Date.now() } as any;
+    if (!conversation || !text.trim()) return;
+    const newId =
+      (globalThis as any).crypto?.randomUUID
+        ? (globalThis as any).crypto.randomUUID()
+        : uuid();
+    const user: Message = {
+      id: newId,
+      role: "user",
+      content: text.trim(),
+      createdAt: Date.now(),
+    } as any;
     onAddMessage(conversation.id, user);
+    console.log("[Composer] Added user message", user);
     setText("");
     setPending(true);
 
-    const aId = (globalThis as any).crypto?.randomUUID ? (globalThis as any).crypto.randomUUID() : uuid();
-    const assistant: Message = { id: aId, role:'assistant', content: "", createdAt: Date.now() } as any;
+    const aId =
+      (globalThis as any).crypto?.randomUUID
+        ? (globalThis as any).crypto.randomUUID()
+        : uuid();
+    const assistant: Message = {
+      id: aId,
+      role: "assistant",
+      content: "",
+      createdAt: Date.now(),
+    } as any;
     onAddMessage(conversation.id, assistant);
+    console.log("[Composer] Added assistant stub", assistant);
 
-    const ac = new AbortController(); abortRef.current = ac;
-    try{
+    const ac = new AbortController();
+    abortRef.current = ac;
+    try {
       await adapter.send({
         conversation,
         userText: user.content,
         model: conversation.model,
         onToken: (chunk) => {
-          onUpdateMessage(conversation.id, assistant.id, { content: (assistant.content += chunk) });
+          onUpdateMessage(conversation.id, assistant.id, {
+            content: (assistant.content += chunk),
+          });
         },
         signal: ac.signal,
       });
-    } catch(e){
-      onUpdateMessage(conversation.id, assistant.id, { content: "⚠️ Error generating response." });
+    } catch (e) {
+      console.error("[Composer] adapter.send error", e);
+      onUpdateMessage(conversation.id, assistant.id, {
+        content: "Warning: error generating response.",
+      });
     } finally {
       setPending(false);
       abortRef.current = null;
@@ -45,20 +74,62 @@ export function Composer({ conversation, adapter, onAddMessage, onUpdateMessage 
   };
 
   return (
-    <div style={{ padding: 12, display:'flex', gap:8, alignItems:'flex-end' }}>
+    <div style={{ padding: 12, display: "flex", gap: 8, alignItems: "flex-end" }}>
       <textarea
         aria-label="Message composer"
         placeholder="Type a message"
         value={text}
-        onChange={(e)=>setText(e.target.value)}
-        onKeyDown={(e)=>{
-          if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); }
-          else if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); send(); }
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            send();
+          } else if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+            e.preventDefault();
+            send();
+          }
         }}
-        style={{ flex:1, minHeight:60, maxHeight:180, resize:'vertical', background:'transparent', color:'#fff', border:'1px solid rgba(255,255,255,0.15)', borderRadius:8, padding:'8px 10px' }}
+        style={{
+          flex: 1,
+          minHeight: 60,
+          maxHeight: 180,
+          resize: "vertical",
+          background: "transparent",
+          color: "#fff",
+          border: "1px solid rgba(255,255,255,0.15)",
+          borderRadius: 8,
+          padding: "8px 10px",
+        }}
       />
-      <button onClick={send} disabled={!conversation || !text.trim() || pending} style={{ height:36, borderRadius:8, padding:'0 12px', border:'1px solid rgba(59,130,246,0.6)', background:'rgba(59,130,246,0.15)', color:'#fff' }}>Send</button>
-      {pending && <button onClick={()=>abortRef.current?.abort()} style={{ height:36, borderRadius:8, padding:'0 12px', border:'1px solid rgba(255,255,255,0.2)', background:'transparent', color:'#fff' }}>Stop</button>}
+      <button
+        onClick={send}
+        disabled={!conversation || !text.trim() || pending}
+        style={{
+          height: 36,
+          borderRadius: 8,
+          padding: "0 12px",
+          border: "1px solid rgba(59,130,246,0.6)",
+          background: "rgba(59,130,246,0.15)",
+          color: "#fff",
+        }}
+      >
+        Send
+      </button>
+      {pending && (
+        <button
+          onClick={() => abortRef.current?.abort()}
+          style={{
+            height: 36,
+            borderRadius: 8,
+            padding: "0 12px",
+            border: "1px solid rgba(255,255,255,0.2)",
+            background: "transparent",
+            color: "#fff",
+          }}
+        >
+          Stop
+        </button>
+      )}
     </div>
   );
 }

@@ -11,7 +11,14 @@ const ITEMS_KEY = "od:items:v2";
 const COLS = { lg: 12, md: 12, sm: 8, xs: 4, xxs: 2 };
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
 
-const createBaseItems = () => [{ i: `calendarCard-${Date.now()}-b`, kind: 'calendarCard' }];
+const BASE_KINDS = ['calendarCard', 'smartSuggestions'];
+
+const createItemForKind = (kind) => ({
+  i: `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  kind
+});
+
+const createBaseItems = () => BASE_KINDS.map((kind) => createItemForKind(kind));
 const isValidItem = (item) =>
   item && typeof item.i === "string" && item.kind && WIDGET_KINDS.includes(item.kind);
 
@@ -60,11 +67,18 @@ function sanitizeLayouts(layouts, items) {
 
 export default function DashboardGrid() {
   const [items, setItems] = React.useState(() => {
+    const baseItems = createBaseItems();
     try {
       const saved = JSON.parse(localStorage.getItem(ITEMS_KEY) || "[]");
       if (Array.isArray(saved)) {
         const validItems = saved.filter(isValidItem);
         if (validItems.length > 0) {
+          const kindsPresent = new Set(validItems.map((i) => i.kind));
+          BASE_KINDS.forEach((kind) => {
+            if (!kindsPresent.has(kind)) {
+              validItems.push(createItemForKind(kind));
+            }
+          });
           return validItems;
         }
       }
@@ -73,7 +87,7 @@ export default function DashboardGrid() {
       localStorage.removeItem(ITEMS_KEY);
     }
 
-    return createBaseItems();
+    return baseItems;
   });
 
   const [layouts, setLayouts] = React.useState(() => {
@@ -82,7 +96,16 @@ export default function DashboardGrid() {
       if (saved && Object.keys(saved).length > 0) {
         const sanitized = sanitizeLayouts(saved, items);
         const hasLayouts = Object.values(sanitized).some((arr) => (arr || []).length > 0);
-        if (hasLayouts) return sanitized;
+        if (hasLayouts) {
+          const layoutIds = new Set();
+          Object.values(sanitized).forEach((arr) => {
+            (arr || []).forEach((entry) => layoutIds.add(entry.i));
+          });
+          const allItemsHaveLayout = items.every((item) => layoutIds.has(item.i));
+          if (allItemsHaveLayout) {
+            return sanitized;
+          }
+        }
       }
     } catch {
       localStorage.removeItem(LAYOUT_KEY);

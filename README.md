@@ -41,10 +41,10 @@ src/
 ```
 
 Key files
-- `src/routes.js` – central route/side-nav config
-- `src/features/calendar/` – calendar page + styles + .ics parser and modal
-- `src/features/dashboard/` – widget registry + grid host
-- `src/features/assistant/` – local-first assistant (store, adapters, UI)
+- `src/routes.js` â€“ central route/side-nav config
+- `src/features/calendar/` â€“ calendar page + styles + .ics parser and modal
+- `src/features/dashboard/` â€“ widget registry + grid host
+- `src/features/assistant/` â€“ local-first assistant (store, adapters, UI)
 
 ## Architecture at a glance
 - CRA + React 18 + MUI dark theme
@@ -52,14 +52,33 @@ Key files
 - Pluggable adapters pattern (e.g., assistant providers)
 - React-Grid-Layout dashboard with per-breakpoint sizes and persisted layouts
 
+
+## AI Assistant Providers
+The Assistant feature uses a pluggable adapter system so you can swap providers without touching the UI. Supported providers:
+- `mock` (default, no network calls)
+- `openai`
+- `groq` (Llama 3.1 8B via Groq's OpenAI-compatible API)
+
+Configure the provider via `.env`:
+```bash
+VITE_AI_PROVIDER=groq
+VITE_GROQ_API_KEY=your_key
+VITE_GROQ_MODEL=llama-3.1-8b-instant
+# optional override (defaults to https://api.groq.com/openai/v1)
+VITE_GROQ_API_BASE=https://api.groq.com/openai/v1
+```
+
+Leaving the key empty falls back to the mock adapter so local development still works.
+Both the Assistant page and Notes AI panel use the same provider setting, so once Groq is enabled you get the same answers everywhere.
+
 ## Scripts
-- `start` – CRA dev server
-- `build` – production build
-- `lint` – eslint over `src`
-- `preview` – `serve -s build` (optional for local preview)
+- `start` â€“ CRA dev server
+- `build` â€“ production build
+- `lint` â€“ eslint over `src`
+- `preview` â€“ `serve -s build` (optional for local preview)
 
 ## License
-MIT — see LICENSE
+MIT â€” see LICENSE
 
 ## Contributing
 See CONTRIBUTING.md for guidelines.

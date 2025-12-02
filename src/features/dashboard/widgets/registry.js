@@ -1,5 +1,6 @@
 import React from 'react';
 import CalendarCardWidget from './CalendarCardWidget';
+import SmartSuggestionsWidget from './SmartSuggestionsWidget';
 
 // Widget registry with curated default widgets
 export const widgetDefaults = {
@@ -9,15 +10,24 @@ export const widgetDefaults = {
     sm: { w: 2, h: 7 },
     xs: { w: 3, h: 8 },
     xxs: { w: 2, h: 9 }
+  },
+  smartSuggestions: {
+    lg: { w: 3, h: 6 },
+    md: { w: 3, h: 6 },
+    sm: { w: 4, h: 7 },
+    xs: { w: 4, h: 8 },
+    xxs: { w: 2, h: 9 }
   }
 };
 
-export const WIDGET_KINDS = ['calendarCard'];
+export const WIDGET_KINDS = ['calendarCard', 'smartSuggestions'];
 
 export function renderWidget(kind, id, onRemove) {
   switch (kind) {
     case 'calendarCard':
       return <CalendarCardWidget key={id} onRemove={onRemove} />;
+    case 'smartSuggestions':
+      return <SmartSuggestionsWidget key={id} onRemove={onRemove} />;
     default:
       return null;
   }
@@ -30,6 +40,12 @@ export const widgetSizeConstraints = {
     minH: 5,
     maxW: 6,
     maxH: 10
+  },
+  smartSuggestions: {
+    minW: 3,
+    minH: 4,
+    maxW: 8,
+    maxH: 12
   }
 };
 
@@ -39,5 +55,10 @@ export const widgetMetadata = {
     name: 'Calendar Card',
     description: 'Daily schedule at a glance',
     icon: 'dY".'
+  },
+  smartSuggestions: {
+    name: 'Smart Suggestions',
+    description: 'AI-powered study tips based on your data',
+    icon: '✨'
   }
 };

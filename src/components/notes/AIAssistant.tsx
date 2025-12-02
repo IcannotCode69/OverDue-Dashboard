@@ -1,224 +1,259 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
+import { getAdapter } from "../../features/assistant/adapters/resolveAdapter";
+import type { Conversation } from "../../features/assistant/state/assistant.store";
 
 interface AIAssistantProps {
   isOpen: boolean;
   onClose: () => void;
   noteContent: string;
+  noteTitle?: string;
+  classTitle?: string;
+  chapterTitle?: string;
 }
 
-export default function AIAssistant({ isOpen, onClose, noteContent }: AIAssistantProps) {
-  const [inputText, setInputText] = useState('');
+function makeConversation(): Conversation {
+  const now = Date.now();
+  return {
+    id: "notes-ai",
+    title: "Notes AI",
+    messages: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+}
 
-  // Pre-populate with note content when opened
+const basePanelStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "rgba(0,0,0,0.4)",
+  zIndex: 9999,
+};
+
+const cardStyle: React.CSSProperties = {
+  width: "90vw",
+  maxWidth: 600,
+  maxHeight: "80vh",
+  display: "flex",
+  flexDirection: "column",
+  background: "var(--bg-1)",
+  border: "1px solid var(--stroke-inner)",
+  borderRadius: 12,
+  boxShadow: "0 18px 45px rgba(0,0,0,0.5)",
+  overflow: "hidden",
+};
+
+export default function AIAssistant(props: AIAssistantProps) {
+  const { isOpen, onClose, noteContent, noteTitle, classTitle, chapterTitle } = props;
+
+  const [inputText, setInputText] = useState("");
+  const [responseText, setResponseText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const adapter = getAdapter();
+
   useEffect(() => {
-    if (isOpen && noteContent) {
-      setInputText(`Please help me with this note content:\n\n${noteContent}`);
+    if (isOpen && noteContent && !inputText) {
+      setInputText("Summarize this note in clear bullet points.");
     }
-  }, [isOpen, noteContent]);
+    if (!isOpen) {
+      setResponseText("");
+      setError(null);
+      setIsLoading(false);
+    }
+  }, [isOpen, noteContent, inputText]);
 
   if (!isOpen) return null;
 
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          zIndex: 1000,
-          backdropFilter: 'blur(4px)'
-        }}
-        onClick={onClose}
-      />
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+    if (!noteContent.trim()) {
+      setError("This note is empty. Add some content first.");
+      return;
+    }
 
-      {/* Modal */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '90vw',
-          maxWidth: '600px',
-          height: '80vh',
-          background: 'var(--bg-1)',
-          border: '1px solid var(--stroke-inner)',
-          borderRadius: 'var(--r-2xl)',
-          zIndex: 1001,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          boxShadow: 'var(--shadow-2)'
-        }}
-      >
-        {/* Header */}
+    setIsLoading(true);
+    setError(null);
+    setResponseText("");
+
+    const conv = makeConversation();
+    const systemPrompt =
+      "You are a study assistant that ONLY uses the provided note content as your knowledge source. " +
+      "If something is not in the note, say you don't know. Use headings and bullet points when helpful.";
+
+    const contextLines = [
+      classTitle && `Class: ${classTitle}`,
+      chapterTitle && `Chapter: ${chapterTitle}`,
+      noteTitle && `Note title: ${noteTitle}`,
+      "",
+      "Note content:",
+      noteContent,
+      "",
+      "User question:",
+      inputText.trim(),
+    ].filter(Boolean);
+
+    const userText = contextLines.join("\n");
+
+    try {
+      const { fullText } = await adapter.send({
+        conversation: conv,
+        userText,
+        systemPrompt,
+        onToken: (chunk) => {
+          setResponseText((prev) => prev + chunk);
+        },
+      });
+      if (!responseText && fullText) {
+        setResponseText(fullText);
+      }
+    } catch (err: any) {
+      console.error(err);
+      const msg =
+        typeof err?.message === "string"
+          ? err.message
+          : "Failed to contact AI. Check your Groq API key.";
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const runPreset = (prompt: string) => {
+    setInputText(prompt);
+    setTimeout(handleSend, 0);
+  };
+
+  const presetButtonStyle: React.CSSProperties = {
+    border: "1px solid var(--stroke-inner)",
+    borderRadius: 999,
+    padding: "4px 12px",
+    background: "rgba(255,255,255,0.04)",
+    color: "var(--ink-1)",
+    fontSize: 12,
+    cursor: "pointer",
+  };
+
+  return (
+    <div style={basePanelStyle} onClick={onClose}>
+      <div style={cardStyle} onClick={(e) => e.stopPropagation()}>
         <div
           style={{
-            padding: 'var(--space-4)',
-            borderBottom: '1px solid var(--stroke-outer)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'rgba(255,255,255,0.02)'
+            padding: "12px 16px",
+            borderBottom: "1px solid var(--stroke-outer)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "rgba(255,255,255,0.02)",
           }}
         >
-          <div
-            style={{
-              fontSize: 'var(--h2)',
-              fontWeight: '600',
-              color: 'var(--ink-0)',
-              fontFamily: 'var(--font-sans)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-2)'
-            }}
-          >
-            <span>🤖</span>
-            Assistant
+          <div style={{ fontSize: "var(--h3)", fontWeight: 600, color: "var(--ink-0)" }}>
+            Notes AI
           </div>
           <button
             onClick={onClose}
             style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--ink-2)',
-              cursor: 'pointer',
-              padding: 'var(--space-2)',
-              borderRadius: 'var(--r-md)',
-              fontSize: '20px',
-              lineHeight: '1',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,93,122,0.1)';
-              e.currentTarget.style.color = 'var(--acc-red)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--ink-2)';
+              border: "none",
+              background: "transparent",
+              color: "var(--ink-2)",
+              cursor: "pointer",
+              fontSize: 18,
             }}
           >
-            ×
+            X
           </button>
         </div>
 
-        {/* Chat area placeholder */}
-        <div
-          style={{
-            flex: 1,
-            padding: 'var(--space-4)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-4)'
-          }}
-        >
-          {/* Placeholder messages */}
-          <div
-            style={{
-              background: 'rgba(136,85,255,0.1)',
-              border: '1px solid rgba(136,85,255,0.2)',
-              borderRadius: 'var(--r-lg)',
-              padding: 'var(--space-4)',
-              color: 'var(--ink-1)',
-              fontSize: 'var(--body)',
-              fontFamily: 'var(--font-sans)'
-            }}
-          >
-            <div style={{ fontWeight: '500', marginBottom: 'var(--space-2)', color: 'var(--acc-2)' }}>
-              🤖 Assistant
-            </div>
-            <div>
-              Hi! I'm your Assistant. I can help you with your notes, answer questions, 
-              and provide explanations. Currently, I'm in demo mode - full AI integration 
-              will be available soon.
-            </div>
+        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+          <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
+            Ask questions about this note. I only use the note content you see in the editor.
           </div>
 
-          {/* Input area */}
-          <div style={{ marginTop: 'auto' }}>
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="Ask me about your notes, or paste content for analysis..."
-              style={{
-                width: '100%',
-                height: '120px',
-                background: 'var(--bg-2)',
-                border: '1px solid var(--stroke-inner)',
-                borderRadius: 'var(--r-md)',
-                padding: 'var(--space-3)',
-                color: 'var(--ink-0)',
-                fontSize: 'var(--body)',
-                fontFamily: 'var(--font-sans)',
-                resize: 'none',
-                outline: 'none',
-                marginBottom: 'var(--space-3)'
-              }}
-              className="nice-scroll"
-            />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <button style={presetButtonStyle} onClick={() => runPreset("Summarize this note in concise bullet points.")}>
+              Summarize
+            </button>
+            <button style={presetButtonStyle} onClick={() => runPreset("Explain this note like I'm new to the topic.")}>
+              Explain simply
+            </button>
+            <button
+              style={presetButtonStyle}
+              onClick={() => runPreset("Generate 10 quiz questions with answers based on this note.")}
+            >
+              Quiz me
+            </button>
+            <button
+              style={presetButtonStyle}
+              onClick={() => runPreset("Create a 3-day study plan using only this note.")}
+            >
+              Study plan
+            </button>
+          </div>
 
-            <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setInputText('')}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid var(--stroke-inner)',
-                  color: 'var(--ink-2)',
-                  cursor: 'pointer',
-                  padding: 'var(--space-3) var(--space-4)',
-                  borderRadius: 'var(--r-md)',
-                  fontSize: 'var(--body)',
-                  fontFamily: 'var(--font-sans)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                  e.currentTarget.style.color = 'var(--ink-1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'var(--ink-2)';
-                }}
-              >
-                Clear
-              </button>
-              
-              <button
-                onClick={() => {
-                  // Placeholder for AI submission
-                  alert('Assistant integration coming soon! This would send your message for processing.');
-                }}
-                style={{
-                  background: 'var(--acc-1)',
-                  border: 'none',
-                  color: 'white',
-                  cursor: 'pointer',
-                  padding: 'var(--space-3) var(--space-4)',
-                  borderRadius: 'var(--r-md)',
-                  fontSize: 'var(--body)',
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: '500',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#3b96e8';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,168,255,0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--acc-1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                Send Message
-              </button>
-            </div>
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Ask me anything about this note..."
+            style={{
+              width: "100%",
+              minHeight: 90,
+              maxHeight: 150,
+              resize: "vertical",
+              background: "var(--bg-2)",
+              border: "1px solid var(--stroke-inner)",
+              borderRadius: 8,
+              padding: "8px 10px",
+              color: "var(--ink-0)",
+              fontFamily: "var(--font-mono)",
+              fontSize: 13,
+            }}
+          />
+
+          <div
+            style={{
+              flex: 1,
+              minHeight: 120,
+              maxHeight: 220,
+              overflowY: "auto",
+              border: "1px solid var(--stroke-inner)",
+              borderRadius: 8,
+              padding: 10,
+              background: "var(--bg-2)",
+              fontSize: 13,
+              color: "var(--ink-0)",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {isLoading && <div>Thinking...</div>}
+            {error && <div style={{ color: "#f87171" }}>{error}</div>}
+            {!isLoading && !error && !responseText && (
+              <div style={{ color: "var(--ink-2)" }}>Your AI answer will appear here.</div>
+            )}
+            {!isLoading && !error && responseText && <div>{responseText}</div>}
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <button
+              onClick={handleSend}
+              disabled={isLoading || !inputText.trim()}
+              style={{
+                padding: "6px 14px",
+                borderRadius: 999,
+                border: "none",
+                background: "var(--acc-1)",
+                color: "#fff",
+                cursor: isLoading || !inputText.trim() ? "default" : "pointer",
+                opacity: isLoading || !inputText.trim() ? 0.6 : 1,
+              }}
+            >
+              {isLoading ? "Sending..." : "Send"}
+            </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -135,6 +135,19 @@ export default function NotesPage() {
     saveClasses(updatedClasses);
   };
 
+  const derivedClassTitle =
+    (selectedClass as (Class & { title?: string }) | null)?.title ||
+    selectedClass?.name ||
+    '';
+  const derivedChapterTitle =
+    (selectedChapter as (Chapter & { title?: string }) | null)?.title ||
+    selectedChapter?.name ||
+    '';
+  const derivedNoteTitle =
+    (selectedChapter?.note as { title?: string } | undefined)?.title ||
+    selectedChapter?.name ||
+    '';
+
   return (
     <div
       style={{
@@ -495,6 +508,9 @@ export default function NotesPage() {
         isOpen={isAIOpen}
         onClose={() => setIsAIOpen(false)}
         noteContent={selectedChapter?.note.content || ''}
+        noteTitle={derivedNoteTitle}
+        classTitle={derivedClassTitle}
+        chapterTitle={derivedChapterTitle}
       />
     </div>
   );
