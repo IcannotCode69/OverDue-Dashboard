@@ -7,6 +7,7 @@ import GradesPage from "./pages/Grades.tsx";
 import ProfilePage from "./pages/Profile.tsx";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
+import OnboardingPage from "./pages/Onboarding";
 import { 
   IoHome,
   IoCalendarOutline,
@@ -81,6 +82,16 @@ const routes = [
     icon: <IoLogInOutline size="15px" color="inherit" />,
     component: SignInPage,
     noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Onboarding",
+    key: "onboarding",
+    route: "/onboarding",
+    icon: null,
+    component: OnboardingPage,
+    noCollapse: true,
+    hideInNav: true,
   },
   {
     type: "collapse",
