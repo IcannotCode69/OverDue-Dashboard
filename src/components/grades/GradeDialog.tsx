@@ -1,54 +1,79 @@
 import * as React from 'react';
 import { format } from 'date-fns';
 import { X } from 'lucide-react';
-import type { GradeItem, GradeStatus } from '../../features/grades/grades.types';
+import type {
+  AssignmentPayload,
+  GradeAssignment,
+  GradeCourse,
+  GradeStatus,
+} from '../../features/grades/grades.types';
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: Omit<GradeItem, 'id'>, id?: string) => void;
-  item?: GradeItem; // if set -> edit mode
+  onSave: (item: AssignmentPayload, id?: string) => void;
+  item?: GradeAssignment;
+  courses: GradeCourse[];
+  defaultCourseId?: string;
 };
 
 const STATUSES: GradeStatus[] = ['Not Started', 'In Progress', 'Submitted', 'Graded'];
 
-export default function GradeDialog({ isOpen, onClose, onSave, item }: Props) {
-  const [course, setCourse] = React.useState(item?.course ?? '');
-  const [assignment, setAssignment] = React.useState(item?.assignment ?? '');
+export default function GradeDialog({
+  isOpen,
+  onClose,
+  onSave,
+  item,
+  courses,
+  defaultCourseId,
+}: Props) {
+  const initialCourseId = item?.courseId ?? defaultCourseId ?? courses[0]?.id ?? '';
+  const [courseId, setCourseId] = React.useState(initialCourseId);
+  const [assignment, setAssignment] = React.useState(item?.name ?? '');
   const [due, setDue] = React.useState(
     item?.due ? format(new Date(item.due), "yyyy-MM-dd'T'HH:mm") : ''
   );
-  const [pointsPossible, setPointsPossible] = React.useState<number>(item?.pointsPossible ?? 100);
+  const [pointsPossible, setPointsPossible] = React.useState<string>(
+    item?.pointsPossible != null ? String(item.pointsPossible) : ''
+  );
   const [pointsEarned, setPointsEarned] = React.useState<string>(
     item?.pointsEarned != null ? String(item.pointsEarned) : ''
   );
+  const [letter, setLetter] = React.useState(item?.letter ?? '');
   const [status, setStatus] = React.useState<GradeStatus>(item?.status ?? 'Not Started');
   const [notes, setNotes] = React.useState(item?.notes ?? '');
 
   React.useEffect(() => {
     if (isOpen) {
-      setCourse(item?.course ?? '');
-      setAssignment(item?.assignment ?? '');
+      const nextCourseId = item?.courseId ?? defaultCourseId ?? courses[0]?.id ?? '';
+      setCourseId(nextCourseId);
+      setAssignment(item?.name ?? '');
       setDue(item?.due ? format(new Date(item.due), "yyyy-MM-dd'T'HH:mm") : '');
-      setPointsPossible(item?.pointsPossible ?? 100);
+      setPointsPossible(item?.pointsPossible != null ? String(item.pointsPossible) : '');
       setPointsEarned(item?.pointsEarned != null ? String(item.pointsEarned) : '');
+      setLetter(item?.letter ?? '');
       setStatus(item?.status ?? 'Not Started');
       setNotes(item?.notes ?? '');
     }
-  }, [isOpen, item]);
+  }, [isOpen, item, courses, defaultCourseId]);
 
   if (!isOpen) return null;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: Omit<GradeItem, 'id'> = {
-      course: course.trim(),
-      assignment: assignment.trim(),
-      due: new Date(due).toISOString(),
-      pointsPossible: Number(pointsPossible) || 0,
+    if (!courseId) {
+      alert('Add a class before adding assignments.');
+      return;
+    }
+    const payload: AssignmentPayload = {
+      courseId,
+      name: assignment.trim(),
+      due: due ? new Date(due).toISOString() : null,
+      pointsPossible: pointsPossible === '' ? null : Number(pointsPossible),
       pointsEarned: pointsEarned === '' ? null : Number(pointsEarned),
       status,
       notes: notes.trim() || undefined,
+      letter: letter.trim() || null,
     };
     onSave(payload, item?.id);
     onClose();
@@ -68,8 +93,18 @@ export default function GradeDialog({ isOpen, onClose, onSave, item }: Props) {
           <div className="cal-grid-2">
             <div>
               <label className="cal-label" htmlFor="course">Course</label>
-              <input id="course" className="cal-input" value={course}
-                onChange={(e) => setCourse(e.target.value)} required />
+              <select
+                id="course"
+                className="cal-input"
+                value={courseId}
+                onChange={(e) => setCourseId(e.target.value)}
+              >
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="cal-label" htmlFor="assignment">Assignment</label>
@@ -97,13 +132,24 @@ export default function GradeDialog({ isOpen, onClose, onSave, item }: Props) {
             <div>
               <label className="cal-label" htmlFor="pointsPossible">Points Possible</label>
               <input id="pointsPossible" type="number" min={0} className="cal-input"
-                value={pointsPossible} onChange={(e) => setPointsPossible(Number(e.target.value))} required />
+                value={pointsPossible} onChange={(e) => setPointsPossible(e.target.value)} required />
             </div>
             <div>
               <label className="cal-label" htmlFor="pointsEarned">Points Earned (optional)</label>
               <input id="pointsEarned" type="number" min={0} className="cal-input"
                 value={pointsEarned} onChange={(e) => setPointsEarned(e.target.value)} />
             </div>
+          </div>
+
+          <div>
+            <label className="cal-label" htmlFor="letter">Letter Grade (optional)</label>
+            <input
+              id="letter"
+              className="cal-input"
+              value={letter}
+              onChange={(e) => setLetter(e.target.value)}
+              placeholder="A, B+, C-..."
+            />
           </div>
 
           <div>
@@ -121,4 +167,3 @@ export default function GradeDialog({ isOpen, onClose, onSave, item }: Props) {
     </div>
   );
 }
-

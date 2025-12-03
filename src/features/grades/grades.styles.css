@@ -122,6 +122,78 @@
   gap: 8px;
 }
 
+.gr-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.gr-tab {
+  border-radius: 999px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+}
+.gr-tab.active {
+  background: rgba(99,102,241,0.22);
+  border-color: rgba(99,102,241,0.5);
+  box-shadow: 0 6px 18px rgba(99,102,241,0.25);
+}
+.gr-tab.add {
+  border-style: dashed;
+  opacity: 0.8;
+}
+.gr-tab-close {
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+.gr-tab-close:hover {
+  opacity: 1;
+}
+.gr-add-class {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0 16px;
+}
+.gr-add-class-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.gr-import-error {
+  color: #f97373;
+  font-size: 13px;
+}
+.gr-import-preview {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  overflow: auto;
+}
+.gr-import-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.gr-import-preview th,
+.gr-import-preview td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.gr-import-preview tr:last-child td {
+  border-bottom: none;
+}
+
 /* Hide scrollbars in summary side overflow cases (nice look) */
 .gr-card::-webkit-scrollbar { display: none; }
 

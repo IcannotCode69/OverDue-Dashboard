@@ -1,7 +1,12 @@
 import { getNotes } from "../notes/store";
 import type { Class } from "../notes/types";
 import { readCalendarEvents, CalendarEventShared } from "../calendar/storage";
-import type { GradeItem } from "../grades/grades.types";
+import type {
+  GradeAssignment,
+  GradeCourse,
+  GradeItem,
+  GradesState,
+} from "../grades/grades.types";
 
 export interface UserStudyContext {
   text: string;
@@ -57,7 +62,9 @@ function gatherEvents(): string[] {
   );
 
   const focusRegex = /(exam|test|quiz|midterm|final|project|due)/i;
-  const prioritized = upcoming.filter((evt) => focusRegex.test(`${evt.title} ${evt.description || ""}`));
+  const prioritized = upcoming.filter((evt) =>
+    focusRegex.test(`${evt.title} ${evt.description || ""}`)
+  );
   const list = (prioritized.length ? prioritized : upcoming).slice(0, 10);
 
   if (!list.length) return ["(none in next 14 days)"];
@@ -65,28 +72,74 @@ function gatherEvents(): string[] {
   return list.map((evt) => `- ${formatDate(evt.start)}: ${evt.title || "Untitled event"}`);
 }
 
-function gatherGrades(): string[] {
-  let items: GradeItem[] = [];
+function readCurrentGrades(): { courses: GradeCourse[]; assignments: GradeAssignment[] } {
   try {
-    const raw = localStorage.getItem("grades.items");
+    const raw = localStorage.getItem("grades.state.v2");
     if (raw) {
-      items = JSON.parse(raw) as GradeItem[];
+      const parsed = JSON.parse(raw) as GradesState;
+      if (parsed?.assignments?.length) {
+        return { courses: parsed.courses ?? [], assignments: parsed.assignments };
+      }
     }
   } catch {
-    items = [];
+    // ignore and attempt legacy fallback
   }
 
-  if (!items.length) return ["(none yet)"];
+  try {
+    const legacyRaw = localStorage.getItem("grades.items");
+    if (legacyRaw) {
+      const legacy = JSON.parse(legacyRaw) as GradeItem[];
+      const assignments: GradeAssignment[] = legacy.map((item) => ({
+        id: item.id,
+        courseId: item.course,
+        name: item.assignment,
+        due: item.due,
+        pointsEarned: item.pointsEarned,
+        pointsPossible: item.pointsPossible,
+        letter: null,
+        status: item.status,
+        notes: item.notes,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      }));
+      return { courses: [], assignments };
+    }
+  } catch {
+    // ignore
+  }
 
-  return items
-    .sort((a, b) => new Date(a.due).getTime() - new Date(b.due).getTime())
+  return { courses: [], assignments: [] };
+}
+
+function gatherGrades(): string[] {
+  const { assignments, courses } = readCurrentGrades();
+
+  if (!assignments.length) return ["(none yet)"];
+
+  const courseNames = new Map<string, string>();
+  courses.forEach((course) => courseNames.set(course.id, course.name));
+
+  return assignments
+    .slice()
+    .sort((a, b) => {
+      const aTime = a.due ? new Date(a.due).getTime() : Infinity;
+      const bTime = b.due ? new Date(b.due).getTime() : Infinity;
+      return aTime - bTime;
+    })
     .slice(0, 6)
-    .map((item) => {
+    .map((assignment) => {
+      const course =
+        courseNames.get(assignment.courseId) ||
+        courseNames.get(assignment.name) ||
+        assignment.courseId ||
+        "Course";
       const status =
-        item.pointsEarned != null
-          ? `${Math.round((item.pointsEarned / item.pointsPossible) * 100)}%`
-          : item.status;
-      return `- ${item.course}: ${item.assignment} – ${status} (due ${formatDate(item.due)})`;
+        assignment.pointsEarned != null && assignment.pointsPossible
+          ? `${Math.round((assignment.pointsEarned / assignment.pointsPossible) * 100)}%`
+          : assignment.status;
+      return `- ${course}: ${assignment.name} • ${status} (due ${formatDate(
+        assignment.due ?? undefined
+      )})`;
     });
 }
 
