@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useHistory } from "react-router-dom";
 import { useUserProfileStore } from "../features/user/userProfile.store";
+import { generateId } from "../utils/randomId";
 
 function fieldStyle() {
   return {
@@ -38,7 +39,7 @@ export default function OnboardingPage() {
     setSubmitting(true);
     const now = Date.now();
     const profile = {
-      id: globalThis.crypto?.randomUUID?.() ?? `user-${now}`,
+      id: generateId(),
       name: name.trim(),
       school: school.trim() || undefined,
       major: major.trim() || undefined,

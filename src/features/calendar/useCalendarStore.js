@@ -1,3 +1,5 @@
+import { generateId } from "../../utils/randomId";
+
 // Deprecated store; Calendar now uses Google Calendar embed. Keeping stub to avoid accidental imports.
 export default {};
 export function list(){ return []; }
@@ -7,7 +9,7 @@ const KEY = 'od:cal:events';
 
 function read() { try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : []; } catch { return []; } }
 function write(v) { localStorage.setItem(KEY, JSON.stringify(v)); }
-function uuid() { return (window.crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2,10))); }
+function uuid() { return generateId(); }
 
 const MIN_GAP = 30; // minutes
 

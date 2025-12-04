@@ -7,11 +7,11 @@ import type {
   GradeItem,
   GradesState,
 } from './grades.types';
+import { generateId } from '../../utils/randomId';
 
 const STORAGE_KEY = 'grades.state.v2';
 
-const uuid = () =>
-  globalThis.crypto?.randomUUID?.() ?? `grade-${Math.random().toString(36).slice(2, 10)}`;
+const uuid = () => generateId();
 
 function seedState(): GradesState {
   const now = Date.now();

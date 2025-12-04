@@ -1,4 +1,5 @@
 import { GradeAssignment } from "./grades.types";
+import { generateId } from "../../utils/randomId";
 
 export interface ParsedGradeLine {
   name: string;
@@ -73,9 +74,7 @@ export function parsedToAssignments(
 ): GradeAssignment[] {
   const now = Date.now();
   return parsed.map((item, index) => ({
-    id:
-      (globalThis.crypto?.randomUUID?.() ??
-        `grade-${Math.random().toString(36).slice(2, 10)}`) + `-${index}`,
+    id: `${generateId()}-${index}`,
     courseId,
     name: item.name,
     due: null,

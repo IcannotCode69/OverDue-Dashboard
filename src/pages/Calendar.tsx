@@ -15,6 +15,7 @@ import ICSImportModal from "../components/calendar/ICSImportModal";
 import { IcsEvent } from "../features/calendar/ics";
 import { dedupeByUidThenTitleStart } from "../features/calendar/ics.dedupe";
 import { guessCategoryId } from "../features/calendar/ics.map";
+import { generateId } from "../utils/randomId";
 // add this import so all cal-* and mini-cal-* styles load
 import "../features/calendar/calendar.styles.css";
 
@@ -93,13 +94,13 @@ export default function Calendar() {
 
   function handleSaveEvent(payload: Omit<CalendarEvent, "id">) {
     setEvents((prev) =>
-      prev.concat({ id: crypto.randomUUID(), ...payload })
+      prev.concat({ id: generateId(), ...payload })
     );
   }
 
   function mapImported(items: IcsEvent[]): (CalendarEvent & { __icsUid?: string; __lastModified?: Date })[] {
     return items.map((it) => ({
-      id: crypto.randomUUID(),
+      id: generateId(),
       title: it.title,
       start: new Date(it.start),
       end: new Date(it.end),

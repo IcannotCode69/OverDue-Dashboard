@@ -1,7 +1,7 @@
 import React from "react";
-import { v4 as uuid } from "uuid";
 import { Conversation, Message } from "../state/assistant.store";
 import { ProviderAdapter } from "../adapters/types";
+import { generateId } from "../../../utils/randomId";
 
 export function Composer({
   conversation,
@@ -20,10 +20,7 @@ export function Composer({
 
   const send = async () => {
     if (!conversation || !text.trim()) return;
-    const newId =
-      (globalThis as any).crypto?.randomUUID
-        ? (globalThis as any).crypto.randomUUID()
-        : uuid();
+    const newId = generateId();
     const user: Message = {
       id: newId,
       role: "user",
@@ -35,10 +32,7 @@ export function Composer({
     setText("");
     setPending(true);
 
-    const aId =
-      (globalThis as any).crypto?.randomUUID
-        ? (globalThis as any).crypto.randomUUID()
-        : uuid();
+    const aId = generateId();
     const assistant: Message = {
       id: aId,
       role: "assistant",

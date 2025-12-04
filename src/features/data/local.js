@@ -1,3 +1,5 @@
+import { generateId } from "../../utils/randomId";
+
 // Simple in-browser data layer backed by localStorage with seeding.
 // Types (informal):
 // Task: { id, title, due: ISO string, done: boolean }
@@ -26,8 +28,7 @@ function write(key, value) {
 }
 
 function uuid() {
-  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-  return 'id-' + Math.random().toString(36).slice(2, 10);
+  return generateId();
 }
 
 function addDays(date, days) {

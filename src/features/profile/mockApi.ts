@@ -1,4 +1,5 @@
 import { Profile, Preferences, SecurityState, Connections } from './types';
+import { generateId } from '../../utils/randomId';
 
 const delay = (ms = 450) => new Promise((res) => setTimeout(res, ms));
 
@@ -38,8 +39,8 @@ const DEFAULT_PREFS: Preferences = {
 const DEFAULT_SECURITY: SecurityState = {
   has2FA: false,
   sessions: [
-    { id: crypto.randomUUID(), agent: 'Chrome • Windows', ip: '127.0.0.1', lastActive: new Date().toISOString() },
-    { id: crypto.randomUUID(), agent: 'Safari • iPhone', ip: '10.0.0.21', lastActive: new Date(Date.now() - 86400000).toISOString() },
+    { id: generateId(), agent: 'Chrome • Windows', ip: '127.0.0.1', lastActive: new Date().toISOString() },
+    { id: generateId(), agent: 'Safari • iPhone', ip: '10.0.0.21', lastActive: new Date(Date.now() - 86400000).toISOString() },
   ],
   recoveryCodes: [],
 };
@@ -98,4 +99,3 @@ export async function saveConnections(conns: Connections): Promise<void> {
   await delay(600);
   write(KEYS.connections, conns);
 }
-
