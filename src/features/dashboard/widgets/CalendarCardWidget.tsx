@@ -85,7 +85,7 @@ export default function CalendarCardWidget({ onRemove }: CalendarCardWidgetProps
   };
 
   return (
-    <div className="calendar-card">
+    <div className="calendar-card app-card app-card--flush">
       {/* Header */}
       <div className="calendar-card__header">
         <div className="calendar-card__date">

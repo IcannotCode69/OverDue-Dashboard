@@ -5,6 +5,7 @@
   grid-template-columns: 320px 1fr;
   gap: 24px;
   min-height: calc(100vh - 96px);
+  align-items: flex-start;
 }
 
 .cal-sidebar {
@@ -16,9 +17,9 @@
 }
 
 .cal-panel {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 20px;
   padding: 16px;
 }
 
@@ -92,6 +93,12 @@
   width: 10px;
   height: 10px;
   border-radius: 999px;
+}
+
+.cal-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 /* Toolbar */

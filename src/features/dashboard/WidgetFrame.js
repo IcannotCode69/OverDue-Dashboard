@@ -1,18 +1,13 @@
 import React from "react";
 
-export default function WidgetFrame({ title, onRemove, children }) {
+export default function WidgetFrame({ title, onRemove, children, className }) {
+  const classes = ["widget-frame", "app-card", "app-card--flush"];
+  if (className) {
+    classes.push(className);
+  }
+
   return (
-    <div
-      style={{
-        height: "100%",
-        borderRadius: "12px",
-        border: "1px solid rgba(255,255,255,0.1)",
-        backgroundColor: "rgba(30,41,59,0.8)", // slate-800/80
-        boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className={classes.join(" ")} style={{ height: "100%" }}>
       <div
         style={{
           display: "flex",

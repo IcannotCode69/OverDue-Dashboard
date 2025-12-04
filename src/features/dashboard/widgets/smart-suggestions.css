@@ -24,23 +24,12 @@
 }
 
 .dashboard-widget-icon-button {
-  border: 1px solid var(--stroke-inner);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ink-2);
-  padding: 4px 12px;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.dashboard-widget-icon-button:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.dashboard-widget-icon-button:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--ink-0);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  text-transform: none;
 }
 
 .smart-suggestion-pill {

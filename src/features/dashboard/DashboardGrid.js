@@ -142,119 +142,111 @@ export default function DashboardGrid() {
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)", height: "100%", padding: "var(--space-5)" }}>
-
-      <div 
-        style={{ 
-          position: 'relative',
-          borderRadius: "var(--r-2xl)", 
-          padding: "var(--space-5)", 
-          background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))", 
-          border: "1px solid var(--stroke-outer)",
-          backdropFilter: "blur(var(--blur))",
-          minHeight: 420,
-          flex: 1,
-        }}
-      >
-        <div className="mesh-overlay" style={{ borderRadius: 'inherit' }} />
-        {items.length === 0 && (
-          <div style={{ 
-            color: "var(--ink-2)", 
-            textAlign: "center", 
-            padding: "var(--space-6)",
-            fontSize: "var(--h3)",
-            fontFamily: "var(--font-sans)",
-            position: "relative",
-            zIndex: 1
-          }}>
-            <div style={{ fontSize: 48, marginBottom: "var(--space-4)" }}>📊</div>
-            <div style={{ fontWeight: 500 }}>Dashboard is empty</div>
-            <div style={{ fontSize: "var(--body)", marginTop: "var(--space-2)", color: "var(--muted)" }}>
-              We'll add a curated set of default widgets next.
-            </div>
-          </div>
-        )}
-        <ResponsiveGridLayout
-          className="layout"
-          layouts={layouts}
-          cols={COLS}
-          breakpoints={BREAKPOINTS}
-          rowHeight={36}
-          margin={[12, 12]}
-          compactType="vertical"
-          preventCollision={false}
-          onLayoutsChange={onLayoutsChange}
-          draggableHandle=".react-grid-dragHandle"
-        >
-          {items.map((item) => {
-            const widgetContent = renderWidget(item.kind, item.i, () => removeItem(item.i));
-            
-            return (
-              <div key={item.i} style={{ height: '100%' }}>
-                {widgetContent || (
-                  <Card
-                    header={
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div 
-                          className="react-grid-dragHandle" 
-                          style={{ 
-                            cursor: 'grab', 
-                            opacity: 0.7,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "var(--space-2)",
-                            fontSize: "var(--body)",
-                            fontWeight: 500,
-                            color: "var(--ink-1)"
-                          }}
-                        >
-                          <span style={{ display: 'inline-block', width: 18 }}>
-                            <span style={{ display: 'block', height: 2, background: 'var(--muted)', margin: '3px 0', borderRadius: 2 }} />
-                            <span style={{ display: 'block', height: 2, background: 'var(--muted)', margin: '3px 0', borderRadius: 2 }} />
-                            <span style={{ display: 'block', height: 2, background: 'var(--muted)', margin: '3px 0', borderRadius: 2 }} />
-                          </span>
-                          Unknown widget: {item.kind}
-                        </div>
-                        <button 
-                          onClick={() => removeItem(item.i)} 
-                          style={{ 
-                            background: "transparent", 
-                            border: "none", 
-                            color: "var(--ink-2)", 
-                            cursor: "pointer",
-                            fontSize: 12,
-                            padding: "4px 8px",
-                            borderRadius: "var(--r-sm)",
-                            transition: "all 0.2s ease"
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.backgroundColor = "rgba(255,93,122,0.12)";
-                            e.currentTarget.style.color = "var(--acc-red)";
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.backgroundColor = "transparent";
-                            e.currentTarget.style.color = "var(--ink-2)";
-                          }}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    }
-                  >
-                    <div style={{ 
-                      padding: "var(--space-3) 0", 
-                      color: "var(--ink-2)",
-                      fontSize: "var(--body)",
-                      fontFamily: "var(--font-sans)"
-                    }}>
-                      Widget kind '{item.kind}' not found
-                    </div>
-                  </Card>
-                )}
+    <div className="dashboard-grid">
+      <div className="dashboard-grid__surface app-card">
+        <div className="mesh-overlay" />
+        <div className="dashboard-grid__content">
+          {items.length === 0 && (
+            <div
+              style={{
+                color: "var(--ink-2)",
+                textAlign: "center",
+                padding: "var(--space-6)",
+                fontSize: "var(--h3)",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              <div style={{ fontSize: 48, marginBottom: "var(--space-4)" }}>dY"S</div>
+              <div style={{ fontWeight: 500 }}>Dashboard is empty</div>
+              <div style={{ fontSize: "var(--body)", marginTop: "var(--space-2)", color: "var(--muted)" }}>
+                We'll add a curated set of default widgets next.
               </div>
-            );
-          })}
-        </ResponsiveGridLayout>
+            </div>
+          )}
+          <ResponsiveGridLayout
+            className="layout"
+            layouts={layouts}
+            cols={COLS}
+            breakpoints={BREAKPOINTS}
+            rowHeight={36}
+            margin={[12, 12]}
+            compactType="vertical"
+            preventCollision={false}
+            onLayoutsChange={onLayoutsChange}
+            draggableHandle=".react-grid-dragHandle"
+          >
+            {items.map((item) => {
+              const widgetContent = renderWidget(item.kind, item.i, () => removeItem(item.i));
+
+              return (
+                <div key={item.i} style={{ height: "100%" }}>
+                  {widgetContent || (
+                    <Card
+                      header={
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div
+                            className="react-grid-dragHandle"
+                            style={{
+                              cursor: "grab",
+                              opacity: 0.7,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "var(--space-2)",
+                              fontSize: "var(--body)",
+                              fontWeight: 500,
+                              color: "var(--ink-1)",
+                            }}
+                          >
+                            <span style={{ display: "inline-block", width: 18 }}>
+                              <span style={{ display: "block", height: 2, background: "var(--muted)", margin: "3px 0", borderRadius: 2 }} />
+                              <span style={{ display: "block", height: 2, background: "var(--muted)", margin: "3px 0", borderRadius: 2 }} />
+                              <span style={{ display: "block", height: 2, background: "var(--muted)", margin: "3px 0", borderRadius: 2 }} />
+                            </span>
+                            Unknown widget: {item.kind}
+                          </div>
+                          <button
+                            onClick={() => removeItem(item.i)}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              color: "var(--ink-2)",
+                              cursor: "pointer",
+                              fontSize: 12,
+                              padding: "4px 8px",
+                              borderRadius: "var(--r-sm)",
+                              transition: "all 0.2s ease",
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.backgroundColor = "rgba(255,93,122,0.12)";
+                              e.currentTarget.style.color = "var(--acc-red)";
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.backgroundColor = "transparent";
+                              e.currentTarget.style.color = "var(--ink-2)";
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      }
+                    >
+                      <div
+                        style={{
+                          padding: "var(--space-3) 0",
+                          color: "var(--ink-2)",
+                          fontSize: "var(--body)",
+                          fontFamily: "var(--font-sans)",
+                        }}
+                      >
+                        Widget kind '{item.kind}' not found
+                      </div>
+                    </Card>
+                  )}
+                </div>
+              );
+            })}
+          </ResponsiveGridLayout>
+        </div>
       </div>
     </div>
   );

@@ -70,7 +70,7 @@ export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWid
   }, [fetchSuggestions]);
 
   return (
-    <WidgetFrame title="Smart Suggestions" onRemove={onRemove}>
+    <WidgetFrame title="Smart Suggestions" onRemove={onRemove} className="app-card--accent">
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "center" }}>
         <div style={{ fontSize: 12, color: "var(--ink-2)" }}>
           AI study ideas based on your calendar, notes, and grades.
@@ -78,7 +78,7 @@ export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWid
         <button
           onClick={fetchSuggestions}
           disabled={isLoading}
-          className="dashboard-widget-icon-button"
+          className="dashboard-widget-icon-button app-button-primary"
           style={{ fontSize: 12 }}
         >
           {isLoading ? "Refreshing..." : "Refresh"}

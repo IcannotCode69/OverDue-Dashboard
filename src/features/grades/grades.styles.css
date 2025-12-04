@@ -3,7 +3,6 @@
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   gap: 32px;
-  padding: 24px 28px 40px;
   box-sizing: border-box;
   position: relative;
 }
@@ -17,10 +16,9 @@
   z-index: 0; /* ensure table sits above any card shadows */
 }
 .gr-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 20px;
 }
 .gr-card-title {
   font-weight: 700;
@@ -42,11 +40,13 @@
 
 /* Right column: table */
 .grades-main {
-  display: grid;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   min-width: 0; /* prevent overflow in grid */
   position: relative;
   z-index: 1; /* keep above left-side card shadows */
+  padding: 20px;
 }
 .gr-toolbar {
   display: flex;
@@ -127,6 +127,10 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 6px;
+}
+.gr-table-wrapper {
+  overflow: auto;
+  padding-bottom: 6px;
 }
 .gr-tab {
   border-radius: 999px;

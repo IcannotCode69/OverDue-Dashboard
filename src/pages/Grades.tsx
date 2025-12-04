@@ -12,6 +12,7 @@ import { useGradesStore } from '../features/grades/useGradesStore';
 
 import '../features/calendar/calendar.styles.css';
 import '../features/grades/grades.styles.css';
+import PageHeader from '../components/layout/PageHeader';
 
 type CourseFilter = 'all' | string;
 
@@ -194,50 +195,11 @@ export default function Grades() {
   };
 
   return (
-    <div className="grades-wrap">
-      <div className="grades-left">
-        <div className="gr-card">
-          <div className="gr-card-title">Summary</div>
-          <div className="gr-summary">
-            <div className="gr-pill">
-              <div className="label">Overall</div>
-              <div className="value">{summary.pct}%</div>
-            </div>
-            <div className="gr-pill">
-              <div className="label">Graded</div>
-              <div className="value">
-                {summary.graded}/{summary.total}
-              </div>
-            </div>
-            <div className="gr-pill">
-              <div className="label">Completed</div>
-              <div className="value">{summary.completed}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="gr-card">
-          <div className="gr-card-title">Filters</div>
-          <div style={{ display: 'grid', gap: 10 }}>
-            <div className="gr-search">
-              <input
-                placeholder="Search class or assignment"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grades-main">
-        <div className="gr-toolbar">
-          <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Grades</h1>
-            <p style={{ opacity: 0.7, marginTop: 4, fontSize: 13 }}>
-              Organize assignments by class and import directly from Brightspace.
-            </p>
-          </div>
+    <div className="grades-page">
+      <PageHeader
+        title="Grades"
+        subtitle="Organize assignments by class and import directly from Brightspace."
+        actions={
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {activeCourse && (
               <button className="cal-btn cal-btn-ghost" onClick={openImportModal}>
@@ -248,117 +210,157 @@ export default function Grades() {
               <Plus size={16} style={{ marginRight: 8 }} /> Add Item
             </button>
           </div>
-        </div>
-
-        <div className="gr-tabs">
-          <button
-            className={`gr-tab ${selectedCourseId === 'all' ? 'active' : ''}`}
-            onClick={() => setSelectedCourseId('all')}
-          >
-            All Classes
-          </button>
-          {courses.map((course) => (
-            <button
-              key={course.id}
-              className={`gr-tab ${selectedCourseId === course.id ? 'active' : ''}`}
-              onClick={() => setSelectedCourseId(course.id)}
-            >
-              {course.name}
-              <span
-                className="gr-tab-close"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveCourse(course.id);
-                }}
-                aria-label="Remove class"
-              >
-                x
-              </span>
-            </button>
-          ))}
-          {!isAddingCourse && (
-            <button className="gr-tab add" onClick={handleAddCourseClick}>
-              + Add Class
-            </button>
-          )}
-        </div>
-
-        {isAddingCourse && (
-          <div className="gr-add-class">
-            <input
-              id="new-course-input"
-              className="cal-input"
-              placeholder="Course name"
-              value={newCourseName}
-              onChange={(e) => setNewCourseName(e.target.value)}
-            />
-            <div className="gr-add-class-actions">
-              <button className="cal-btn cal-btn-primary" onClick={saveNewCourse}>
-                Save
-              </button>
-              <button className="cal-btn cal-btn-ghost" onClick={cancelNewCourse}>
-                Cancel
-              </button>
+        }
+      />
+      <div className="grades-wrap">
+        <div className="grades-left">
+          <div className="gr-card app-card">
+            <div className="gr-card-title">Summary</div>
+            <div className="gr-summary">
+              <div className="gr-pill">
+                <div className="label">Overall</div>
+                <div className="value">{summary.pct}%</div>
+              </div>
+              <div className="gr-pill">
+                <div className="label">Graded</div>
+                <div className="value">
+                  {summary.graded}/{summary.total}
+                </div>
+              </div>
+              <div className="gr-pill">
+                <div className="label">Completed</div>
+                <div className="value">{summary.completed}</div>
+              </div>
             </div>
           </div>
-        )}
 
-        <table className="gr-table">
-          <thead className="gr-head">
-            <tr>
-              {selectedCourseId === 'all' && <th>Course</th>}
-              <th>Assignment</th>
-              <th>Due</th>
-              <th>Points</th>
-              <th>Letter</th>
-              <th>Status</th>
-              <th style={{ width: 180 }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleAssignments.length === 0 && (
-              <tr>
-                <td colSpan={selectedCourseId === 'all' ? 7 : 6} className="gr-empty">
-                  No assignments yet.
-                </td>
-              </tr>
+          <div className="gr-card app-card">
+            <div className="gr-card-title">Filters</div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div className="gr-search">
+                <input
+                  placeholder="Search class or assignment"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grades-main app-card app-card--flush">
+          <div className="gr-tabs">
+            <button
+              className={`gr-tab ${selectedCourseId === 'all' ? 'active' : ''}`}
+              onClick={() => setSelectedCourseId('all')}
+            >
+              All Classes
+            </button>
+            {courses.map((course) => (
+              <button
+                key={course.id}
+                className={`gr-tab ${selectedCourseId === course.id ? 'active' : ''}`}
+                onClick={() => setSelectedCourseId(course.id)}
+              >
+                {course.name}
+                <span
+                  className="gr-tab-close"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveCourse(course.id);
+                  }}
+                  aria-label="Remove class"
+                >
+                  x
+                </span>
+              </button>
+            ))}
+            {!isAddingCourse && (
+              <button className="gr-tab add" onClick={handleAddCourseClick}>
+                + Add Class
+              </button>
             )}
-            {visibleAssignments.map((assignment) => {
-              const courseName = courseMap.get(assignment.courseId)?.name ?? 'Unknown';
-              const dueText = assignment.due
-                ? format(new Date(assignment.due), 'MMM d, yyyy @ HH:mm')
-                : '--';
-              const points =
-                assignment.pointsPossible != null
-                  ? `${assignment.pointsEarned ?? '--'} / ${assignment.pointsPossible}`
-                  : assignment.pointsEarned ?? '--';
+          </div>
 
-              return (
-                <tr key={assignment.id} className="gr-row">
-                  {selectedCourseId === 'all' && <td className="gr-course">{courseName}</td>}
-                  <td>{assignment.name}</td>
-                  <td>{dueText}</td>
-                  <td>{points}</td>
-                  <td>{assignment.letter ?? '--'}</td>
-                  <td>{statusChip(assignment.status)}</td>
-                  <td>
-                    <div className="gr-actions">
-                      <button className="cal-btn cal-btn-ghost" onClick={() => openEdit(assignment)}>
-                        <Pencil size={14} /> Edit
-                      </button>
-                      <button
-                        className="cal-btn cal-btn-ghost"
-                        onClick={() => handleRemoveAssignment(assignment.id)}
-                      >
-                        <Trash2 size={14} /> Delete
-                      </button>
-                    </div>
-                  </td>
+          {isAddingCourse && (
+            <div className="gr-add-class">
+              <input
+                id="new-course-input"
+                className="cal-input"
+                placeholder="Course name"
+                value={newCourseName}
+                onChange={(e) => setNewCourseName(e.target.value)}
+              />
+              <div className="gr-add-class-actions">
+                <button className="cal-btn cal-btn-primary" onClick={saveNewCourse}>
+                  Save
+                </button>
+                <button className="cal-btn cal-btn-ghost" onClick={cancelNewCourse}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="gr-table-wrapper nice-scroll">
+            <table className="gr-table">
+              <thead className="gr-head">
+                <tr>
+                  {selectedCourseId === 'all' && <th>Course</th>}
+                  <th>Assignment</th>
+                  <th>Due</th>
+                  <th>Points</th>
+                  <th>Letter</th>
+                  <th>Status</th>
+                  <th style={{ width: 180 }}>Actions</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {visibleAssignments.length === 0 && (
+                  <tr>
+                    <td colSpan={selectedCourseId === 'all' ? 7 : 6} className="gr-empty">
+                      No assignments yet.
+                    </td>
+                  </tr>
+                )}
+                {visibleAssignments.map((assignment) => {
+                  const courseName = courseMap.get(assignment.courseId)?.name ?? 'Unknown';
+                  const dueText = assignment.due
+                    ? format(new Date(assignment.due), 'MMM d, yyyy @ HH:mm')
+                    : '--';
+                  const points =
+                    assignment.pointsPossible != null
+                      ? `${assignment.pointsEarned ?? '--'} / ${assignment.pointsPossible}`
+                      : assignment.pointsEarned ?? '--';
+
+                  return (
+                    <tr key={assignment.id} className="gr-row">
+                      {selectedCourseId === 'all' && <td className="gr-course">{courseName}</td>}
+                      <td>{assignment.name}</td>
+                      <td>{dueText}</td>
+                      <td>{points}</td>
+                      <td>{assignment.letter ?? '--'}</td>
+                      <td>{statusChip(assignment.status)}</td>
+                      <td>
+                        <div className="gr-actions">
+                          <button className="cal-btn cal-btn-ghost" onClick={() => openEdit(assignment)}>
+                            <Pencil size={14} /> Edit
+                          </button>
+                          <button
+                            className="cal-btn cal-btn-ghost"
+                            onClick={() => handleRemoveAssignment(assignment.id)}
+                          >
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <GradeDialog

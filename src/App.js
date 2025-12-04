@@ -22,8 +22,12 @@ function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
         width: "260px",
         height: "100vh",
         backdropFilter: "blur(var(--blur))",
-        padding: "20px",
+        padding: "24px 20px",
         zIndex: 1000,
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px",
       }}
     >
       <div
@@ -64,19 +68,8 @@ function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
                 textDecoration: "none",
                 fontFamily: "var(--font-sans)",
                 fontSize: "var(--body)",
-                backgroundColor: isActive ? "rgba(255,255,255,0.08)" : "transparent",
                 borderRadius: 10,
                 transition: "background-color 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }
               }}
             >
               <span style={{ marginRight: "12px" }}>{route.icon}</span>
@@ -121,19 +114,23 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div className="app-bg" style={{ minHeight: "100vh" }}>
-        <SimpleSidebar
-          routes={routes}
-          profile={profile}
-          currentPath={location.pathname}
-          onNavigate={(route) => history.push(route)}
-        />
-        <div style={{ marginLeft: "260px", minHeight: "100vh", position: "relative" }}>
-          <div className="mesh-overlay" />
-          <Switch>
-            {getRoutes(routes)}
-            <Redirect from="*" to="/dashboard" />
-          </Switch>
+      <div className="app-root">
+        <div className="app-shell">
+          <SimpleSidebar
+            routes={routes}
+            profile={profile}
+            currentPath={location.pathname}
+            onNavigate={(route) => history.push(route)}
+          />
+          <div className="app-content">
+            <div className="mesh-overlay" />
+            <main className="app-main">
+              <Switch>
+                {getRoutes(routes)}
+                <Redirect from="*" to="/dashboard" />
+              </Switch>
+            </main>
+          </div>
         </div>
       </div>
     </ThemeProvider>

@@ -16,6 +16,8 @@ import { IcsEvent } from "../features/calendar/ics";
 import { dedupeByUidThenTitleStart } from "../features/calendar/ics.dedupe";
 import { guessCategoryId } from "../features/calendar/ics.map";
 import { generateId } from "../utils/randomId";
+import { getUpcomingEvents } from "../features/calendar/selectors";
+import PageHeader from "../components/layout/PageHeader";
 // add this import so all cal-* and mini-cal-* styles load
 import "../features/calendar/calendar.styles.css";
 
@@ -76,21 +78,40 @@ export default function Calendar() {
     [events, enabledCategoryIds]
   );
 
+  const normalizedEvents = React.useMemo(
+    () =>
+      filteredEvents.map((event) => ({
+        ...event,
+        start: event.start instanceof Date ? event.start : new Date(event.start),
+        end: event.end instanceof Date ? event.end : new Date(event.end),
+      })),
+    [filteredEvents]
+  );
+
+  const eventsByDay = React.useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    normalizedEvents.forEach((event) => {
+      const key = event.start.toDateString();
+      const list = map.get(key) ?? [];
+      list.push(event);
+      map.set(key, list);
+    });
+    map.forEach((list) => {
+      list.sort((a, b) => a.start.getTime() - b.start.getTime());
+    });
+    return map;
+  }, [normalizedEvents]);
+
   React.useEffect(() => { writeCalendarEvents(events as any); }, [events]);
 
   function eventsForDay(d: Date) {
-    return filteredEvents
-      .filter((e) => isSameDay(e.start, d))
-      .sort((a, b) => a.start.getTime() - b.start.getTime());
+    return eventsByDay.get(d.toDateString()) ?? [];
   }
 
-  function getUpcoming() {
-    const weekStart = startOfWeek(selectedDate);
-    return filteredEvents
-      .filter((e) => e.start >= weekStart)
-      .sort((a, b) => a.start.getTime() - b.start.getTime())
-      .slice(0, 1); // Lovable mock shows a single featured upcoming card
-  }
+  const upcomingEvents = React.useMemo(
+    () => getUpcomingEvents(normalizedEvents, { maxCount: 5, daysAhead: 30 }),
+    [normalizedEvents]
+  );
 
   function handleSaveEvent(payload: Omit<CalendarEvent, "id">) {
     setEvents((prev) =>
@@ -122,22 +143,32 @@ export default function Calendar() {
   }
 
   return (
-    <div className="cal-layout">
+    <div className="calendar-page">
+      <PageHeader
+        title="Calendar"
+        subtitle="See your week at a glance and manage upcoming events."
+        actions={
+          <button className="app-button-primary" onClick={() => setImportOpen(true)}>
+            <Upload size={16} style={{ marginRight: 6 }} /> Import .ics
+          </button>
+        }
+      />
+      <div className="cal-layout">
       {/* LEFT SIDEBAR */}
       <aside className="cal-sidebar">
-        <div className="cal-panel cal-panel--calendar">
+        <div className="cal-panel cal-panel--calendar app-card app-card--flush">
           <MiniCalendar
             selectedDate={selectedDate}
             onChange={(d: Date) => setSelectedDate(d)}
           />
         </div>
 
-        <div className="cal-panel cal-panel--upcoming">
+        <div className="cal-panel cal-panel--upcoming app-card">
           <div className="cal-panel-title">Upcoming</div>
-          {getUpcoming().length === 0 ? (
+          {upcomingEvents.length === 0 ? (
             <div className="cal-empty">No upcoming events</div>
           ) : (
-            getUpcoming().map((e) => {
+            upcomingEvents.map((e) => {
               const cat = categories.find((c) => c.id === e.categoryId);
               return (
                 <div key={e.id} className="cal-upcoming-card">
@@ -162,7 +193,7 @@ export default function Calendar() {
           )}
         </div>
 
-        <div className="cal-panel cal-panel--categories">
+        <div className="cal-panel cal-panel--categories app-card">
           <div className="cal-panel-title">Categories</div>
           <div className="cal-cat-list">
             {categories.map((c) => (
@@ -187,7 +218,7 @@ export default function Calendar() {
       </aside>
 
       {/* MAIN */}
-      <section className="cal-main">
+      <section className="cal-main app-card">
         <header className="cal-toolbar">
           <div className="cal-toolbar-left">
             <button
@@ -209,9 +240,6 @@ export default function Calendar() {
               onClick={() => setSelectedDate((d) => addWeeks(d, 1))}
             >
               <ChevronRight size={18} />
-            </button>
-            <button className="cal-btn cal-btn-ghost" onClick={() => setImportOpen(true)}>
-              <Upload size={16} style={{ marginRight: 6 }} /> Import .ics
             </button>
           </div>
 
@@ -286,5 +314,6 @@ export default function Calendar() {
         </div>
       )}
     </div>
+  </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import getAdapter from "../features/assistant/adapters/resolveAdapter";
 import type { Conversation } from "../features/assistant/state/assistant.store";
 import { buildUserStudyContext } from "../features/assistant/buildUserStudyContext";
+import PageHeader from "../components/layout/PageHeader";
 
 type Role = "user" | "assistant";
 
@@ -117,58 +118,14 @@ const AssistantPage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        background: "var(--bg-0)",
-      }}
-    >
-      <header
-        style={{
-          padding: "12px 20px",
-          borderBottom: "1px solid var(--stroke-inner)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          backdropFilter: "blur(12px)",
-          background:
-            "linear-gradient(to right, rgba(10,10,20,0.9), rgba(10,10,20,0.7))",
-        }}
-      >
-        <div>
-          <div style={{ fontSize: "var(--h3)", fontWeight: 600, color: "var(--ink-0)" }}>
-            Study Assistant
-          </div>
-          <div style={{ fontSize: 12, color: "var(--ink-2)" }}>
-            Ask anything about studying, planning, exams, and more.
-          </div>
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            padding: "4px 10px",
-            borderRadius: 999,
-            border: "1px solid var(--stroke-inner)",
-            color: "var(--ink-2)",
-          }}
-        >
-          Model: Groq Llama 3.1 8B
-        </div>
-      </header>
-
-      <main
-        ref={chatRef}
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "16px 20px 110px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
+    <div className="assistant-page">
+      <PageHeader
+        title="AI Assistant"
+        subtitle="Ask questions about your schedule, grades, and study plans."
+        actions={<span className="assistant-model-chip">Model: Groq Llama 3.1 8B</span>}
+      />
+      <div className="assistant-panel app-card app-card--flush">
+        <div ref={chatRef} className="assistant-chat nice-scroll">
         {messages.length === 0 && (
           <div
             style={{
@@ -234,67 +191,24 @@ const AssistantPage: React.FC = () => {
             {error}
           </div>
         )}
-      </main>
-
-      <footer
-        style={{
-          position: "fixed",
-          left: "var(--sidebar-width, 240px)",
-          right: 0,
-          bottom: 0,
-          padding: "12px 18px 18px",
-          background:
-            "linear-gradient(to top, rgba(5,7,12,0.96), rgba(5,7,12,0.9))",
-          borderTop: "1px solid var(--stroke-inner)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 900,
-            margin: "0 auto",
-            display: "flex",
-            gap: 10,
-            alignItems: "flex-end",
-          }}
-        >
+        </div>
+        <div className="assistant-composer">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Send a message..."
-            style={{
-              flex: 1,
-              minHeight: 44,
-              maxHeight: 120,
-              resize: "vertical",
-              borderRadius: 12,
-              border: "1px solid var(--stroke-inner)",
-              padding: "10px 12px",
-              background: "var(--bg-1)",
-              color: "var(--ink-0)",
-              fontSize: 14,
-              fontFamily: "inherit",
-            }}
           />
           <button
+            className="app-button-primary"
             onClick={handleSend}
             disabled={isSending || !input.trim()}
-            style={{
-              padding: "10px 16px",
-              borderRadius: 999,
-              border: "none",
-              background: "var(--acc-1)",
-              color: "#fff",
-              cursor: isSending || !input.trim() ? "default" : "pointer",
-              opacity: isSending || !input.trim() ? 0.6 : 1,
-              transition: "transform 0.1s ease-out, box-shadow 0.1s",
-              boxShadow: "0 8px 18px rgba(0,0,0,0.4)",
-            }}
+            style={{ minHeight: 44 }}
           >
             {isSending ? "Sending..." : "Send"}
           </button>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };

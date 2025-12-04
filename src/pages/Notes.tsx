@@ -5,6 +5,7 @@ import ClassCard from '../components/notes/ClassCard';
 import ChapterList from '../components/notes/ChapterList';
 import NoteEditor from '../components/notes/NoteEditor';
 import AIAssistant from '../components/notes/AIAssistant';
+import PageHeader from '../components/layout/PageHeader';
 
 export default function NotesPage() {
   const [classes, setClasses] = useState<Class[]>([]);
@@ -149,119 +150,54 @@ export default function NotesPage() {
     '';
 
   return (
-    <div
-      style={{
-        padding: 'var(--space-5)',
-        minHeight: '100vh',
-        fontFamily: 'var(--font-sans)'
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--space-6)'
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 'var(--h1)',
-            fontWeight: '700',
-            color: 'var(--ink-0)',
-            margin: 0
-          }}
-        >
-          Notes
-        </h1>
-        
-        <button
-          onClick={() => setIsAddClassOpen(true)}
-          style={{
-            background: 'var(--acc-1)',
-            border: 'none',
-            color: 'white',
-            cursor: 'pointer',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--r-md)',
-            fontSize: 'var(--body)',
-            fontFamily: 'var(--font-sans)',
-            fontWeight: '500',
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#3b96e8';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,168,255,0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--acc-1)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <span>+</span>
-          Add Class
-        </button>
-      </div>
+    <div className="notes-page">
+      <PageHeader
+        title="Notes"
+        subtitle="Organize your classes and chapters, then chat with them using the built-in AI."
+        actions={
+          <button className="app-button-primary" onClick={() => setIsAddClassOpen(true)}>
+            + Add Class
+          </button>
+        }
+      />
 
       {/* Main layout */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '300px 280px 1fr',
-          gap: 'var(--space-5)',
-          height: 'calc(100vh - 200px)',
-          minHeight: '600px'
-        }}
-      >
+      <div className="notes-grid">
         {/* Left column: Classes */}
-        <div
-          className="nice-scroll"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-4)',
-            overflowY: 'auto',
-            paddingRight: 'var(--space-2)'
-          }}
-        >
-          {classes.length === 0 ? (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: 'var(--space-6)',
-                color: 'var(--ink-2)',
-                fontSize: 'var(--body)',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
-                border: '1px solid var(--stroke-outer)',
-                borderRadius: 'var(--r-2xl)'
-              }}
-            >
-              <div style={{ fontSize: '48px', marginBottom: 'var(--space-3)' }}>📚</div>
-              <div>No classes yet. Click \"Add Class\" to get started.</div>
-            </div>
-          ) : (
-            classes.map((classItem) => (
-              <ClassCard
-                key={classItem.id}
-                classItem={classItem}
-                isSelected={selectedClass?.id === classItem.id}
-                onClick={() => {
-                  setSelectedClass(classItem);
-                  setSelectedChapter(null);
+        <div className="notes-column app-card">
+          <div className="nice-scroll notes-column-scroll" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            {classes.length === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: 'var(--space-6)',
+                  color: 'var(--ink-2)',
+                  fontSize: 'var(--body)'
                 }}
-                onDelete={() => handleDeleteClass(classItem.id)}
-                onRename={(newName) => handleRenameClass(classItem.id, newName)}
-              />
-            ))
-          )}
+              >
+                <div style={{ fontSize: '48px', marginBottom: 'var(--space-3)' }}>📚</div>
+                <div>No classes yet. Click "Add Class" to get started.</div>
+              </div>
+            ) : (
+              classes.map((classItem) => (
+                <ClassCard
+                  key={classItem.id}
+                  classItem={classItem}
+                  isSelected={selectedClass?.id === classItem.id}
+                  onClick={() => {
+                    setSelectedClass(classItem);
+                    setSelectedChapter(null);
+                  }}
+                  onDelete={() => handleDeleteClass(classItem.id)}
+                  onRename={(newName) => handleRenameClass(classItem.id, newName)}
+                />
+              ))
+            )}
+          </div>
         </div>
 
         {/* Middle column: Chapters */}
-        <div>
+        <div className="notes-column app-card">
           {selectedClass ? (
             <ChapterList
               classItem={selectedClass}
@@ -274,13 +210,9 @@ export default function NotesPage() {
           ) : (
             <div
               style={{
-                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
-                border: '1px solid var(--stroke-outer)',
-                borderRadius: 'var(--r-2xl)',
                 color: 'var(--ink-2)',
                 fontSize: 'var(--body)',
                 textAlign: 'center',
@@ -296,24 +228,20 @@ export default function NotesPage() {
         </div>
 
         {/* Right column: Editor */}
-        <div>
+        <div className="notes-column app-card app-card--flush">
           {selectedChapter ? (
             <NoteEditor
               chapter={selectedChapter}
-              onUpdateNote={(content) => 
+              onUpdateNote={(content) =>
                 handleUpdateNote(selectedClass!.id, selectedChapter.id, content)
               }
             />
           ) : (
             <div
               style={{
-                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
-                border: '1px solid var(--stroke-outer)',
-                borderRadius: 'var(--r-2xl)',
                 color: 'var(--ink-2)',
                 fontSize: 'var(--body)',
                 textAlign: 'center',
@@ -328,7 +256,6 @@ export default function NotesPage() {
           )}
         </div>
       </div>
-
       {/* Floating AI button */}
       {selectedChapter && (
         <button
