@@ -197,6 +197,7 @@ body,
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
 }
 
 .dashboard-grid__surface {
@@ -204,6 +205,7 @@ body,
   padding: 28px;
   min-height: 420px;
   overflow: hidden;
+  width: 100%;
 }
 
 .dashboard-grid__surface .mesh-overlay {

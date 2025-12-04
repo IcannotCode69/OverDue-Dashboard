@@ -34,6 +34,7 @@ export type CalendarEvent = {
   categoryId: string;
   location?: string;
   description?: string;
+  allDay?: boolean;
 };
 
 // -------------------- Seed (safe) --------------------
@@ -47,7 +48,11 @@ const DEFAULT_CATEGORIES: Category[] = [
 import { readCalendarEvents, writeCalendarEvents } from "../features/calendar/storage";
 
 // -------------------- Helpers --------------------
-const HOURS = Array.from({ length: 15 }, (_, i) => i + 6); // 6am–8pm
+const START_HOUR = 6;
+const END_HOUR = 22; // exclusive
+const HOUR_HEIGHT = 56;
+const PX_PER_MINUTE = HOUR_HEIGHT / 60;
+const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
 function useWeek(startDate: Date) {
   const start = startOfWeek(startDate, { weekStartsOn: 0 });
   return Array.from({ length: 7 }).map((_, i) => addDays(start, i));
@@ -88,12 +93,12 @@ export default function Calendar() {
     [filteredEvents]
   );
 
-  const eventsByDay = React.useMemo(() => {
-    const map = new Map<string, CalendarEvent[]>();
-    normalizedEvents.forEach((event) => {
-      const key = event.start.toDateString();
-      const list = map.get(key) ?? [];
-      list.push(event);
+    const eventsByDay = React.useMemo(() => {
+      const map = new Map<string, CalendarEvent[]>();
+      normalizedEvents.forEach((event) => {
+        const key = event.start.toDateString();
+        const list = map.get(key) ?? [];
+        list.push(event);
       map.set(key, list);
     });
     map.forEach((list) => {
@@ -141,6 +146,11 @@ export default function Calendar() {
     setToast(`Imported ${items.length} event(s).`);
     setTimeout(() => setToast(null), 2500);
   }
+
+  const weekDays = useWeek(selectedDate);
+  const hours = HOURS;
+
+  const getEventsForColumn = (day: Date) => eventsForDay(day);
 
   return (
     <div className="calendar-page">
@@ -251,40 +261,87 @@ export default function Calendar() {
           </div>
         </header>
 
-        {/* Day headers */}
-        <div className="cal-week-headers">
-          {useWeek(selectedDate).map((d) => (
-            <div key={d.toISOString()} className={`cal-day-header ${isSameDay(d, selectedDate) ? 'is-active' : ''}`}>
-              <div className="cal-day-name">{format(d, "EEEE")}</div>
-              <div className="cal-day-number">{format(d, "d")}</div>
-            </div>
-          ))}
-        </div>
+        <div className="cal-week-shell">
+          <div className="cal-week-header-row">
+            <div className="cal-week-header-time" />
+            {weekDays.map((d) => (
+              <div
+                key={d.toISOString()}
+                className={`cal-week-header-day ${isSameDay(d, selectedDate) ? 'is-active' : ''}`}
+              >
+                <div className="cal-day-name">{format(d, "EEE")}</div>
+                <div className="cal-day-number">{format(d, "d")}</div>
+              </div>
+            ))}
+          </div>
 
-        {/* Grid */}
-        <div className="cal-week-grid">
-          {HOURS.map((hr) => (
-            <div key={hr} className="cal-hour-row">
-              {days.map((d) => (
-                <div key={`${d.toDateString()}-${hr}`} className="cal-hour-cell">
-                  {eventsForDay(d)
-                    .filter((e) => e.start.getHours() === hr)
-                    .map((e) => {
-                      const cat = categories.find((c) => c.id === e.categoryId);
-                      return (
-                        <EventCard
-                          key={e.id}
-                          title={e.title}
-                          start={e.start}
-                          end={e.end}
-                          color={cat?.color || "#6366f1"}
-                        />
-                      );
-                    })}
+          <div className="cal-week-body">
+            <div className="cal-time-column">
+              {hours.map((hr) => (
+                <div key={hr} className="cal-time-slot-label">
+                  {format(new Date().setHours(hr, 0, 0, 0), "h a")}
                 </div>
               ))}
             </div>
-          ))}
+
+            <div className="cal-day-columns">
+              {weekDays.map((day) => {
+                const eventsForThisDay = getEventsForColumn(day);
+                return (
+                  <div key={day.toISOString()} className="cal-day-column">
+                    {hours.map((hr) => (
+                      <div key={`${day.toDateString()}-${hr}`} className="cal-hour-cell" />
+                    ))}
+
+                    {eventsForThisDay.map((event) => {
+                      const start = event.start instanceof Date ? event.start : new Date(event.start);
+                      const end = event.end instanceof Date ? event.end : new Date(event.end);
+
+                      const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
+                      const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
+                      const visibleStartMinutes = START_HOUR * 60;
+                      const visibleEndMinutes = END_HOUR * 60;
+
+                      const clampedStart = Math.max(eventStartMinutes, visibleStartMinutes);
+                      const clampedEnd = Math.max(
+                        clampedStart + 15,
+                        Math.min(eventEndMinutes, visibleEndMinutes)
+                      );
+
+                      const offsetMinutes = clampedStart - visibleStartMinutes;
+                      const durationMinutes = clampedEnd - clampedStart;
+
+                      const top = offsetMinutes * PX_PER_MINUTE;
+                      const height = Math.max(HOUR_HEIGHT * 0.8, durationMinutes * PX_PER_MINUTE);
+
+                      const cat = categories.find((c) => c.id === event.categoryId);
+                      return (
+                        <div
+                          key={event.id}
+                          className="cal-event-block"
+                          style={{
+                            top,
+                            height,
+                            background: cat?.color
+                              ? `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`
+                              : undefined,
+                          }}
+                        >
+                          <div className="cal-event-title">{event.title}</div>
+                          {!event.allDay && (
+                            <div className="cal-event-time">
+                              {format(start, "h:mm a")} – {format(end, "h:mm a")}
+                            </div>
+                          )}
+                          {event.location && <div className="cal-event-location">{event.location}</div>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Floating Add Button */}
