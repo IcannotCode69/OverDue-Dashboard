@@ -219,11 +219,9 @@
 
 .cal-week-body {
   display: grid;
-  grid-template-columns: 60px 1fr;
-  gap: 10px;
-  height: calc((22 - 6) * 56px);
+  grid-template-columns: 64px 1fr;
+  gap: 0;
   position: relative;
-  overflow: hidden;
 }
 
 .cal-time-column {
@@ -243,6 +241,12 @@
   justify-content: flex-end;
 }
 
+.cal-week-scroll {
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+  position: relative;
+}
+
 .cal-day-columns {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -252,10 +256,10 @@
 
 .cal-day-column {
   position: relative;
-  border-left: 1px solid rgba(255,255,255,0.04);
+  border-left: 1px solid rgba(255,255,255,0.03);
   background: rgba(255,255,255,0.01);
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .cal-hour-cell {
@@ -273,7 +277,7 @@
   padding: 6px 8px;
   font-size: 12px;
   line-height: 1.3;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #a66bff, #5c6cff);
   color: #fdfcff;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
   overflow: hidden;
@@ -281,18 +285,26 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  gap: 2px;
+  min-height: 48px;
 }
 
 .cal-event-title {
   font-weight: 600;
-  margin-bottom: 2px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.cal-event-time,
+.cal-event-time {
+  font-size: 10px;
+  opacity: 0.85;
+}
+
 .cal-event-location {
-  font-size: 11px;
-  opacity: 0.8;
-  margin-top: 1px;
+  font-size: 10px;
+  opacity: 0.7;
 }
 
 .cal-event-peers {

@@ -49,7 +49,7 @@ import { readCalendarEvents, writeCalendarEvents } from "../features/calendar/st
 
 // -------------------- Helpers --------------------
 const START_HOUR = 6;
-const END_HOUR = 22; // exclusive
+const END_HOUR = 24; // exclusive (midnight)
 const HOUR_HEIGHT = 56;
 const PX_PER_MINUTE = HOUR_HEIGHT / 60;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
@@ -284,62 +284,73 @@ export default function Calendar() {
               ))}
             </div>
 
-            <div className="cal-day-columns">
-              {weekDays.map((day) => {
-                const eventsForThisDay = getEventsForColumn(day);
-                return (
-                  <div key={day.toISOString()} className="cal-day-column">
-                    {hours.map((hr) => (
-                      <div key={`${day.toDateString()}-${hr}`} className="cal-hour-cell" />
-                    ))}
+            <div className="cal-week-scroll">
+              <div className="cal-day-columns">
+                {weekDays.map((day) => {
+                  const eventsForThisDay = getEventsForColumn(day);
+                  return (
+                    <div key={day.toISOString()} className="cal-day-column">
+                      {hours.map((hr) => (
+                        <div key={`${day.toDateString()}-${hr}`} className="cal-hour-cell" />
+                      ))}
 
-                    {eventsForThisDay.map((event) => {
-                      const start = event.start instanceof Date ? event.start : new Date(event.start);
-                      const end = event.end instanceof Date ? event.end : new Date(event.end);
+                      {eventsForThisDay.map((event) => {
+                        const start = event.start instanceof Date ? event.start : new Date(event.start);
+                        const end = event.end instanceof Date ? event.end : new Date(event.end);
 
-                      const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-                      const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-                      const visibleStartMinutes = START_HOUR * 60;
-                      const visibleEndMinutes = END_HOUR * 60;
+                        const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
+                        const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
+                        const visibleStartMinutes = START_HOUR * 60;
+                        const visibleEndMinutes = END_HOUR * 60;
+                        const MIN_DURATION_MINUTES = 45;
 
-                      const clampedStart = Math.max(eventStartMinutes, visibleStartMinutes);
-                      const clampedEnd = Math.max(
-                        clampedStart + 15,
-                        Math.min(eventEndMinutes, visibleEndMinutes)
-                      );
+                        // Skip events entirely before the visible window
+                        if (eventEndMinutes <= visibleStartMinutes) {
+                          return null;
+                        }
 
-                      const offsetMinutes = clampedStart - visibleStartMinutes;
-                      const durationMinutes = clampedEnd - clampedStart;
+                        const clampedStart = Math.min(
+                          Math.max(eventStartMinutes, visibleStartMinutes),
+                          visibleEndMinutes - MIN_DURATION_MINUTES
+                        );
+                        const clampedEnd = Math.min(
+                          Math.max(eventEndMinutes, clampedStart + MIN_DURATION_MINUTES),
+                          visibleEndMinutes
+                        );
 
-                      const top = offsetMinutes * PX_PER_MINUTE;
-                      const height = Math.max(HOUR_HEIGHT * 0.8, durationMinutes * PX_PER_MINUTE);
+                        const offsetMinutes = clampedStart - visibleStartMinutes;
+                        const durationMinutes = Math.max(MIN_DURATION_MINUTES, clampedEnd - clampedStart);
 
-                      const cat = categories.find((c) => c.id === event.categoryId);
-                      return (
-                        <div
-                          key={event.id}
-                          className="cal-event-block"
-                          style={{
-                            top,
-                            height,
-                            background: cat?.color
-                              ? `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`
-                              : undefined,
-                          }}
-                        >
-                          <div className="cal-event-title">{event.title}</div>
-                          {!event.allDay && (
-                            <div className="cal-event-time">
-                              {format(start, "h:mm a")} – {format(end, "h:mm a")}
-                            </div>
-                          )}
-                          {event.location && <div className="cal-event-location">{event.location}</div>}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
+                        const top = offsetMinutes * PX_PER_MINUTE;
+                        const height = Math.max(MIN_DURATION_MINUTES * PX_PER_MINUTE, durationMinutes * PX_PER_MINUTE);
+
+                        const cat = categories.find((c) => c.id === event.categoryId);
+                        return (
+                          <div
+                            key={event.id}
+                            className="cal-event-block"
+                            style={{
+                              top,
+                              height,
+                              background: cat?.color
+                                ? `linear-gradient(135deg, ${cat.color}, ${cat.color}cc)`
+                                : undefined,
+                            }}
+                          >
+                            <div className="cal-event-title">{event.title}</div>
+                            {!event.allDay && (
+                              <div className="cal-event-time">
+                                {format(start, "h:mm a")} – {format(end, "h:mm a")}
+                              </div>
+                            )}
+                            {event.location && <div className="cal-event-location">{event.location}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
