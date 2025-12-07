@@ -123,3 +123,14 @@
 
 /* Toast */
 .pf-toast { position: fixed; right: 24px; bottom: 24px; background: rgba(20,28,42,.95); border: 1px solid var(--pf-border); color: var(--pf-text); padding: 10px 14px; border-radius: 12px; box-shadow: var(--pf-shadow); z-index: 1300; }
+
+.pf-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.pf-fieldset[disabled] {
+  opacity: 0.7;
+  pointer-events: none;
+}

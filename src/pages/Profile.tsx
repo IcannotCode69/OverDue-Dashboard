@@ -4,12 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { profileSchema, preferencesSchema } from '../features/profile/types';
 import type { Profile, Preferences } from '../features/profile/types';
 import { loadProfile, saveProfile, loadPreferences, savePreferences } from '../features/profile/mockApi';
-import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfileForm from '../components/profile/ProfileForm';
-import PreferencesPanel from '../components/profile/PreferencesPanel';
-import SecurityPanel from '../components/profile/SecurityPanel';
-import ConnectedAccounts from '../components/profile/ConnectedAccounts';
-import ActivitySummary from '../components/profile/ActivitySummary';
 import '../features/profile/profile.styles.css';
 import { resetAllLocalData } from '../features/sync/resetLocalData';
 import { useSync } from '../features/sync/useSync';
@@ -23,6 +18,7 @@ function Toast({ text }: { text: string }) {
 export default function ProfilePage() {
   const [loading, setLoading] = React.useState(true);
   const [toast, setToast] = React.useState<string | null>(null);
+  const [isEditing, setIsEditing] = React.useState(false);
 
   const methods = useForm<FormShape>({
     resolver: zodResolver(profileSchema.merge(preferencesSchema) as any),
@@ -79,53 +75,54 @@ export default function ProfilePage() {
     methods.reset({ ...profile, ...prefs });
     setToast('Profile updated');
     setTimeout(() => setToast(null), 1800);
+    setIsEditing(false);
   }
-
-  function onDiscard() {
-    methods.reset(undefined, { keepValues: false });
-  }
-
-  // KPI stubs – could be derived from other stores if present
-  const kpis = { upcomingDue: 3, completedThisWeek: 5, overallPercent: 88, streakDays: 6 };
-
-  const displayName = methods.watch('displayName') || '';
-  const handle = methods.watch('handle') || '';
-  const avatarUrl = methods.watch('avatarUrl');
-  const coverUrl = methods.watch('coverUrl');
 
   return (
     <div className="pf-page">
       <div className="pf-topbar">
         <h1 className="pf-title">Profile</h1>
         <div className="pf-actions">
-          <button className="pf-btn pf-btn-ghost" onClick={onDiscard} aria-label="Discard changes" disabled={!isDirty}>Discard</button>
-          <button className="pf-btn pf-btn-primary" onClick={methods.handleSubmit(onSave)} aria-label="Save changes" disabled={!isDirty || !isValid || loading}>
-            {methods.formState.isSubmitting ? 'Saving…' : 'Save'}
-          </button>
+          {!isEditing && (
+            <button
+              type="button"
+              className="pf-btn pf-btn-primary"
+              onClick={() => setIsEditing(true)}
+            >
+              Edit profile
+            </button>
+          )}
+          {isEditing && (
+            <>
+              <button
+                type="button"
+                className="pf-btn pf-btn-ghost"
+                onClick={() => {
+                  methods.reset();
+                  setIsEditing(false);
+                }}
+                disabled={loading}
+                aria-label="Cancel editing"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="pf-btn pf-btn-primary"
+                onClick={methods.handleSubmit(onSave)}
+                disabled={!isDirty || !isValid || loading}
+                aria-label="Save profile changes"
+              >
+                {methods.formState.isSubmitting ? 'Saving…' : 'Save changes'}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       <FormProvider {...methods}>
-        {/* Header – avatar/cover editing */}
-        <ProfileHeader
-          displayName={displayName || 'Student'}
-          handle={handle || '@handle'}
-          avatarUrl={avatarUrl}
-          coverUrl={coverUrl}
-          onChangeAvatar={(d) => methods.setValue('avatarUrl', d, { shouldDirty: true })}
-          onChangeCover={(d) => methods.setValue('coverUrl', d, { shouldDirty: true })}
-        />
-
-        <div className="pf-grid" style={{ marginTop: 16 }}>
-          <div>
-            <ActivitySummary {...kpis} />
-          </div>
-          <div style={{ display:'grid', gap: 16 }}>
-            <ProfileForm />
-            <PreferencesPanel />
-            <SecurityPanel />
-            <ConnectedAccounts />
-          </div>
+        <div style={{ marginTop: 16 }}>
+          <ProfileForm isEditing={isEditing} />
         </div>
 
         <div style={{ marginTop: 24, display: 'grid', gap: 16 }}>
