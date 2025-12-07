@@ -284,7 +284,7 @@ export default function Calendar() {
               ))}
             </div>
 
-            <div className="cal-week-scroll">
+            <div className="cal-week-scroll nice-scroll">
               <div className="cal-day-columns">
                 {weekDays.map((day) => {
                   const eventsForThisDay = getEventsForColumn(day);
