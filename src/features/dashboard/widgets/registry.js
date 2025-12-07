@@ -1,6 +1,7 @@
 import React from 'react';
 import CalendarCardWidget from './CalendarCardWidget';
 import SmartSuggestionsWidget from './SmartSuggestionsWidget';
+import StreakWidget from './StreakWidget';
 
 // Widget registry with curated default widgets
 export const widgetDefaults = {
@@ -17,10 +18,17 @@ export const widgetDefaults = {
     sm: { w: 4, h: 7 },
     xs: { w: 4, h: 8 },
     xxs: { w: 2, h: 9 }
+  },
+  streak: {
+    lg: { w: 2, h: 4 },
+    md: { w: 2, h: 4 },
+    sm: { w: 3, h: 4 },
+    xs: { w: 4, h: 4 },
+    xxs: { w: 2, h: 4 }
   }
 };
 
-export const WIDGET_KINDS = ['calendarCard', 'smartSuggestions'];
+export const WIDGET_KINDS = ['calendarCard', 'smartSuggestions', 'streak'];
 
 export function renderWidget(kind, id, onRemove) {
   switch (kind) {
@@ -28,6 +36,8 @@ export function renderWidget(kind, id, onRemove) {
       return <CalendarCardWidget key={id} onRemove={onRemove} />;
     case 'smartSuggestions':
       return <SmartSuggestionsWidget key={id} onRemove={onRemove} />;
+    case 'streak':
+      return <StreakWidget key={id} onRemove={onRemove} />;
     default:
       return null;
   }
@@ -46,6 +56,12 @@ export const widgetSizeConstraints = {
     minH: 4,
     maxW: 8,
     maxH: 12
+  },
+  streak: {
+    minW: 2,
+    minH: 3,
+    maxW: 4,
+    maxH: 6
   }
 };
 
@@ -60,5 +76,10 @@ export const widgetMetadata = {
     name: 'Smart Suggestions',
     description: 'AI-powered study tips based on your data',
     icon: '✨'
+  },
+  streak: {
+    name: 'Streak',
+    description: 'Track how many days in a row you showed up.',
+    icon: '🔥'
   }
 };

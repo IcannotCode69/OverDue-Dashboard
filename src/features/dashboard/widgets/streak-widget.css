@@ -1,0 +1,125 @@
+.streak-widget {
+  height: 100%;
+  border-radius: var(--r-lg);
+  background: radial-gradient(
+    circle at 0 0,
+    #ffb347 0,
+    var(--acc-2) 38%,
+    #050814 100%
+  );
+  position: relative;
+  overflow: hidden;
+  color: var(--ink-0);
+  display: flex;
+}
+
+.streak-widget__inner {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+}
+
+.streak-widget__top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.streak-widget__flame {
+  font-size: 24px;
+  filter: drop-shadow(0 0 8px rgba(255, 184, 108, 0.8));
+}
+
+.streak-widget__remove {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  border: none;
+  color: var(--ink-2);
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.streak-widget__remove:hover {
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--ink-0);
+}
+
+.streak-widget__content {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.streak-widget__number-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.streak-widget__number {
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.streak-widget__number--bump {
+  animation: streak-bump 0.22s ease-out;
+}
+
+@keyframes streak-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.streak-widget__label {
+  font-size: 14px;
+  color: var(--ink-1);
+}
+
+.streak-widget__character {
+  width: 84px;
+  height: 52px;
+  border-radius: 20px 20px 6px 6px;
+  background: linear-gradient(135deg, #ffd966, #ffe48f);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55);
+}
+
+/* Button */
+.streak-widget__button {
+  margin-top: var(--space-4);
+  align-self: flex-start;
+  border-radius: 999px;
+  border: none;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  background-image: linear-gradient(135deg, var(--acc-1), var(--acc-2));
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.streak-widget__button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
+}
+
+.streak-widget__button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.45);
+}

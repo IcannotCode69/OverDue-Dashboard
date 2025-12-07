@@ -11,7 +11,7 @@ const ITEMS_KEY = "od:items:v2";
 const COLS = { lg: 12, md: 12, sm: 8, xs: 4, xxs: 2 };
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 };
 
-const BASE_KINDS = ['calendarCard', 'smartSuggestions'];
+const BASE_KINDS = ['streak', 'calendarCard', 'smartSuggestions'];
 
 const createItemForKind = (kind) => ({
   i: `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
