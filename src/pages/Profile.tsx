@@ -11,6 +11,8 @@ import SecurityPanel from '../components/profile/SecurityPanel';
 import ConnectedAccounts from '../components/profile/ConnectedAccounts';
 import ActivitySummary from '../components/profile/ActivitySummary';
 import '../features/profile/profile.styles.css';
+import { resetAllLocalData } from '../features/sync/resetLocalData';
+import { useSync } from '../features/sync/useSync';
 
 type FormShape = Profile & Preferences;
 
@@ -34,6 +36,16 @@ export default function ProfilePage() {
 
   const isDirty = methods.formState.isDirty;
   const isValid = methods.formState.isValid;
+  const email = methods.watch('email');
+  const userId = (email || '').trim();
+
+  const {
+    isSyncing,
+    lastSyncedAt,
+    syncError,
+    syncFromCloud,
+    syncToCloud,
+  } = useSync();
 
   async function onSave(values: FormShape) {
     methods.clearErrors();
@@ -115,10 +127,69 @@ export default function ProfilePage() {
             <ConnectedAccounts />
           </div>
         </div>
+
+        <div style={{ marginTop: 24, display: 'grid', gap: 16 }}>
+          <div className="app-card">
+            <h2 style={{ fontSize: 16, marginBottom: 8 }}>Cloud Sync (preview)</h2>
+            <p style={{ fontSize: 13, color: 'var(--ink-3, #97a1c0)', marginBottom: 8 }}>
+              Use your profile email as your cloud id. You can load data from the cloud or save your current dashboard snapshot.
+            </p>
+            <p style={{ fontSize: 12, marginBottom: 8 }}>
+              <strong>User id:</strong>{' '}
+              {userId ? userId : <span style={{ opacity: 0.7 }}>Add an email in your profile to enable sync.</span>}
+            </p>
+            {lastSyncedAt && (
+              <p style={{ fontSize: 12, marginBottom: 8 }}>
+                <strong>Last synced:</strong> {new Date(lastSyncedAt).toLocaleString()}
+              </p>
+            )}
+            {syncError && (
+              <p style={{ fontSize: 12, color: '#fca5a5', marginBottom: 8 }}>
+                {syncError}
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button
+                type="button"
+                className="app-button-primary"
+                disabled={isSyncing || !userId}
+                onClick={() => syncFromCloud(userId)}
+              >
+                {isSyncing ? 'Syncing...' : 'Load from cloud'}
+              </button>
+              <button
+                type="button"
+                className="app-button-primary"
+                disabled={isSyncing || !userId}
+                onClick={() => syncToCloud(userId)}
+              >
+                {isSyncing ? 'Syncing...' : 'Save to cloud'}
+              </button>
+            </div>
+          </div>
+
+          <div className="app-card">
+            <h2 style={{ fontSize: 16, marginBottom: 8 }}>Reset this device</h2>
+            <p style={{ fontSize: 13, color: 'var(--ink-3, #97a1c0)', marginBottom: 8 }}>
+              Clear all OverDue Dashboard data stored in this browser, including calendar events, notes, grades, and profile info. This does not affect any data stored in the cloud.
+            </p>
+            <button
+              type="button"
+              className="app-button-primary"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to clear all local data on this device?')) {
+                  resetAllLocalData();
+                  window.location.reload();
+                }
+              }}
+            >
+              Clear local data on this device
+            </button>
+          </div>
+        </div>
       </FormProvider>
 
       {toast && <Toast text={toast} />}
     </div>
   );
 }
-

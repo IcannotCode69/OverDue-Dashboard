@@ -41,54 +41,11 @@ export function setNotes(classes: Class[]): void {
 // Create demo data if storage is empty
 export function seedIfEmpty(): void {
   const existing = getNotes();
-  if (existing.length > 0) {
+  if (existing && existing.length > 0) {
     return; // Already has data
   }
-
-  const mathClass: Class = {
-    id: generateId(),
-    name: "Mathematics",
-    color: GRADIENT_COLORS[0], // blue
-    chapters: [
-      {
-        id: generateId(),
-        name: "Calculus I",
-        note: {
-          id: generateId(),
-          content: "# Calculus I Notes\n\n## Limits\n- Definition of a limit\n- Properties of limits\n- Continuity\n\n## Derivatives\n- Power rule\n- Product rule\n- Chain rule\n\n## Applications\n- Related rates\n- Optimization problems",
-          updatedAt: new Date().toISOString()
-        }
-      },
-      {
-        id: generateId(),
-        name: "Linear Algebra",
-        note: {
-          id: generateId(),
-          content: "# Linear Algebra Notes\n\n## Vectors\n- Vector operations\n- Dot product\n- Cross product\n\n## Matrices\n- Matrix operations\n- Determinants\n- Eigenvalues and eigenvectors",
-          updatedAt: new Date().toISOString()
-        }
-      }
-    ]
-  };
-
-  const physicsClass: Class = {
-    id: generateId(),
-    name: "Physics",
-    color: GRADIENT_COLORS[2], // pink
-    chapters: [
-      {
-        id: generateId(),
-        name: "Mechanics",
-        note: {
-          id: generateId(),
-          content: "# Mechanics Notes\n\n## Kinematics\n- Position, velocity, acceleration\n- Motion in one dimension\n- Motion in two dimensions\n\n## Dynamics\n- Newton's laws of motion\n- Forces and free-body diagrams\n- Work and energy",
-          updatedAt: new Date().toISOString()
-        }
-      }
-    ]
-  };
-
-  setNotes([mathClass, physicsClass]);
+  // Start brand new users with no classes
+  setNotes([]);
 }
 
 // Helper to get a random gradient color

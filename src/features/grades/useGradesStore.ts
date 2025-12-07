@@ -14,57 +14,10 @@ const STORAGE_KEY = 'grades.state.v2';
 const uuid = () => generateId();
 
 function seedState(): GradesState {
-  const now = Date.now();
-  const courseA: GradeCourse = { id: uuid(), name: 'CS 2410', createdAt: now };
-  const courseB: GradeCourse = { id: uuid(), name: 'CS 4920', createdAt: now + 1 };
-  const courseC: GradeCourse = { id: uuid(), name: 'MATH 2210', createdAt: now + 2 };
-
-  const assignments: GradeAssignment[] = [
-    {
-      id: uuid(),
-      courseId: courseA.id,
-      name: 'Project Proposal',
-      due: new Date(2025, 9, 14, 23, 59).toISOString(),
-      pointsPossible: 20,
-      pointsEarned: 18,
-      status: 'Graded',
-      letter: 'A-',
-      notes: undefined,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: uuid(),
-      courseId: courseB.id,
-      name: 'Sprint 1 Report',
-      due: new Date(2025, 9, 18, 12, 0).toISOString(),
-      pointsPossible: 100,
-      pointsEarned: null,
-      status: 'In Progress',
-      letter: null,
-      notes: undefined,
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      id: uuid(),
-      courseId: courseC.id,
-      name: 'Homework 4',
-      due: new Date(2025, 9, 16, 9, 0).toISOString(),
-      pointsPossible: 10,
-      pointsEarned: 10,
-      status: 'Graded',
-      letter: 'A',
-      notes: undefined,
-      createdAt: now,
-      updatedAt: now,
-    },
-  ];
-
   return {
     version: 2,
-    courses: [courseA, courseB, courseC],
-    assignments,
+    courses: [],
+    assignments: [],
   };
 }
 
