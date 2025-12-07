@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Upload, X } from 'lucide-react';
-// import JSZip from 'jszip';
 import JSZip, { JSZipObject } from 'jszip';
 import { parseICS, type IcsEvent } from '../../features/calendar/ics';
 
@@ -16,21 +15,44 @@ export default function ICSImportModal({ open, onClose, onImport }: Props) {
   const [err, setErr] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  React.useEffect(() => { if (open) setErr(null); }, [open]);
+  React.useEffect(() => {
+    if (open) {
+      setErr(null);
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+    }
+  }, [open]);
+
   if (!open) return null;
 
   async function handleFile(f: File) {
     setErr(null);
-    if (f.size > MAX) { setErr('File too large (max 5MB).'); return; }
+
+    if (f.size > MAX) {
+      setErr('File too large (max 5MB).');
+      return;
+    }
+
     const name = f.name.toLowerCase();
     const isZip = name.endsWith('.zip');
+    const isIcs = name.endsWith('.ics') || /text\/calendar/.test(f.type);
+
+    if (!isZip && !isIcs) {
+      setErr('Please select a .ics file or a .zip export containing .ics files.');
+      return;
+    }
 
     try {
       if (isZip) {
         const zip = await JSZip.loadAsync(f);
-        const entries = Object.values(zip.files).filter(
-          (entry) => !entry.dir && entry.name.toLowerCase().endsWith('.ics')
-        );
+
+        const entries: JSZipObject[] = [];
+        zip.forEach((relativePath, file) => {
+          if (!file.dir && file.name.toLowerCase().endsWith('.ics')) {
+            entries.push(file);
+          }
+        });
 
         if (!entries.length) {
           setErr("Couldn't find any .ics files in this zip.");
@@ -54,13 +76,12 @@ export default function ICSImportModal({ open, onClose, onImport }: Props) {
         onImport(allItems);
         onClose();
       } else {
-        if (!/\.ics$/i.test(f.name) && !/text\/calendar/.test(f.type)) {
-          setErr('Please select a .ics file.');
-          return;
-        }
         const text = await f.text();
         const items = parseICS(text);
-        if (!items.length) { setErr("Couldn't find any events in this file."); return; }
+        if (!items.length) {
+          setErr("Couldn't find any events in this file.");
+          return;
+        }
         onImport(items);
         onClose();
       }
@@ -72,27 +93,79 @@ export default function ICSImportModal({ open, onClose, onImport }: Props) {
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (file) {
+      void handleFile(file);
+    }
   }
 
   return (
-    <div className="cal-dialog-overlay" onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
-      <div className="cal-dialog-content" role="dialog" aria-modal="true" aria-label="Import .ics">
+    <div
+      className="cal-dialog-overlay"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
+    >
+      <div
+        className="cal-dialog-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Import .ics"
+      >
         <div className="cal-dialog-header">
           <h2 className="cal-dialog-title">Import .ics</h2>
-          <button className="cal-dialog-close" aria-label="Close" onClick={onClose}><X size={16}/></button>
+          <button
+            className="cal-dialog-close"
+            aria-label="Close"
+            onClick={onClose}
+          >
+            <X size={16} />
+          </button>
         </div>
         <div className="cal-dialog-form">
           <div>
-            <label className="cal-label" htmlFor="icsfile">Choose .ics file</label>
-            <input id="icsfile" ref={inputRef} type="file" accept=".ics,text/calendar,.zip,application/zip" className="cal-input" onChange={onChange} />
-            <div className="ics-inline">Google Calendar (.ics or .zip with multiple .ics files) and Brightspace exports supported. Max 5MB.</div>
-            <div className="ics-inline">Tip: Export your Google Calendar, upload the .zip here, and we&apos;ll import all calendars inside.</div>
-            {err && <div className="ics-error" role="alert">{err}</div>}
+            <label className="cal-label" htmlFor="icsfile">
+              Choose .ics or .zip file
+            </label>
+            <input
+              id="icsfile"
+              ref={inputRef}
+              type="file"
+              accept=".ics,text/calendar,.zip,application/zip"
+              className="cal-input"
+              onChange={onChange}
+            />
+            <div className="ics-inline">
+              Google Calendar (.ics or .zip with multiple .ics files) and Brightspace exports supported. Max 5MB.
+            </div>
+            <div className="ics-inline">
+              Tip: Export your Google Calendar, upload the .zip here, and we'll import all calendars inside.
+            </div>
+            {err && (
+              <div className="ics-error" role="alert">
+                {err}
+              </div>
+            )}
           </div>
           <div className="cal-dialog-footer">
-            <button className="cal-btn cal-btn-ghost" type="button" onClick={() => { inputRef.current && (inputRef.current.value = ''); setErr(null); }}>Reset</button>
-            <button className="cal-btn cal-btn-primary" type="button" onClick={() => inputRef.current?.click()}><Upload size={14}/> Select File</button>
+            <button
+              className="cal-btn cal-btn-ghost"
+              type="button"
+              onClick={() => {
+                if (inputRef.current) {
+                  inputRef.current.value = '';
+                }
+                setErr(null);
+              }}
+            >
+              Reset
+            </button>
+            <button
+              className="cal-btn cal-btn-primary"
+              type="button"
+              onClick={() => inputRef.current?.click()}
+            >
+              <Upload size={14} /> Select File
+            </button>
           </div>
         </div>
       </div>
