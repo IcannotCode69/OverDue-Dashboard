@@ -111,9 +111,18 @@ export default function DashboardGrid() {
       localStorage.removeItem(LAYOUT_KEY);
     }
 
-    // Generate default layouts for current items
-    return generateDefaultLayouts(items);
+  // Generate default layouts for current items
+  return generateDefaultLayouts(items);
   });
+
+  // Persist items whenever they change so IDs remain stable across reloads
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
+    } catch {
+      // ignore storage errors to avoid breaking UI
+    }
+  }, [items]);
 
   const onLayoutsChange = (l) => {
     setLayouts(l);
@@ -172,7 +181,11 @@ export default function DashboardGrid() {
             margin={[12, 12]}
             compactType="vertical"
             preventCollision={false}
-            onLayoutsChange={onLayoutsChange}
+            onLayoutChange={(_, allLayouts) => {
+              if (allLayouts) {
+                onLayoutsChange(allLayouts);
+              }
+            }}
             draggableHandle=".react-grid-dragHandle"
           >
             {items.map((item) => {
