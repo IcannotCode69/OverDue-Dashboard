@@ -13,6 +13,16 @@
   display: flex;
 }
 
+.streak-widget__dragHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px; /* only the top strip is draggable */
+  cursor: move;
+  opacity: 0;
+}
+
 .streak-widget__inner {
   padding: var(--space-4);
   display: flex;

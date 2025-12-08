@@ -57,6 +57,10 @@ export default function StreakWidget({ onRemove }: StreakWidgetProps) {
 
   return (
     <div className="streak-widget app-card app-card--flush">
+      <div
+        className="react-grid-dragHandle streak-widget__dragHandle"
+        aria-hidden="true"
+      />
       <div className="streak-widget__inner">
         <div className="streak-widget__top-row">
           <div className="streak-widget__flame" aria-hidden="true">
