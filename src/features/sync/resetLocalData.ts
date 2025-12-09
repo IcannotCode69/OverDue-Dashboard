@@ -3,6 +3,7 @@ export function resetAllLocalData(): void {
     'od:calendar:events:v1',
     'od:notes:v2',
     'grades.state.v2',
+    'grades.items',
     'od:userProfile:v1',
     'od:tasks',
     'od:notes',

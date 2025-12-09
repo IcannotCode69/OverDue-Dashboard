@@ -8,6 +8,7 @@ import ProfilePage from "./pages/Profile.tsx";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
 import OnboardingPage from "./pages/Onboarding";
+import StudyPlannerPage from "./pages/StudyPlanner";
 import { 
   IoHome,
   IoCalendarOutline,
@@ -16,7 +17,8 @@ import {
   IoSchoolOutline,
   IoPersonOutline,
   IoLogInOutline,
-  IoPersonAddOutline
+  IoPersonAddOutline,
+  IoListOutline,
 } from "react-icons/io5";
 
 const routes = [
@@ -45,6 +47,15 @@ const routes = [
     route: "/notes",
     icon: <IoDocumentTextOutline size="15px" color="inherit" />,
     component: NotesPage,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Study Planner",
+    key: "study-planner",
+    route: "/study-planner",
+    icon: <IoListOutline size="15px" color="inherit" />,
+    component: StudyPlannerPage,
     noCollapse: true,
   },
   {
