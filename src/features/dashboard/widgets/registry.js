@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import CalendarCardWidget from './CalendarCardWidget';
 import SmartSuggestionsWidget from './SmartSuggestionsWidget';
 import StreakWidget from './StreakWidget';
+import QuickLinksWidget from './QuickLinksWidget';
 
 // Widget registry with curated default widgets
 export const widgetDefaults = {
@@ -25,10 +26,17 @@ export const widgetDefaults = {
     sm: { w: 3, h: 4 },
     xs: { w: 4, h: 4 },
     xxs: { w: 2, h: 4 }
+  },
+  quickLinks: {
+    lg: { w: 3, h: 5 },
+    md: { w: 3, h: 5 },
+    sm: { w: 4, h: 5 },
+    xs: { w: 4, h: 6 },
+    xxs: { w: 2, h: 7 }
   }
 };
 
-export const WIDGET_KINDS = ['calendarCard', 'smartSuggestions', 'streak'];
+export const WIDGET_KINDS = ['calendarCard', 'smartSuggestions', 'streak', 'quickLinks'];
 
 export function renderWidget(kind, id, onRemove) {
   switch (kind) {
@@ -38,6 +46,8 @@ export function renderWidget(kind, id, onRemove) {
       return <SmartSuggestionsWidget key={id} onRemove={onRemove} />;
     case 'streak':
       return <StreakWidget key={id} onRemove={onRemove} />;
+    case 'quickLinks':
+      return <QuickLinksWidget key={id} onRemove={onRemove} />;
     default:
       return null;
   }
@@ -62,6 +72,12 @@ export const widgetSizeConstraints = {
     minH: 3,
     maxW: 4,
     maxH: 6
+  },
+  quickLinks: {
+    minW: 2,
+    minH: 4,
+    maxW: 6,
+    maxH: 10
   }
 };
 
@@ -81,5 +97,10 @@ export const widgetMetadata = {
     name: 'Streak',
     description: 'Track how many days in a row you showed up.',
     icon: '🔥'
+  },
+  quickLinks: {
+    name: 'Study sites',
+    description: 'One-click shortcuts to your homework portals.',
+    icon: '🔗'
   }
 };
