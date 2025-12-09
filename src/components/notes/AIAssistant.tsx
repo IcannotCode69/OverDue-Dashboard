@@ -23,25 +23,22 @@ function makeConversation(): Conversation {
 }
 
 const basePanelStyle: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  background: "rgba(0,0,0,0.4)",
-  zIndex: 9999,
+  flexDirection: "column",
+  height: "100%",
+  minHeight: 0,
 };
 
 const cardStyle: React.CSSProperties = {
-  width: "90vw",
-  maxWidth: 600,
-  maxHeight: "80vh",
   display: "flex",
   flexDirection: "column",
   background: "var(--bg-1)",
   border: "1px solid var(--stroke-inner)",
-  borderRadius: 12,
+  borderRadius: 16,
   boxShadow: "0 18px 45px rgba(0,0,0,0.5)",
+  padding: 16,
+  height: "100%",
+  minHeight: 0,
   overflow: "hidden",
 };
 
@@ -138,8 +135,8 @@ export default function AIAssistant(props: AIAssistantProps) {
   };
 
   return (
-    <div style={basePanelStyle} onClick={onClose}>
-      <div style={cardStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={basePanelStyle}>
+      <div style={cardStyle}>
         <div
           style={{
             padding: "12px 16px",
@@ -167,7 +164,16 @@ export default function AIAssistant(props: AIAssistantProps) {
           </button>
         </div>
 
-        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+        <div
+          style={{
+            padding: 16,
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            flex: 1,
+            minHeight: 0,
+          }}
+        >
           <div style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
             Ask questions about this note. I only use the note content you see in the editor.
           </div>
@@ -215,16 +221,16 @@ export default function AIAssistant(props: AIAssistantProps) {
           <div
             style={{
               flex: 1,
-              minHeight: 120,
-              maxHeight: 220,
+              minHeight: 0,
               overflowY: "auto",
-              border: "1px solid var(--stroke-inner)",
-              borderRadius: 8,
-              padding: 10,
+              padding: 12,
+              borderRadius: 12,
               background: "var(--bg-2)",
-              fontSize: 13,
-              color: "var(--ink-0)",
+              border: "1px solid var(--stroke-inner)",
               whiteSpace: "pre-wrap",
+              fontSize: 13,
+              lineHeight: 1.5,
+              color: "var(--ink-0)",
             }}
           >
             {isLoading && <div>Thinking...</div>}
