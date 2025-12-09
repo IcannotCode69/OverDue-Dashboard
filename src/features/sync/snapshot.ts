@@ -4,6 +4,7 @@ export interface DashboardSnapshot {
   notes: any[];
   grades: any;
   userProfile: any;
+  assistantConversations?: any[];
   updatedAt: string;
 }
 
@@ -11,6 +12,7 @@ const CAL_KEY = 'od:calendar:events:v1';
 const NOTES_KEY = 'od:notes:v2';
 const GRADES_KEY = 'grades.state.v2';
 const USER_PROFILE_KEY = 'od:userProfile:v1';
+const ASSISTANT_KEY = 'overdue.ai.conversations.v1';
 
 function safeParse<T>(raw: string | null, fallback: T): T {
   if (!raw) return fallback;
@@ -30,6 +32,7 @@ export function buildSnapshotFromLocal(): DashboardSnapshot {
   const notes = safeParse<any[]>(typeof window !== 'undefined' ? window.localStorage.getItem(NOTES_KEY) : null, []);
   const grades = safeParse<any>(typeof window !== 'undefined' ? window.localStorage.getItem(GRADES_KEY) : null, null);
   const userProfile = safeParse<any>(typeof window !== 'undefined' ? window.localStorage.getItem(USER_PROFILE_KEY) : null, null);
+  const assistantConversations = safeParse<any[]>(typeof window !== 'undefined' ? window.localStorage.getItem(ASSISTANT_KEY) : null, []);
 
   return {
     version: 1,
@@ -37,6 +40,7 @@ export function buildSnapshotFromLocal(): DashboardSnapshot {
     notes,
     grades,
     userProfile,
+    assistantConversations,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -56,6 +60,12 @@ export function applySnapshotToLocal(snapshot: DashboardSnapshot): void {
     }
     if (snapshot.userProfile !== undefined) {
       window.localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(snapshot.userProfile));
+    }
+    if (snapshot.assistantConversations !== undefined) {
+      window.localStorage.setItem(
+        ASSISTANT_KEY,
+        JSON.stringify(snapshot.assistantConversations ?? [])
+      );
     }
   } catch {
     // ignore storage errors

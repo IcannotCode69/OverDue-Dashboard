@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+﻿import React, { useState, useEffect, useCallback } from "react";
 import getAdapter from "../features/assistant/adapters/resolveAdapter";
 import type { Conversation } from "../features/assistant/state/assistant.store";
 import { buildUserStudyContext } from "../features/assistant/buildUserStudyContext";
@@ -10,6 +10,7 @@ const StudyPlannerPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState(() => buildUserStudyContext());
+  const hasPlan = plan.trim().length > 0;
 
   const generatePlan = useCallback(async () => {
     setIsLoading(true);
@@ -68,116 +69,104 @@ const StudyPlannerPage: React.FC = () => {
       <PageHeader
         title="Study Planner"
         subtitle="Turn your classes, assignments, and schedule into a focused plan."
-        actions={
-          <button
-            type="button"
-            className="app-button-primary"
-            onClick={generatePlan}
-            disabled={isLoading}
-          >
-            {isLoading ? "Generating..." : plan ? "Regenerate plan" : "Generate plan"}
-          </button>
-        }
       />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1.4fr)",
-          gap: 18,
-          alignItems: "stretch",
-        }}
-      >
-        <section
-          className="app-card"
-          style={{
-            minHeight: 260,
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
-          <h2 style={{ fontSize: "var(--h3)", margin: 0 }}>Your current workload</h2>
-          <p
-            style={{
-              fontSize: "var(--body)",
-              color: "var(--ink-2)",
-              margin: 0,
-            }}
-          >
-            This summary is built from your notes, calendar, and grades.
-          </p>
-          <div
-            className="nice-scroll"
-            style={{
-              marginTop: 12,
-              padding: "8px 10px",
-              borderRadius: 12,
-              background: "rgba(15, 23, 42, 0.6)",
-              border: "1px solid rgba(148, 163, 184, 0.22)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--body)",
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.5,
-              maxHeight: 320,
-              overflow: "auto",
-            }}
-          >
-            {hasContext
-              ? context.summary || context.text
-              : "No context available yet. Add some notes, events, or grades to get a richer plan."}
+      <div className="study-planner-layout">
+        {/* Left side: compact workload overview */}
+        <section className="study-planner-panel study-planner-panel--overview app-card">
+          <header className="study-planner-panel__header">
+            <div className="study-planner-panel__title-group">
+              <h2 className="study-planner-panel__title">Your current workload</h2>
+              <p className="study-planner-panel__subtitle">
+                Quick snapshot of your classes, calendar, and grades.
+              </p>
+            </div>
+          </header>
+
+          <div className="study-planner-panel__body study-planner-panel__body--overview">
+            <p
+              style={{
+                fontSize: "var(--body)",
+                color: "var(--ink-2)",
+                margin: 0,
+              }}
+            >
+              This summary is built from your notes, calendar, and grades.
+            </p>
+            <div
+              className="nice-scroll"
+              style={{
+                marginTop: 12,
+                padding: "8px 10px",
+                borderRadius: 12,
+                background: "rgba(15, 23, 42, 0.6)",
+                border: "1px solid rgba(148, 163, 184, 0.22)",
+                fontFamily: "var(--font-mono)",
+                fontSize: "var(--body)",
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.5,
+                maxHeight: 320,
+                overflow: "auto",
+              }}
+            >
+              {hasContext
+                ? context.summary || context.text
+                : "No context available yet. Add some notes, events, or grades to get a richer plan."}
+            </div>
           </div>
         </section>
 
-        <section
-          className="app-card"
-          style={{
-            minHeight: 260,
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
-          <h2 style={{ fontSize: "var(--h3)", margin: 0 }}>AI study plan</h2>
-          <p
-            style={{
-              fontSize: "var(--body)",
-              color: "var(--ink-2)",
-              margin: 0,
-            }}
-          >
-            A step-by-step plan you can follow over the next few days.
-          </p>
-          <div
-            className="nice-scroll"
-            style={{
-              marginTop: 12,
-              padding: "8px 10px",
-              borderRadius: 12,
-              background: "rgba(15, 23, 42, 0.6)",
-              border: "1px solid rgba(148, 163, 184, 0.22)",
-              fontFamily: "var(--font-sans)",
-              fontSize: "var(--body)",
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.5,
-              maxHeight: 420,
-              overflow: "auto",
-            }}
-          >
+        {/* Right side: main AI study plan panel */}
+        <section className="study-planner-panel study-planner-panel--plan app-card app-card--flush">
+          <header className="study-planner-panel__header">
+            <div className="study-planner-panel__title-group">
+              <h2 className="study-planner-panel__title">AI study plan</h2>
+              <p className="study-planner-panel__subtitle">
+                A step-by-step plan you can follow over the next few days.
+              </p>
+            </div>
+            <div className="study-planner-panel__header-actions">
+              <button
+                type="button"
+                className="app-button-primary"
+                onClick={generatePlan}
+                disabled={isLoading}
+              >
+                {isLoading ? "Generating..." : hasPlan ? "Regenerate plan" : "Generate plan"}
+              </button>
+            </div>
+          </header>
+
+          <div className="study-planner-panel__body study-planner-panel__body--plan">
+            {/* Status / error messages */}
             {error && (
-              <div style={{ color: "var(--acc-red)" }}>{error}</div>
-            )}
-            {!error && isLoading && (
-              <div style={{ color: "var(--ink-2)" }}>
-                Generating your plan based on your current workload...
+              <div className="study-planner-alert">
+                <span>{error}</span>
               </div>
             )}
-            {!error && !isLoading && !plan && (
-              <div style={{ color: "var(--ink-2)" }}>
-                Click “Generate plan” to create a personalized study plan.
+
+            {!error && !hasPlan && !isLoading && (
+              <div className="study-planner-empty">
+                <h3>No plan yet</h3>
+                <p>
+                  Click "Generate plan" to create a study schedule based on your current workload.
+                </p>
               </div>
             )}
-            {!error && !isLoading && plan && <div>{plan}</div>}
+
+            {isLoading && (
+              <div className="study-planner-empty">
+                <h3>Generating your plan...</h3>
+                <p>This usually takes just a moment.</p>
+              </div>
+            )}
+
+            {/* Existing plan output */}
+            {hasPlan && !isLoading && (
+              <div className="study-planner-plan-scroll nice-scroll">
+                <div>{plan}</div>
+              </div>
+            )}
           </div>
         </section>
       </div>
