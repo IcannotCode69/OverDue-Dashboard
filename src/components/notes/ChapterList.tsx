@@ -223,11 +223,15 @@ export default function ChapterList({
                     fontWeight: selectedChapter?.id === chapter.id ? '500' : '400',
                     flex: 1,
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'normal'
                   }}
                 >
-                  {chapter.name}
+                  <span
+                    className="chapter-name-text"
+                    title={chapter.name}
+                  >
+                    {chapter.name}
+                  </span>
                 </div>
 
                 {/* Chapter menu */}

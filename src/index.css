@@ -315,7 +315,7 @@ body,
 
 .notes-panel__body--grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   gap: var(--space-3);
   height: 100%;
   min-height: 0;
@@ -347,6 +347,12 @@ body,
   height: 100%;
   gap: 4px;
   color: var(--ink-2);
+}
+
+.notes-panel__empty--centered {
+  align-items: center;
+  text-align: center;
+  padding: 0 var(--space-3);
 }
 
 .notes-panel__preview {
@@ -414,6 +420,16 @@ body,
 .notes-icon-button:hover {
   background: rgba(15, 23, 42, 0.9);
   color: var(--ink-0);
+}
+
+.chapter-name-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  font-size: 0.8rem;
 }
 
 .assistant-panel {

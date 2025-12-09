@@ -261,21 +261,9 @@ export default function NotesPage() {
                     onRenameChapter={(chapterId, name) => handleRenameChapter(selectedClass.id, chapterId, name)}
                   />
                 ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "var(--ink-2)",
-                      fontSize: "var(--body)",
-                      textAlign: "center",
-                      padding: "var(--space-6)",
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: "48px", marginBottom: "var(--space-3)" }}>dY"-</div>
-                      <div>Select a class to view its chapters</div>
-                    </div>
+                  <div className="notes-panel__empty notes-panel__empty--centered">
+                    <h3>Select a class</h3>
+                    <p>Select a class on the left to view its chapters.</p>
                   </div>
                 )}
               </div>
