@@ -121,34 +121,34 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
     setLinks((prev) => prev.filter((l) => l.id !== id));
   };
 
+  const manageButton = (
+    <button
+      type="button"
+      className="quick-links-manage-btn react-grid-no-drag"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsManaging(true);
+      }}
+      aria-label="Manage shortcuts"
+      title="Manage shortcuts"
+    >
+      ?
+    </button>
+  );
+
   return (
     <WidgetFrame
       title="Study sites"
       onRemove={onRemove}
       className="quick-links-widget"
+      rightActions={manageButton}
     >
       <div className="quick-links-body">
-        <div className="quick-links-header">
-          <button
-            type="button"
-            className="quick-links-manage-btn react-grid-no-drag"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsManaging(true);
-            }}
-            aria-label="Manage shortcuts"
-            title="Manage shortcuts"
-          >
-            ⚙
-          </button>
-        </div>
-
         <div className="quick-links-grid">
           {links.length === 0 && (
             <div className="dashboard-widget-empty">
-              No shortcuts yet. Click <strong>Manage</strong> to add your
-              homework sites.
+              No shortcuts yet. Use the ? icon to add your homework sites.
             </div>
           )}
 
@@ -214,7 +214,7 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
                     setIsManaging(false);
                   }}
                 >
-                  ✕
+                  ?
                 </button>
               </div>
 

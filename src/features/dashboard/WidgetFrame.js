@@ -1,6 +1,12 @@
 import React from "react";
 
-export default function WidgetFrame({ title, onRemove, children, className }) {
+export default function WidgetFrame({
+  title,
+  onRemove,
+  children,
+  className,
+  rightActions = null,
+}) {
   const classes = ["widget-frame", "app-card", "app-card--flush"];
   if (className) {
     classes.push(className);
@@ -18,7 +24,7 @@ export default function WidgetFrame({ title, onRemove, children, className }) {
           minHeight: 40,
         }}
       >
-        {/* drag handle */}
+        {/* drag handle + title */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span
             className="react-grid-dragHandle"
@@ -46,25 +52,48 @@ export default function WidgetFrame({ title, onRemove, children, className }) {
             {title}
           </h3>
         </div>
-        <button
-          onClick={onRemove}
-          aria-label={`Remove ${title} widget`}
-          style={{
-            fontSize: 12,
-            padding: "4px 8px",
-            borderRadius: 6,
-            backgroundColor: "rgba(255,255,255,0.1)",
-            color: "rgba(255,255,255,0.85)",
-            border: "none",
-            cursor: "pointer",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)")}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}
-        >
-          Remove
-        </button>
+
+        {/* header actions + close */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {rightActions}
+          {onRemove && (
+            <button
+              onClick={onRemove}
+              aria-label={`Remove ${title} widget`}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,0.2)",
+                backgroundColor: "rgba(15,23,42,0.9)",
+                color: "rgba(255,255,255,0.85)",
+                cursor: "pointer",
+                padding: 0,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255,255,255,0.12)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(15,23,42,0.9)";
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
-      <div className="nice-scroll" style={{ padding: 12, height: "calc(100% - 40px)", overflow: "auto" }}>{children}</div>
+      <div
+        className="nice-scroll"
+        style={{ padding: 12, height: "calc(100% - 40px)", overflow: "auto" }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
