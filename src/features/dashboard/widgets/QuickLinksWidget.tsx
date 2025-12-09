@@ -129,12 +129,6 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
     >
       <div className="quick-links-body">
         <div className="quick-links-header">
-          <div className="quick-links-header-text">
-            <div className="quick-links-title">Homework shortcuts</div>
-            <div className="quick-links-subtitle">
-              Jump straight to your homework portals and resources.
-            </div>
-          </div>
           <button
             type="button"
             className="quick-links-manage-btn react-grid-no-drag"
@@ -143,8 +137,10 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
               e.stopPropagation();
               setIsManaging(true);
             }}
+            aria-label="Manage shortcuts"
+            title="Manage shortcuts"
           >
-            Manage
+            ⚙
           </button>
         </div>
 
