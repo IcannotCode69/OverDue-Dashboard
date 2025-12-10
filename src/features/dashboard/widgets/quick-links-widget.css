@@ -67,7 +67,13 @@
   min-height: 0;
 }
 
+.study-site-card-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .quick-links-item {
+  width: 100%;
   border-radius: 16px;
   border: 1px solid rgba(148, 163, 184, 0.25);
   background: radial-gradient(
@@ -128,6 +134,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.study-site-delete {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(15, 23, 42, 0.9);
+  color: rgba(248, 250, 252, 0.9);
+  font-size: 11px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.study-site-card-wrapper:hover .study-site-delete {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.study-site-delete:hover {
+  border-color: rgba(129, 140, 248, 0.9);
 }
 
 /* Overlay */

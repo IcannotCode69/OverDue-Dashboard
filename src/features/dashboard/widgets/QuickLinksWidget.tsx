@@ -121,6 +121,10 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
     setLinks((prev) => prev.filter((l) => l.id !== id));
   };
 
+  const handleDeleteLink = (id: string) => {
+    setLinks((prev) => prev.filter((link) => link.id !== id));
+  };
+
   const manageButton = (
     <button
       type="button"
@@ -133,7 +137,7 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
       aria-label="Manage shortcuts"
       title="Manage shortcuts"
     >
-      ?
+      ⚙
     </button>
   );
 
@@ -148,7 +152,7 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
         <div className="quick-links-grid">
           {links.length === 0 && (
             <div className="dashboard-widget-empty">
-              No shortcuts yet. Use the ? icon to add your homework sites.
+              No shortcuts yet. Use the ⚙ icon to add your homework sites.
             </div>
           )}
 
@@ -157,33 +161,48 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
             const initial = getInitial(link.label, link.url);
 
             return (
-              <button
-                key={link.id}
-                type="button"
-                className="quick-links-item react-grid-no-drag"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openLink(link.url);
-                }}
-              >
-                <div className="quick-links-icon">
-                  <span className="quick-links-initial">{initial}</span>
-                  {favicon && (
-                    <img
-                      src={favicon}
-                      alt={link.label}
-                      onError={(event) => {
-                        const target = event.currentTarget as HTMLImageElement;
-                        target.style.display = "none";
-                      }}
-                    />
-                  )}
-                </div>
-                <div className="quick-links-label" title={link.label}>
-                  {link.label}
-                </div>
-              </button>
+              <div key={link.id} className="study-site-card-wrapper">
+                <button
+                  type="button"
+                  className="quick-links-item react-grid-no-drag study-site-card"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openLink(link.url);
+                  }}
+                >
+                  <div className="quick-links-icon">
+                    <span className="quick-links-initial">{initial}</span>
+                    {favicon && (
+                      <img
+                        src={favicon}
+                        alt={link.label}
+                        onError={(event) => {
+                          const target = event.currentTarget as HTMLImageElement;
+                          target.style.display = "none";
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div className="quick-links-label" title={link.label}>
+                    {link.label}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="study-site-delete react-grid-no-drag"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDeleteLink(link.id);
+                  }}
+                  aria-label="Remove shortcut"
+                  title="Remove shortcut"
+                >
+                  ×
+                </button>
+              </div>
             );
           })}
         </div>
@@ -214,7 +233,7 @@ export default function QuickLinksWidget({ onRemove }: QuickLinksWidgetProps) {
                     setIsManaging(false);
                   }}
                 >
-                  ?
+                  ✕
                 </button>
               </div>
 
