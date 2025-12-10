@@ -1,8 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import CalendarCardWidget from './CalendarCardWidget';
 import SmartSuggestionsWidget from './SmartSuggestionsWidget';
 import StreakWidget from './StreakWidget';
 import QuickLinksWidget from './QuickLinksWidget';
+import TodoWidget from './TodoWidget';
 
 // Widget registry with curated default widgets
 export const widgetDefaults = {
@@ -33,10 +34,17 @@ export const widgetDefaults = {
     sm: { w: 4, h: 5 },
     xs: { w: 4, h: 6 },
     xxs: { w: 2, h: 7 }
+  },
+  todo: {
+    lg: { w: 3, h: 6 },
+    md: { w: 3, h: 6 },
+    sm: { w: 4, h: 6 },
+    xs: { w: 4, h: 7 },
+    xxs: { w: 2, h: 7 }
   }
 };
 
-export const WIDGET_KINDS = ['calendarCard', 'smartSuggestions', 'streak', 'quickLinks'];
+export const WIDGET_KINDS = ['calendarCard', 'smartSuggestions', 'streak', 'quickLinks', 'todo'];
 
 export function renderWidget(kind, id, onRemove) {
   switch (kind) {
@@ -48,6 +56,8 @@ export function renderWidget(kind, id, onRemove) {
       return <StreakWidget key={id} onRemove={onRemove} />;
     case 'quickLinks':
       return <QuickLinksWidget key={id} onRemove={onRemove} />;
+    case 'todo':
+      return <TodoWidget key={id} onRemove={onRemove} />;
     default:
       return null;
   }
@@ -78,6 +88,12 @@ export const widgetSizeConstraints = {
     minH: 4,
     maxW: 6,
     maxH: 10
+  },
+  todo: {
+    minW: 2,
+    minH: 4,
+    maxW: 6,
+    maxH: 12
   }
 };
 
@@ -91,16 +107,21 @@ export const widgetMetadata = {
   smartSuggestions: {
     name: 'Smart Suggestions',
     description: 'AI-powered study tips based on your data',
-    icon: '✨'
+    icon: '?'
   },
   streak: {
     name: 'Streak',
     description: 'Track how many days in a row you showed up.',
-    icon: '🔥'
+    icon: '??'
   },
   quickLinks: {
     name: 'Study sites',
     description: 'One-click shortcuts to your homework portals.',
-    icon: '🔗'
+    icon: '??'
+  },
+  todo: {
+    name: 'Tasks',
+    description: 'Simple daily to-do list for your study day.',
+    icon: '??'
   }
 };

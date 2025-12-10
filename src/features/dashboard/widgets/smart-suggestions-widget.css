@@ -1,0 +1,42 @@
+.smart-suggestion-card {
+  position: relative;
+}
+
+.smart-suggestion-send {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+
+.smart-suggestion-card:hover .smart-suggestion-send {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.smart-suggestion-send-button {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 23, 42, 0.9);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.smart-suggestion-send-button:hover {
+  border-color: rgba(129, 140, 248, 0.9);
+  transform: translateY(-1px);
+}
+
+.smart-suggestion-send-button:active {
+  transform: translateY(0);
+}

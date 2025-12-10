@@ -3,15 +3,17 @@ import getAdapter from "../../assistant/adapters/resolveAdapter";
 import { buildUserStudyContext } from "../../assistant/buildUserStudyContext";
 import WidgetFrame from "../WidgetFrame";
 import "./smart-suggestions.css";
+import "./smart-suggestions-widget.css";
+import { emitAddTodoTask } from "./todoEvents";
 
-type Suggestion = { id: string; text: string };
+type SuggestionItem = { id: string; text: string };
 
 interface SmartSuggestionsWidgetProps {
   onRemove?: () => void;
 }
 
 export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWidgetProps) {
-  const [suggestions, setSuggestions] = React.useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = React.useState<SuggestionItem[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const adapter = React.useMemo(() => getAdapter(), []);
@@ -53,9 +55,12 @@ export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWid
       });
       const lines = full
         .split("\n")
-        .map((line) => line.replace(/^[-•\d\.\s]+/, "").trim())
+        .map((line) => line.replace(/^[-ź?>\d\.\s]+/, "").trim())
         .filter(Boolean);
-      const parsed = lines.slice(0, 5).map((text, idx) => ({ id: `sugg-${idx}`, text }));
+      const parsed = lines.slice(0, 5).map((text, idx) => ({
+        id: `sugg-${idx}`,
+        text,
+      }));
       setSuggestions(parsed);
     } catch (e: any) {
       console.error("SmartSuggestionsWidget error", e);
@@ -69,21 +74,35 @@ export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWid
     fetchSuggestions();
   }, [fetchSuggestions]);
 
+  // Compact refresh icon for the widget header
+  const refreshButton = (
+    <button
+      type="button"
+      className="react-grid-no-drag"
+      onClick={fetchSuggestions}
+      aria-label="Refresh suggestions"
+      title="Refresh suggestions"
+      style={{
+        width: 24,
+        height: 24,
+        borderRadius: 999,
+        border: "1px solid rgba(255,255,255,0.25)",
+        background: "rgba(15,23,42,0.9)",
+        color: "rgba(255,255,255,0.85)",
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 13,
+        padding: 0,
+      }}
+    >
+      ⟳
+    </button>
+  );
+
   return (
-    <WidgetFrame title="Smart Suggestions" onRemove={onRemove} className="app-card--accent">
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "center" }}>
-        <div style={{ fontSize: 12, color: "var(--ink-2)" }}>
-          AI study ideas based on your calendar, notes, and grades.
-        </div>
-        <button
-          onClick={fetchSuggestions}
-          disabled={isLoading}
-          className="dashboard-widget-icon-button app-button-primary"
-          style={{ fontSize: 12 }}
-        >
-          {isLoading ? "Refreshing..." : "Refresh"}
-        </button>
-      </div>
+    <WidgetFrame title="Smart Suggestions" onRemove={onRemove} className="app-card--accent" rightActions={refreshButton}>
       <div className="nice-scroll smart-suggestions-body">
         {isLoading && <div className="dashboard-widget-empty">Thinking...</div>}
         {error && <div className="dashboard-widget-error">{error}</div>}
@@ -92,11 +111,41 @@ export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWid
         )}
         {!isLoading &&
           !error &&
-          suggestions.map((s) => (
-            <div key={s.id} className="smart-suggestion-pill">
-              {s.text}
-            </div>
-          ))}
+          suggestions.map((suggestion, index) => {
+            const text = suggestion.text;
+            const key = suggestion.id ?? `sugg-${index}`;
+
+            return (
+              <div
+                key={key}
+                className="smart-suggestion-card smart-suggestion-pill"
+                style={{
+                  position: "relative",
+                }}
+              >
+                <div className="smart-suggestion-send">
+                  <button
+                    type="button"
+                    className="smart-suggestion-send-button react-grid-no-drag"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      emitAddTodoTask({
+                        text,
+                        source: "smartSuggestions",
+                      });
+                    }}
+                    title="Send to Tasks"
+                    aria-label="Send to Tasks"
+                  >
+                    ↗
+                  </button>
+                </div>
+
+                {text}
+              </div>
+            );
+          })}
       </div>
     </WidgetFrame>
   );
