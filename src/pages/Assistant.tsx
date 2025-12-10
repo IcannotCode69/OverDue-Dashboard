@@ -2,7 +2,6 @@
 import getAdapter from "../features/assistant/adapters/resolveAdapter";
 import type { Conversation } from "../features/assistant/state/assistant.store";
 import { buildUserStudyContext } from "../features/assistant/buildUserStudyContext";
-import PageHeader from "../components/layout/PageHeader";
 
 type Role = "user" | "assistant";
 
@@ -289,11 +288,9 @@ const AssistantPage: React.FC = () => {
 
   return (
     <div className="assistant-page">
-      <PageHeader
-        title="AI Assistant"
-        subtitle="Ask questions about your schedule, grades, and study plans."
-        actions={<span className="assistant-model-chip">Model: Groq Llama 3.1 8B</span>}
-      />
+      <div className="page-actions-row page-actions-row--end">
+        <span className="assistant-model-chip">Model: Groq Llama 3.1 8B</span>
+      </div>
 
       <div className="assistant-layout">
         {/* Sidebar: conversations list */}

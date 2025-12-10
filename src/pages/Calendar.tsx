@@ -17,7 +17,6 @@ import { dedupeByUidThenTitleStart } from "../features/calendar/ics.dedupe";
 import { guessCategoryId } from "../features/calendar/ics.map";
 import { generateId } from "../utils/randomId";
 import { getUpcomingEvents } from "../features/calendar/selectors";
-import PageHeader from "../components/layout/PageHeader";
 // add this import so all cal-* and mini-cal-* styles load
 import "../features/calendar/calendar.styles.css";
 
@@ -154,15 +153,11 @@ export default function Calendar() {
 
   return (
     <div className="calendar-page">
-      <PageHeader
-        title="Calendar"
-        subtitle="See your week at a glance and manage upcoming events."
-        actions={
-          <button className="app-button-primary" onClick={() => setImportOpen(true)}>
-            <Upload size={16} style={{ marginRight: 6 }} /> Import .ics
-          </button>
-        }
-      />
+      <div className="page-actions-row page-actions-row--end">
+        <button className="app-button-primary" onClick={() => setImportOpen(true)}>
+          <Upload size={16} style={{ marginRight: 6 }} /> Import .ics
+        </button>
+      </div>
       <div className="cal-layout">
       {/* LEFT SIDEBAR */}
       <aside className="cal-sidebar">

@@ -2,7 +2,6 @@
 import getAdapter from "../features/assistant/adapters/resolveAdapter";
 import type { Conversation } from "../features/assistant/state/assistant.store";
 import { buildUserStudyContext } from "../features/assistant/buildUserStudyContext";
-import PageHeader from "../components/layout/PageHeader";
 
 const StudyPlannerPage: React.FC = () => {
   const adapter = getAdapter();
@@ -66,11 +65,6 @@ const StudyPlannerPage: React.FC = () => {
 
   return (
     <div className="study-planner-page">
-      <PageHeader
-        title="Study Planner"
-        subtitle="Turn your classes, assignments, and schedule into a focused plan."
-      />
-
       <div className="study-planner-layout">
         {/* Left side: compact workload overview */}
         <section className="study-planner-panel study-planner-panel--overview app-card">

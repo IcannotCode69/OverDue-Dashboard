@@ -5,7 +5,20 @@ import ClassCard from "../components/notes/ClassCard";
 import ChapterList from "../components/notes/ChapterList";
 import NoteEditor from "../components/notes/NoteEditor";
 import AIAssistant from "../components/notes/AIAssistant";
-import PageHeader from "../components/layout/PageHeader";
+
+type NotesEmptyStateProps = {
+  title: string;
+  body?: string;
+};
+
+const NotesEmptyState: React.FC<NotesEmptyStateProps> = ({ title, body }) => {
+  return (
+    <div className="notes-panel-empty">
+      <div className="notes-empty-title">{title}</div>
+      {body && <div className="notes-empty-body">{body}</div>}
+    </div>
+  );
+};
 
 export default function NotesPage() {
   const [classes, setClasses] = useState<Class[]>([]);
@@ -153,19 +166,15 @@ export default function NotesPage() {
 
   return (
     <div className="notes-page">
-      <PageHeader
-        title="Notes"
-        subtitle="Organize your classes and chapters, then chat with them using the built-in AI."
-        actions={
-          <button className="app-button-primary" onClick={() => setIsAddClassOpen(true)}>
-            + Add Class
-          </button>
-        }
-      />
+      <div className="page-actions-row page-actions-row--end">
+        <button className="app-button-primary" onClick={() => setIsAddClassOpen(true)}>
+          + Add Class
+        </button>
+      </div>
 
       {/* Main layout */}
       <div className={layoutClassName}>
-        {/* LEFT PANEL – Sources (Classes + Chapters) */}
+        {/* LEFT PANEL - Sources (Classes + Chapters) */}
         <section className="notes-panel notes-panel--left app-card">
           <header className="notes-panel__header">
             <div className="notes-panel__title-group">
@@ -220,17 +229,10 @@ export default function NotesPage() {
                   style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}
                 >
                   {classes.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "var(--space-6)",
-                        color: "var(--ink-2)",
-                        fontSize: "var(--body)",
-                      }}
-                    >
-                      <div style={{ fontSize: "48px", marginBottom: "var(--space-3)" }}>dY"s</div>
-                      <div>No classes yet. Click "Add Class" to get started.</div>
-                    </div>
+                    <NotesEmptyState
+                      title="No classes yet"
+                      body="Click “Add Class” to start organizing your notes."
+                    />
                   ) : (
                     classes.map((classItem) => (
                       <ClassCard
@@ -261,10 +263,10 @@ export default function NotesPage() {
                     onRenameChapter={(chapterId, name) => handleRenameChapter(selectedClass.id, chapterId, name)}
                   />
                 ) : (
-                  <div className="notes-panel__empty notes-panel__empty--centered">
-                    <h3>Select a class</h3>
-                    <p>Select a class on the left to view its chapters.</p>
-                  </div>
+                  <NotesEmptyState
+                    title="Select a class"
+                    body="Choose a class on the left to view its chapters."
+                  />
                 )}
               </div>
             </div>
@@ -297,10 +299,10 @@ export default function NotesPage() {
                 }
               />
             ) : (
-              <div className="notes-panel__empty">
-                <h3>No chapter selected</h3>
-                <p>Select or create a chapter to begin taking notes.</p>
-              </div>
+              <NotesEmptyState
+                title="No chapter selected"
+                body="Select or create a chapter to begin taking notes."
+              />
             )}
           </div>
         </section>
@@ -368,10 +370,10 @@ export default function NotesPage() {
                   </div>
                 </>
               ) : (
-                <div className="notes-panel__empty">
-                  <h3>No chapter selected</h3>
-                  <p>Select a chapter to start chatting with Notes AI.</p>
-                </div>
+                <NotesEmptyState
+                  title="No chapter selected"
+                  body="Select a chapter to start chatting with Notes AI."
+                />
               )}
             </div>
           )}
@@ -518,4 +520,3 @@ export default function NotesPage() {
     </div>
   );
 }
-

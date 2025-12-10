@@ -12,7 +12,6 @@ import { useGradesStore } from '../features/grades/useGradesStore';
 
 import '../features/calendar/calendar.styles.css';
 import '../features/grades/grades.styles.css';
-import PageHeader from '../components/layout/PageHeader';
 
 type CourseFilter = 'all' | string;
 
@@ -196,22 +195,18 @@ export default function Grades() {
 
   return (
     <div className="grades-page">
-      <PageHeader
-        title="Grades"
-        subtitle="Organize assignments by class and import directly from Brightspace."
-        actions={
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {activeCourse && (
-              <button className="cal-btn cal-btn-ghost" onClick={openImportModal}>
-                <Upload size={16} style={{ marginRight: 6 }} /> Paste from Brightspace
-              </button>
-            )}
-            <button className="cal-btn cal-btn-primary" onClick={openAdd}>
-              <Plus size={16} style={{ marginRight: 8 }} /> Add Item
+      <div className="page-actions-row page-actions-row--end">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {activeCourse && (
+            <button className="cal-btn cal-btn-ghost" onClick={openImportModal}>
+              <Upload size={16} style={{ marginRight: 6 }} /> Paste from Brightspace
             </button>
-          </div>
-        }
-      />
+          )}
+          <button className="cal-btn cal-btn-primary" onClick={openAdd}>
+            <Plus size={16} style={{ marginRight: 8 }} /> Add Item
+          </button>
+        </div>
+      </div>
       <div className="grades-wrap">
         <div className="grades-left">
           <div className="gr-card app-card">

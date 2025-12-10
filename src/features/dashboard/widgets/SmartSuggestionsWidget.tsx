@@ -102,7 +102,12 @@ export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWid
   );
 
   return (
-    <WidgetFrame title="Smart Suggestions" onRemove={onRemove} className="app-card--accent" rightActions={refreshButton}>
+    <WidgetFrame
+      title="Smart Suggestions"
+      onRemove={onRemove}
+      className="smart-suggestions-widget"
+      rightActions={refreshButton}
+    >
       <div className="nice-scroll smart-suggestions-body">
         {isLoading && <div className="dashboard-widget-empty">Thinking...</div>}
         {error && <div className="dashboard-widget-error">{error}</div>}
