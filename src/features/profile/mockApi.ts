@@ -10,23 +10,84 @@ const KEYS = {
   connections: 'overdue.connections.v1',
 };
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 const DEFAULT_PROFILE: Profile = {
-  firstName: 'Aki',
-  lastName: 'Student',
-  displayName: 'Aki',
-  handle: '@aki',
-  email: 'aki@example.edu',
+  firstName: '',
+  lastName: '',
+  displayName: '',
+  handle: '',
+  email: '',
   phone: '',
-  bio: 'CS student exploring distributed systems and UI craft.',
+  bio: '',
   timezone: 'America/New_York',
   locale: 'en-US',
-  school: 'Overdue University',
-  program: 'Computer Science',
-  graduationYear: new Date().getFullYear() + 2,
-  socials: { github: 'https://github.com/example', linkedin: '', website: '' },
+  school: '',
+  program: '',
+  graduationYear: CURRENT_YEAR,
+  socials: {
+    github: '',
+    linkedin: '',
+    website: '',
+  },
   avatarUrl: '',
   coverUrl: '',
 };
+
+const ONBOARDING_STORAGE_KEY = 'od:userProfile:v1';
+
+function readOnboardingProfileFromLocalStorage(): Partial<Profile> | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+
+    const state = parsed?.state ?? parsed;
+
+    if (!state) return null;
+
+    const source =
+      state.profile ??
+      state.userProfile ??
+      state;
+
+    if (!source) return null;
+
+    const onboardingProfile: Partial<Profile> = {
+      firstName: source.firstName ?? '',
+      lastName: source.lastName ?? '',
+      displayName: source.displayName ?? '',
+      handle: source.handle ?? '',
+      email: source.email ?? '',
+      bio: source.bio ?? '',
+      timezone: source.timezone ?? 'America/New_York',
+      locale: source.locale ?? 'en-US',
+      school: source.school ?? '',
+      program: source.program ?? '',
+      graduationYear: source.graduationYear ?? new Date().getFullYear(),
+      socials: {
+        github: source.socials?.github ?? '',
+        linkedin: source.socials?.linkedin ?? '',
+        website: source.socials?.website ?? '',
+      },
+      avatarUrl: source.avatarUrl ?? '',
+      coverUrl: source.coverUrl ?? '',
+    };
+
+    const hasAnyValue = Object.values(onboardingProfile).some((v) => {
+      if (v == null) return false;
+      if (typeof v === 'string') return v.trim().length > 0;
+      return true;
+    });
+
+    return hasAnyValue ? onboardingProfile : null;
+  } catch {
+    return null;
+  }
+}
 
 const DEFAULT_PREFS: Preferences = {
   emailReminders: true,
@@ -64,9 +125,48 @@ function write<T>(key: string, value: T) {
   }
 }
 
+function isDemoProfile(profile: Profile): boolean {
+  if (!profile) return true;
+  if (profile.email === 'aki@example.edu') return true;
+  if (profile.displayName === 'Aki' && profile.firstName === 'Aki') return true;
+
+  const keyFields = [
+    profile.firstName,
+    profile.lastName,
+    profile.displayName,
+    profile.email,
+    profile.school,
+    profile.program,
+  ];
+
+  const allEmpty = keyFields.every((v) => !v || String(v).trim().length === 0);
+  return allEmpty;
+}
+
 export async function loadProfile(): Promise<Profile> {
   await delay();
-  return read(KEYS.profile, DEFAULT_PROFILE);
+
+  const stored = read(KEYS.profile, DEFAULT_PROFILE) as Profile;
+
+  if (!isDemoProfile(stored)) {
+    return stored;
+  }
+
+  const onboarding = readOnboardingProfileFromLocalStorage();
+  if (onboarding) {
+    const merged: Profile = {
+      ...DEFAULT_PROFILE,
+      ...stored,
+      ...onboarding,
+    };
+
+    write(KEYS.profile, merged);
+    return merged;
+  }
+
+  const fresh: Profile = { ...DEFAULT_PROFILE };
+  write(KEYS.profile, fresh);
+  return fresh;
 }
 export async function saveProfile(profile: Profile): Promise<void> {
   await delay(600);

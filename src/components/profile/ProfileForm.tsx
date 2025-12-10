@@ -15,12 +15,44 @@ type Props = {
 export default function ProfileForm({ isEditing }: Props) {
   const { register, control, formState: { errors }, watch } = useFormContext<Profile>();
   const bio = watch('bio') || '';
+  const displayName = (watch('displayName') || '').trim();
+  const handle = (watch('handle') || '').trim();
+  const email = (watch('email') || '').trim();
+
+  const initials = React.useMemo(() => {
+    const source = displayName || email;
+    if (!source) return 'U';
+    const parts = source.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return parts[0].charAt(0).toUpperCase();
+    }
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  }, [displayName, email]);
 
   return (
     <div className="pf-card" aria-label="Profile form">
       <fieldset disabled={!isEditing} className="pf-fieldset">
         <div className="pf-card-body">
           <div className="pf-card-title">Profile</div>
+
+          <div className="pf-profile-summary">
+            <div className="pf-avatar-pill">
+              <div className="pf-avatar-initials">{initials}</div>
+            </div>
+            <div className="pf-profile-summary-main">
+              <div className="pf-profile-name">
+                {displayName || 'Your name'}
+              </div>
+              <div className="pf-profile-handle">
+                {handle || 'Add a handle to personalize your dashboard'}
+              </div>
+              <div className="pf-profile-helper">
+                This profile helps personalize your dashboard, study planner, and AI suggestions.
+              </div>
+            </div>
+          </div>
+
+          <div className="pf-divider" />
 
           <div className="pf-row">
             <div>
