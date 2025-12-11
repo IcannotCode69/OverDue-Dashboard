@@ -34,12 +34,14 @@ export default function SmartSuggestionsWidget({ onRemove }: SmartSuggestionsWid
     };
 
     const userText =
-      "Based on the context above, generate 3 to 5 short, actionable study suggestions for today. Each suggestion should fit on one line.";
+      "Based on the context above, generate 3 to 5 short, action-oriented study suggestions for today. " +
+      "Focus on tasks and topics that are actually mentioned in the context (classes, assignments, calendar events, or active to-do items). " +
+      "Each suggestion should fit on one line.";
 
     const systemPrompt =
-      "You are a personal study assistant. You will be given a snapshot of the user's classes, notes, upcoming calendar events, and grades.\n" +
+      "You are a personal study assistant. You will be given a structured snapshot of the user's classes, notes, upcoming calendar events, grades, and active to-do items.\n" +
       "Use this context to produce a compact list of highly actionable, concrete suggestions for what they should study or do next.\n" +
-      "Each suggestion should be a single sentence. Avoid long explanations.\n\n" +
+      "Each suggestion should be a single sentence. Avoid long explanations or repeating the context.\n\n" +
       "Here is the user's context:\n" +
       ctx.text;
 

@@ -18,6 +18,136 @@ const DATE_FMT = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
+type AuthUserSnapshot = {
+  email?: string;
+  sub?: string;
+  name?: string;
+};
+
+const AUTH_STORAGE_KEY = "od:auth:currentUser:v1";
+const PROFILE_STORAGE_BASE_KEY = "overdue.profile.v1";
+const TODO_STORAGE_BASE_KEY = "od:todo:v1";
+
+function readAuthUser(): AuthUserSnapshot | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AuthUserSnapshot;
+    if (!parsed || (!parsed.email && !parsed.sub)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function withUserSuffix(baseKey: string, userId: string | null): string {
+  if (!userId) return baseKey;
+  return `${baseKey}:${userId}`;
+}
+
+function getCurrentUserId(): string | null {
+  const auth = readAuthUser();
+  if (!auth) return null;
+  return auth.email || auth.sub || null;
+}
+
+/**
+ * Read active TODO tasks from the dashboard Todo widget.
+ * Supports a future per-user key shape (baseKey:userId) but
+ * will also fall back to the plain "od:todo:v1" key used today.
+ */
+function gatherTodos(): string[] {
+  if (typeof window === "undefined") return ["(none yet)"];
+
+  const userId = getCurrentUserId();
+  const baseKey = TODO_STORAGE_BASE_KEY;
+  const perUserKey = withUserSuffix(baseKey, userId);
+
+  const raw =
+    window.localStorage.getItem(perUserKey) ||
+    window.localStorage.getItem(baseKey);
+
+  if (!raw) return ["(none yet)"];
+
+  try {
+    const tasks = JSON.parse(raw) as {
+      id: string;
+      text: string;
+      completed: boolean;
+      createdAt: string;
+      completedAt?: string | null;
+    }[];
+
+    const active = tasks.filter((t) => !t.completed);
+
+    if (!active.length) {
+      if (!tasks.length) return ["(none yet)"];
+      return ["All tasks completed recently."];
+    }
+
+    return active.slice(0, 10).map((task) => `- ${task.text}`);
+  } catch {
+    return ["(none yet)"];
+  }
+}
+
+/**
+ * Read basic profile information from the profile storage
+ * that onboarding writes to (overdue.profile.v1[:userId]).
+ */
+function gatherProfileSummary(): string[] {
+  if (typeof window === "undefined") return ["(none yet)"];
+
+  const userId = getCurrentUserId();
+  const baseKey = PROFILE_STORAGE_BASE_KEY;
+  const key = withUserSuffix(baseKey, userId);
+
+  const raw =
+    window.localStorage.getItem(key) ||
+    window.localStorage.getItem(baseKey);
+
+  if (!raw) return ["(none yet)"];
+
+  try {
+    const profile = JSON.parse(raw) as {
+      fullName?: string;
+      school?: string;
+      program?: string;
+      graduationYear?: string;
+      timezone?: string;
+      locale?: string;
+    };
+
+    const lines: string[] = [];
+
+    if (profile.fullName) {
+      lines.push(`Name: ${profile.fullName.trim()}`);
+    }
+
+    if (profile.school || profile.program) {
+      const parts = [profile.school, profile.program].filter(Boolean);
+      if (parts.length) {
+        lines.push(`Program: ${parts.join(" — ")}`);
+      }
+    }
+
+    if (profile.graduationYear) {
+      lines.push(`Graduation year: ${profile.graduationYear}`);
+    }
+
+    if (profile.timezone) {
+      lines.push(`Timezone: ${profile.timezone}`);
+    }
+
+    if (!lines.length) return ["(none yet)"];
+
+    return lines.map((line) => `- ${line}`);
+  } catch {
+    return ["(none yet)"];
+  }
+}
+
 function formatDate(date: Date | string | number | undefined): string {
   if (!date) return "Unknown date";
   const d = date instanceof Date ? date : new Date(date);
@@ -148,24 +278,41 @@ export function buildUserStudyContext(): UserStudyContext {
     const notesSection = gatherNotes();
     const eventsSection = gatherEvents();
     const gradesSection = gatherGrades();
+    const todosSection = gatherTodos();
+    const profileSection = gatherProfileSummary();
 
-    const summary = `Classes: ${
-      notesSection[0] === "(none yet)" ? 0 : notesSection.length
-    }, Upcoming events (14d): ${
-      eventsSection[0] === "(none yet)" || eventsSection[0] === "(none in next 14 days)"
+    const classesCount =
+      notesSection[0] === "(none yet)" ? 0 : notesSection.length;
+    const eventsCount =
+      eventsSection[0] === "(none yet)" ||
+      eventsSection[0] === "(none in next 14 days)"
         ? 0
-        : eventsSection.length
-    }, Grades tracked: ${gradesSection[0] === "(none yet)" ? 0 : gradesSection.length}`;
+        : eventsSection.length;
+    const gradesCount =
+      gradesSection[0] === "(none yet)" ? 0 : gradesSection.length;
+    const todoCount =
+      todosSection[0] === "(none yet)" ||
+      todosSection[0] === "All tasks completed recently."
+        ? 0
+        : todosSection.length;
+
+    const summary = `Classes: ${classesCount}, Upcoming events (14d): ${eventsCount}, Grades tracked: ${gradesCount}, Active tasks: ${todoCount}`;
 
     const text = [
       "=== Classes & Notes ===",
       ...notesSection,
+      "",
+      "=== Tasks / To-do ===",
+      ...todosSection,
       "",
       "=== Upcoming Events (next 14 days) ===",
       ...eventsSection,
       "",
       "=== Grades / Assignments ===",
       ...gradesSection,
+      "",
+      "=== Profile ===",
+      ...profileSection,
     ].join("\n");
 
     return { text, summary };

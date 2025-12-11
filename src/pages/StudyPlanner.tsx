@@ -30,11 +30,13 @@ const StudyPlannerPage: React.FC = () => {
 
       const systemPrompt =
         "You are a focused, practical study planning assistant for a busy university student. " +
-        "You will be given a summary of their current classes, upcoming assignments, calendar events, and grades. " +
+        "You will be given a summary of their current classes, upcoming assignments, calendar events, grades, active to-do items, and some basic profile information (like school, program, and timezone). " +
         "Using ONLY that information, create a concrete, realistic plan for how they should study over the next few days. " +
         "Organize the plan with clear headings such as 'Today', 'Tomorrow', and 'This Week'. " +
-        "Under each heading, use bullet points with specific tasks that mention the course and topic. " +
-        "Prefer short, actionable items over long paragraphs. Do not invent courses or assignments that are not mentioned in the context. " +
+        "Under each heading, use bullet points with specific tasks that mention the course, topic, and (when relevant) assignment or exam. " +
+        "Prefer short, actionable items over long paragraphs. " +
+        "Prioritize items that are due soon or that are high impact. " +
+        "Do not invent courses or assignments that are not mentioned in the context. " +
         "If there is very little data, give a simple but still specific generic study plan.";
 
       const result = await adapter.send({

@@ -238,8 +238,9 @@ const AssistantPage: React.FC = () => {
     const context = buildUserStudyContext();
     const systemPrompt =
       "You are a personal study assistant for a university student. " +
-      "You are given a snapshot of their classes, notes, upcoming calendar events, and grades. " +
-      "Use this context to provide concrete, personalized advice. Always reference relevant classes, exams, and deadlines.\n\n" +
+      "You are given a snapshot of their classes, notes, upcoming calendar events, grades, active to-do items, and basic profile information such as school, program, and timezone. " +
+      "Use this context to provide concrete, personalized advice and answer questions about what to study, how to plan their time, and how to approach their workload. " +
+      "Prefer short, actionable suggestions over long explanations, and when possible reference specific classes, exams, deadlines, and tasks that appear in the context.\n\n" +
       "User context:\n" +
       context.text;
 
