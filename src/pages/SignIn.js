@@ -34,60 +34,66 @@ export default function SignInPage() {
   };
 
   return (
-    <div style={{ padding: "48px", maxWidth: 480, margin: "0 auto" }}>
-      <h1 style={{ fontSize: "var(--h1)", marginBottom: 12 }}>Welcome back</h1>
-      <p style={{ opacity: 0.75, marginBottom: 24 }}>
-        Sign in to continue to your dashboard.
-      </p>
+    <div className="auth-shell auth-shell--form">
+      <div className="auth-card">
+        <h1>Welcome back</h1>
+        <p className="auth-subtitle">
+          Sign in to continue to your dashboard.
+        </p>
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <div style={{ display: "grid", gap: 6 }}>
-          <label htmlFor="email" style={{ fontWeight: 600 }}>Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={inputStyle}
-            placeholder="you@example.com"
-          />
-        </div>
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
+          <div style={{ display: "grid", gap: 6 }}>
+            <label htmlFor="email" style={{ fontWeight: 600 }}>Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={inputStyle}
+              placeholder="you@example.com"
+            />
+          </div>
 
-        <div style={{ display: "grid", gap: 6 }}>
-          <label htmlFor="password" style={{ fontWeight: 600 }}>Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={inputStyle}
-            placeholder="Your password"
-          />
-          {error && (
-            <div style={{ color: "#ff6b6b", fontSize: 12, marginTop: 4 }}>
-              {error}
-            </div>
-          )}
-        </div>
+          <div style={{ display: "grid", gap: 6 }}>
+            <label htmlFor="password" style={{ fontWeight: 600 }}>Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={inputStyle}
+              placeholder="Your password"
+            />
+            {error && (
+              <div style={{ color: "#ff6b6b", fontSize: 12, marginTop: 4 }}>
+                {error}
+              </div>
+            )}
+          </div>
 
-        <button
-          type="submit"
-          className="cal-btn cal-btn-primary"
-          disabled={isLoading}
-          style={{ width: "100%", justifyContent: "center" }}
+          <button
+            type="submit"
+            className="cal-btn cal-btn-primary"
+            disabled={isLoading}
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            {isLoading ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          Need an account?{" "}
+          <button
+            type="button"
+            className="link-button"
+          onClick={() => history.push("/signup")}
         >
-          {isLoading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
-
-      <div style={{ marginTop: 16, fontSize: 13 }}>
-        Need an account?{" "}
-        <a href="/signup" onClick={(e) => { e.preventDefault(); history.push("/signup"); }}>
           Create one
-        </a>
+        </button>
       </div>
+    </div>
     </div>
   );
 }

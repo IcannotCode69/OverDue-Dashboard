@@ -41,76 +41,82 @@ export default function SignUpPage() {
   };
 
   return (
-    <div style={{ padding: "48px", maxWidth: 520, margin: "0 auto" }}>
-      <h1 style={{ fontSize: "var(--h1)", marginBottom: 12 }}>Create your account</h1>
-      <p style={{ opacity: 0.75, marginBottom: 24 }}>
-        We’ll save your profile locally so you can start using the dashboard.
-      </p>
+    <div className="auth-shell auth-shell--form">
+      <div className="auth-card">
+        <h1>Create your account</h1>
+        <p className="auth-subtitle">
+          We’ll save your profile so you can start using the dashboard.
+        </p>
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <div style={{ display: "grid", gap: 6 }}>
-          <label htmlFor="name" style={{ fontWeight: 600 }}>Full name</label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={inputStyle}
-            placeholder="Your name"
-          />
-        </div>
-
-        <div style={{ display: "grid", gap: 6 }}>
-          <label htmlFor="email" style={{ fontWeight: 600 }}>Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={inputStyle}
-            placeholder="you@example.com"
-          />
-        </div>
-
-        <div style={{ display: "grid", gap: 6 }}>
-          <label htmlFor="password" style={{ fontWeight: 600 }}>Password</label>
-          <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={inputStyle}
-          placeholder="Choose a password"
-        />
-        {error && (
-          <div style={{ color: "#ff6b6b", fontSize: 12, marginTop: 4 }}>
-            {error}
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
+          <div style={{ display: "grid", gap: 6 }}>
+            <label htmlFor="name" style={{ fontWeight: 600 }}>Full name</label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={inputStyle}
+              placeholder="Your name"
+            />
           </div>
-        )}
-        {success && (
-          <div style={{ color: "#4ade80", fontSize: 12, marginTop: 4 }}>
-            {success}
+
+          <div style={{ display: "grid", gap: 6 }}>
+            <label htmlFor="email" style={{ fontWeight: 600 }}>Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={inputStyle}
+              placeholder="you@example.com"
+            />
           </div>
-        )}
-      </div>
 
-      <button
-        type="submit"
-        className="cal-btn cal-btn-primary"
-        disabled={isLoading}
-        style={{ width: "100%", justifyContent: "center" }}
-      >
-        {isLoading ? "Creating account..." : "Create account"}
-      </button>
-      </form>
+          <div style={{ display: "grid", gap: 6 }}>
+            <label htmlFor="password" style={{ fontWeight: 600 }}>Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={inputStyle}
+              placeholder="Choose a password"
+            />
+            {error && (
+              <div style={{ color: "#ff6b6b", fontSize: 12, marginTop: 4 }}>
+                {error}
+              </div>
+            )}
+            {success && (
+              <div style={{ color: "#4ade80", fontSize: 12, marginTop: 4 }}>
+                {success}
+              </div>
+            )}
+          </div>
 
-      <div style={{ marginTop: 16, fontSize: 13 }}>
-        Already have an account?{" "}
-        <a href="/signin" onClick={(e) => { e.preventDefault(); history.push("/signin"); }}>
-          Sign in
-        </a>
+          <button
+            type="submit"
+            className="cal-btn cal-btn-primary"
+            disabled={isLoading}
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            {isLoading ? "Creating account..." : "Create account"}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          Already have an account?{" "}
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => history.push("/signin")}
+          >
+            Sign in
+          </button>
+        </div>
       </div>
     </div>
   );

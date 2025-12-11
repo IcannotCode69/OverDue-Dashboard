@@ -41,6 +41,8 @@ html,
 body,
 #root {
   height: 100%;
+  margin: 0;
+  padding: 0;
   background: var(--bg-0);
   font-family: var(--font-sans);
   color: var(--ink-0);
@@ -74,6 +76,131 @@ body,
   padding: 24px 24px 32px;
   position: relative;
   z-index: 1;
+}
+
+/* Full-screen shell for landing/auth */
+.auth-shell {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #08142f 0%, #020617 45%, #020617 100%);
+  overflow: hidden;
+}
+
+/* Full-screen landing layout */
+.landing-shell,
+.landing-page-root {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #101933 0%, #050713 60%, #040010 100%);
+}
+
+/* Inner content wrapper for the hero */
+.landing-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 24px;
+  max-width: 640px;
+}
+
+/* OverDue title */
+.landing-title {
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+/* Tagline under the title */
+.landing-tagline {
+  font-size: 1rem;
+  color: var(--ink-3, #9ca3af);
+  margin-bottom: 2.5rem;
+}
+
+/* Row for Sign Up / Sign In buttons */
+.landing-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Full-screen background for auth pages */
+.auth-shell--form {
+  padding: 0;
+}
+
+/* Card that holds the auth form */
+.auth-card,
+.auth-page-shell {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #020617, #050818);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
+  padding: 32px 32px 28px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.auth-card h1,
+.auth-page-shell h1 {
+  margin-bottom: 8px;
+}
+
+.auth-card p.auth-subtitle,
+.auth-page-shell p.auth-subtitle {
+  margin-bottom: 24px;
+  color: var(--ink-3, #9ca3af);
+  font-size: 0.9rem;
+}
+
+.auth-card form > * + *,
+.auth-page-shell form > * + * {
+  margin-top: 0.9rem;
+}
+
+.auth-card .auth-footer,
+.auth-page-shell .auth-footer {
+  margin-top: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--ink-3, #9ca3af);
+  text-align: center;
+}
+
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #4f8cff;
+  cursor: pointer;
+  font: inherit;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .auth-card,
+  .auth-page-shell {
+    margin: 0 16px;
+    padding: 24px 20px 20px;
+  }
 }
 
 .mesh-overlay {

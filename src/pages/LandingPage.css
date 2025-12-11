@@ -1,0 +1,62 @@
+.landing-main {
+  position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.landing-glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  width: 500px;
+  height: 300px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at center, #2563eb 0%, transparent 60%);
+  filter: blur(80px);
+  opacity: 0.9;
+  pointer-events: none;
+  animation: landing-glow-pulse 6s ease-in-out infinite;
+}
+
+.landing-title {
+  position: relative;
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 40px rgba(37, 99, 235, 0.6);
+}
+
+.landing-typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 4px;
+  background-color: #ffffff;
+  vertical-align: baseline;
+  animation: landing-blink 1s steps(2, start) infinite;
+}
+
+@keyframes landing-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.09);
+  }
+}
+
+@keyframes landing-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
