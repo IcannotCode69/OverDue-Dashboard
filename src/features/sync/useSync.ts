@@ -1,7 +1,11 @@
 import * as React from 'react';
 import type { DashboardSnapshot } from './snapshot';
-import { buildSnapshotFromLocal } from './snapshot';
-import { loadSnapshot, saveSnapshot } from './apiClient';
+import {
+  buildLocalSnapshot,
+  applySnapshotToLocalApp,
+  fetchSnapshotFromCloud,
+  saveSnapshotToCloud,
+} from '../cloudSync/cloudSyncService';
 import { useApplySnapshotToAppState } from '../cloudSync/applySnapshotToAppState';
 
 export function useSync() {
@@ -19,7 +23,7 @@ export function useSync() {
     setIsSyncing(true);
     setSyncError(null);
     try {
-      const snapshot = await loadSnapshot(userId);
+      const snapshot = await fetchSnapshotFromCloud(userId);
       if (snapshot) {
         applySnapshotToAppState(snapshot);
         setLastSyncedAt(snapshot.updatedAt);
@@ -43,8 +47,8 @@ export function useSync() {
     setIsSyncing(true);
     setSyncError(null);
     try {
-      const snapshot: DashboardSnapshot = buildSnapshotFromLocal();
-      await saveSnapshot(userId, snapshot);
+      const snapshot: DashboardSnapshot = buildLocalSnapshot();
+      await saveSnapshotToCloud(userId, snapshot);
       setLastSyncedAt(snapshot.updatedAt);
     } catch (err) {
       console.error(err);

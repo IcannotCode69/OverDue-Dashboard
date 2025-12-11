@@ -11,6 +11,7 @@ import { useUserProfileStore } from "./features/user/userProfile.store";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
+import { useAutoCloudSync } from "./features/cloudSync/useAutoCloudSync";
 
 // Simple sidebar component using standard HTML/CSS instead of complex Vision UI components
 function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
@@ -129,7 +130,8 @@ function AppContent() {
   const history = useHistory();
   const location = useLocation();
   const { profile } = useUserProfileStore();
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, userEmail, isLoading, isAuthenticated } = useAuth();
+  useAutoCloudSync(userEmail);
 
   React.useEffect(() => {
     if (isLoading) return;

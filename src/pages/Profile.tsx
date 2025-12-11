@@ -34,11 +34,8 @@ export default function ProfilePage() {
 
   const isDirty = methods.formState.isDirty;
   const isValid = methods.formState.isValid;
-  const email = methods.watch('email');
-  const { user } = useAuth();
-  const authUserId = getUserIdFromAuth(user);
-  const fallbackProfileId = (email || '').trim();
-  const userId = authUserId || fallbackProfileId || '';
+  const { userEmail } = useAuth();
+  const userId = (userEmail || '').trim();
 
   const {
     isSyncing,
@@ -133,9 +130,9 @@ export default function ProfilePage() {
         <div style={{ marginTop: 24, display: 'grid', gap: 16 }}>
           <div className="app-card">
             <h2 style={{ fontSize: 16, marginBottom: 8 }}>Cloud Sync (preview)</h2>
-            <p style={{ fontSize: 13, color: 'var(--ink-3, #97a1c0)', marginBottom: 8 }}>
-              Sync your dashboard to the cloud using your signed-in account.
-            </p>
+              <p style={{ fontSize: 13, color: 'var(--ink-3, #97a1c0)', marginBottom: 8 }}>
+                Sync your dashboard to the cloud using your signed-in account.
+              </p>
             <p style={{ fontSize: 12, marginBottom: 8 }}>
               <strong>Signed in as:</strong>{' '}
               {userId ? userId : <span style={{ opacity: 0.7 }}>Sign in to use Cloud Sync.</span>}

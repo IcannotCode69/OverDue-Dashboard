@@ -26,6 +26,8 @@ interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  userEmail: string | null;
+  userName: string | null;
   signIn: (params: { email: string; password: string }) => Promise<void>;
   signUp: (params: { email: string; password: string; name?: string }) => Promise<void>;
   signOut: () => Promise<void> | void;
@@ -252,6 +254,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       isAuthenticated: Boolean(user),
       isLoading: loading,
+      userEmail: user?.email ?? null,
+      userName: user?.name ?? null,
       signIn,
       signUp,
       signOut,
