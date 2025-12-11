@@ -19,7 +19,11 @@ export async function loadSnapshot(userId: string): Promise<DashboardSnapshot | 
   }
 
   const url = `${base}/snapshot?userId=${encodeURIComponent(userId)}`;
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: {
+      'x-user-id': userId,
+    },
+  });
 
   if (res.status === 404) {
     return null;

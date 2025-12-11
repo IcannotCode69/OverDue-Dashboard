@@ -8,6 +8,8 @@ import ProfileForm from '../components/profile/ProfileForm';
 import '../features/profile/profile.styles.css';
 import { resetAllLocalData } from '../features/sync/resetLocalData';
 import { useSync } from '../features/sync/useSync';
+import { useAuth } from '../features/auth/AuthContext';
+import { getUserIdFromAuth } from '../features/sync/userId';
 
 type FormShape = Profile & Preferences;
 
@@ -33,7 +35,10 @@ export default function ProfilePage() {
   const isDirty = methods.formState.isDirty;
   const isValid = methods.formState.isValid;
   const email = methods.watch('email');
-  const userId = (email || '').trim();
+  const { user } = useAuth();
+  const authUserId = getUserIdFromAuth(user);
+  const fallbackProfileId = (email || '').trim();
+  const userId = authUserId || fallbackProfileId || '';
 
   const {
     isSyncing,
@@ -129,11 +134,11 @@ export default function ProfilePage() {
           <div className="app-card">
             <h2 style={{ fontSize: 16, marginBottom: 8 }}>Cloud Sync (preview)</h2>
             <p style={{ fontSize: 13, color: 'var(--ink-3, #97a1c0)', marginBottom: 8 }}>
-              Use your profile email as your cloud id. You can load data from the cloud or save your current dashboard snapshot.
+              Sync your dashboard to the cloud using your signed-in account.
             </p>
             <p style={{ fontSize: 12, marginBottom: 8 }}>
-              <strong>User id:</strong>{' '}
-              {userId ? userId : <span style={{ opacity: 0.7 }}>Add an email in your profile to enable sync.</span>}
+              <strong>Signed in as:</strong>{' '}
+              {userId ? userId : <span style={{ opacity: 0.7 }}>Sign in to use Cloud Sync.</span>}
             </p>
             {lastSyncedAt && (
               <p style={{ fontSize: 12, marginBottom: 8 }}>
@@ -150,7 +155,7 @@ export default function ProfilePage() {
                 type="button"
                 className="app-button-primary"
                 disabled={isSyncing || !userId}
-                onClick={() => syncFromCloud(userId)}
+                onClick={() => userId && syncFromCloud(userId)}
               >
                 {isSyncing ? 'Syncing...' : 'Load from cloud'}
               </button>
@@ -158,7 +163,7 @@ export default function ProfilePage() {
                 type="button"
                 className="app-button-primary"
                 disabled={isSyncing || !userId}
-                onClick={() => syncToCloud(userId)}
+                onClick={() => userId && syncToCloud(userId)}
               >
                 {isSyncing ? 'Syncing...' : 'Save to cloud'}
               </button>
