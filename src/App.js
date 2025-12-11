@@ -8,10 +8,15 @@ import routes from "./routes";
 import { useVisionUIController } from "./context";
 import "./styles/theme.tokens.css";
 import { useUserProfileStore } from "./features/user/userProfile.store";
+import { AuthProvider, useAuth } from "./features/auth/AuthContext";
+import LandingPage from "./pages/LandingPage";
+import ProtectedRoute from "./features/auth/ProtectedRoute";
 
 // Simple sidebar component using standard HTML/CSS instead of complex Vision UI components
 function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
-  const greeting = profile?.name ? `Hi, ${profile.name.split(" ")[0]}` : "Let's plan your week";
+  const history = useHistory();
+  const { user, signOut } = useAuth();
+  const greetingName = user?.name || user?.email || profile?.name || "there";
   return (
     <div
       className="sidenav"
@@ -43,13 +48,13 @@ function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
         OverDue Dashboard
       </div>
       <div style={{ color: "var(--ink-2)", textAlign: "center", marginBottom: 24, fontSize: 13 }}>
-        {greeting}
+        {`Hi, ${greetingName}`}
       </div>
 
       <nav>
         {routes.map((route) => {
           if (route.hideInNav) return null;
-          const targetRoute = route.key === "signup" ? "/onboarding" : route.route;
+          const targetRoute = route.route;
           const isActive = currentPath === targetRoute;
           return (
             <a
@@ -78,25 +83,57 @@ function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
           );
         })}
       </nav>
+
+      <div style={{ marginTop: "auto", paddingTop: 12 }}>
+        <button
+          type="button"
+          onClick={async () => {
+            await signOut();
+            history.push("/");
+          }}
+          style={{
+            background: "transparent",
+            border: "1px solid rgba(255,255,255,0.1)",
+            color: "var(--ink-1)",
+            borderRadius: 10,
+            padding: "8px 12px",
+            width: "100%",
+            cursor: "pointer",
+          }}
+        >
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }
 
-export default function App() {
+function AppContent() {
   const [controller] = useVisionUIController();
   const { layout } = controller;
   const history = useHistory();
   const location = useLocation();
   const { profile } = useUserProfileStore();
+  const { user, isLoading } = useAuth();
 
   React.useEffect(() => {
-    const path = location.pathname;
-    const isOnboarding = path.startsWith("/onboarding");
-    const isAuthRoute = path.startsWith("/signin") || path.startsWith("/signup");
-    if (!profile && !isOnboarding && !isAuthRoute) {
+    if (isLoading) return;
+
+    const path = location.pathname || "/";
+    const isOnboardingRoute = path.startsWith("/onboarding");
+    const isAuthRoute =
+      path.startsWith("/signin") ||
+      path.startsWith("/signup");
+
+    if (user && !profile && !isOnboardingRoute && !isAuthRoute) {
       history.replace("/onboarding");
+      return;
     }
-  }, [profile, location.pathname, history]);
+
+    if (user && isAuthRoute) {
+      history.replace("/dashboard");
+    }
+  }, [user, profile, isLoading, location.pathname, history]);
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {
@@ -105,34 +142,49 @@ export default function App() {
       }
 
       if (route.route) {
-        return <Route exact path={route.route} component={route.component} key={route.key} />;
+        const isPublic = route.key === "signin" || route.key === "signup" || route.key === "onboarding";
+        if (isPublic) {
+          return <Route exact path={route.route} component={route.component} key={route.key} />;
+        }
+        return <ProtectedRoute exact path={route.route} component={route.component} key={route.key} />;
       }
 
       return null;
     });
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <div className="app-root">
-        <div className="app-shell">
-          <SimpleSidebar
-            routes={routes}
-            profile={profile}
-            currentPath={location.pathname}
-            onNavigate={(route) => history.push(route)}
-          />
+    <div className="app-root">
+      <div className="app-shell">
+        <SimpleSidebar
+          routes={routes}
+          profile={profile}
+          currentPath={location.pathname}
+          onNavigate={(route) => history.push(route)}
+        />
           <div className="app-content">
             <div className="mesh-overlay" />
             <main className="app-main">
               <Switch>
+                <Route exact path="/" component={LandingPage} />
                 {getRoutes(routes)}
                 <Redirect from="*" to="/dashboard" />
               </Switch>
             </main>
           </div>
-        </div>
       </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
+
+export default App;
