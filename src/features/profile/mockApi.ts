@@ -1,5 +1,7 @@
 import { Profile, Preferences, SecurityState, Connections } from './types';
 import { generateId } from '../../utils/randomId';
+import { AuthUser } from '../auth/AuthContext';
+import { getUserIdFromAuth } from '../sync/userId';
 
 const delay = (ms = 450) => new Promise((res) => setTimeout(res, ms));
 
@@ -10,29 +12,56 @@ const KEYS = {
   connections: 'overdue.connections.v1',
 };
 
+const AUTH_STORAGE_KEY = 'od:auth:currentUser:v1';
+
+function loadAuthUser(): AuthUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AuthUser;
+    if (!parsed || !parsed.email) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function withUserSuffix(baseKey: string, userId: string | null): string {
+  if (!userId) return baseKey;
+  return `${baseKey}:${userId}`;
+}
+
 const CURRENT_YEAR = new Date().getFullYear();
 
-const DEFAULT_PROFILE: Profile = {
-  firstName: '',
-  lastName: '',
-  displayName: '',
-  handle: '',
-  email: '',
-  phone: '',
-  bio: '',
-  timezone: 'America/New_York',
-  locale: 'en-US',
-  school: '',
-  program: '',
-  graduationYear: CURRENT_YEAR,
-  socials: {
-    github: '',
-    linkedin: '',
-    website: '',
-  },
-  avatarUrl: '',
-  coverUrl: '',
-};
+function buildDefaultProfile(authUser: AuthUser | null): Profile {
+  const tz = typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone
+    : 'America/New_York';
+  const locale = typeof navigator !== 'undefined' && navigator.language ? navigator.language : 'en-US';
+
+  return {
+    firstName: '',
+    lastName: '',
+    displayName: authUser?.name || '',
+    handle: '',
+    email: authUser?.email || '',
+    phone: '',
+    bio: '',
+    timezone: tz,
+    locale,
+    school: '',
+    program: '',
+    graduationYear: CURRENT_YEAR,
+    socials: {
+      github: '',
+      linkedin: '',
+      website: '',
+    },
+    avatarUrl: '',
+    coverUrl: '',
+  };
+}
 
 const ONBOARDING_STORAGE_KEY = 'od:userProfile:v1';
 
@@ -146,7 +175,10 @@ function isDemoProfile(profile: Profile): boolean {
 export async function loadProfile(): Promise<Profile> {
   await delay();
 
-  const stored = read(KEYS.profile, DEFAULT_PROFILE) as Profile;
+  const authUser = loadAuthUser();
+  const userId = getUserIdFromAuth(authUser);
+  const key = withUserSuffix(KEYS.profile, userId);
+  const stored = read(key, buildDefaultProfile(authUser)) as Profile;
 
   if (!isDemoProfile(stored)) {
     return stored;
@@ -155,22 +187,25 @@ export async function loadProfile(): Promise<Profile> {
   const onboarding = readOnboardingProfileFromLocalStorage();
   if (onboarding) {
     const merged: Profile = {
-      ...DEFAULT_PROFILE,
+      ...buildDefaultProfile(authUser),
       ...stored,
       ...onboarding,
     };
 
-    write(KEYS.profile, merged);
+    write(key, merged);
     return merged;
   }
 
-  const fresh: Profile = { ...DEFAULT_PROFILE };
-  write(KEYS.profile, fresh);
+  const fresh: Profile = { ...buildDefaultProfile(authUser) };
+  write(key, fresh);
   return fresh;
 }
 export async function saveProfile(profile: Profile): Promise<void> {
   await delay(600);
-  write(KEYS.profile, profile);
+  const authUser = loadAuthUser();
+  const userId = getUserIdFromAuth(authUser);
+  const key = withUserSuffix(KEYS.profile, userId);
+  write(key, profile);
 }
 
 export async function loadPreferences(): Promise<Preferences> {

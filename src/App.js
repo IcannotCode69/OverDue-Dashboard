@@ -15,8 +15,25 @@ import ProtectedRoute from "./features/auth/ProtectedRoute";
 // Simple sidebar component using standard HTML/CSS instead of complex Vision UI components
 function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
   const history = useHistory();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAuthenticated, isLoading } = useAuth();
   const greetingName = user?.name || user?.email || profile?.name || "there";
+
+  const visibleRoutes = routes.filter((route) => {
+    if (route.hideInNav) return false;
+    if (!isAuthenticated && (route.key === "dashboard" || route.key === "calendar" || route.key === "notes" || route.key === "study-planner" || route.key === "assistant" || route.key === "grades" || route.key === "profile")) {
+      return false;
+    }
+    if (isAuthenticated && (route.key === "signin" || route.key === "signup")) {
+      return false;
+    }
+    return true;
+  });
+
+  const handleSignOut = async () => {
+    await signOut();
+    history.push("/signin");
+  };
+
   return (
     <div
       className="sidenav"
@@ -52,8 +69,7 @@ function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
       </div>
 
       <nav>
-        {routes.map((route) => {
-          if (route.hideInNav) return null;
+        {visibleRoutes.map((route) => {
           const targetRoute = route.route;
           const isActive = currentPath === targetRoute;
           return (
@@ -84,26 +100,25 @@ function SimpleSidebar({ routes, profile, onNavigate, currentPath }) {
         })}
       </nav>
 
-      <div style={{ marginTop: "auto", paddingTop: 12 }}>
-        <button
-          type="button"
-          onClick={async () => {
-            await signOut();
-            history.push("/");
-          }}
-          style={{
-            background: "transparent",
-            border: "1px solid rgba(255,255,255,0.1)",
-            color: "var(--ink-1)",
-            borderRadius: 10,
-            padding: "8px 12px",
-            width: "100%",
-            cursor: "pointer",
-          }}
-        >
-          Sign out
-        </button>
-      </div>
+      {isAuthenticated && !isLoading && (
+        <div style={{ marginTop: "auto", paddingTop: 12 }}>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "var(--ink-1)",
+              borderRadius: 10,
+              padding: "8px 12px",
+              width: "100%",
+              cursor: "pointer",
+            }}
+          >
+            Sign out
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -114,7 +129,7 @@ function AppContent() {
   const history = useHistory();
   const location = useLocation();
   const { profile } = useUserProfileStore();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
 
   React.useEffect(() => {
     if (isLoading) return;
@@ -142,7 +157,7 @@ function AppContent() {
       }
 
       if (route.route) {
-        const isPublic = route.key === "signin" || route.key === "signup" || route.key === "onboarding";
+        const isPublic = route.key === "signin" || route.key === "signup";
         if (isPublic) {
           return <Route exact path={route.route} component={route.component} key={route.key} />;
         }
@@ -155,17 +170,21 @@ function AppContent() {
   return (
     <div className="app-root">
       <div className="app-shell">
-        <SimpleSidebar
-          routes={routes}
-          profile={profile}
-          currentPath={location.pathname}
-          onNavigate={(route) => history.push(route)}
-        />
+        {isAuthenticated && (
+          <SimpleSidebar
+            routes={routes}
+            profile={profile}
+            currentPath={location.pathname}
+            onNavigate={(route) => history.push(route)}
+          />
+        )}
           <div className="app-content">
             <div className="mesh-overlay" />
             <main className="app-main">
               <Switch>
-                <Route exact path="/" component={LandingPage} />
+                <Route exact path="/">
+                  {isAuthenticated ? <Redirect to="/dashboard" /> : <LandingPage />}
+                </Route>
                 {getRoutes(routes)}
                 <Redirect from="*" to="/dashboard" />
               </Switch>

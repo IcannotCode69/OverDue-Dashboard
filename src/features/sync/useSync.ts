@@ -1,12 +1,14 @@
 import * as React from 'react';
 import type { DashboardSnapshot } from './snapshot';
-import { buildSnapshotFromLocal, applySnapshotToLocal } from './snapshot';
+import { buildSnapshotFromLocal } from './snapshot';
 import { loadSnapshot, saveSnapshot } from './apiClient';
+import { useApplySnapshotToAppState } from '../cloudSync/applySnapshotToAppState';
 
 export function useSync() {
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [lastSyncedAt, setLastSyncedAt] = React.useState<string | null>(null);
   const [syncError, setSyncError] = React.useState<string | null>(null);
+  const { applySnapshotToAppState } = useApplySnapshotToAppState();
 
   const syncFromCloud = React.useCallback(async (userId: string) => {
     if (!userId) {
@@ -19,7 +21,7 @@ export function useSync() {
     try {
       const snapshot = await loadSnapshot(userId);
       if (snapshot) {
-        applySnapshotToLocal(snapshot);
+        applySnapshotToAppState(snapshot);
         setLastSyncedAt(snapshot.updatedAt);
       } else {
         setSyncError('No cloud data found for this user yet.');

@@ -1,7 +1,8 @@
 import * as React from "react";
 import { useHistory } from "react-router-dom";
 import { useUserProfileStore } from "../features/user/userProfile.store";
-import { generateId } from "../utils/randomId";
+import { useAuth } from "../features/auth/AuthContext";
+import { saveProfile } from "../features/profile/mockApi";
 
 function fieldStyle() {
   return {
@@ -24,7 +25,9 @@ const inputStyle: React.CSSProperties = {
 export default function OnboardingPage() {
   const history = useHistory();
   const { setProfile } = useUserProfileStore();
+  const { user } = useAuth();
   const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [school, setSchool] = React.useState("");
   const [major, setMajor] = React.useState("");
   const [term, setTerm] = React.useState("");
@@ -33,23 +36,59 @@ export default function OnboardingPage() {
   );
   const [isSubmitting, setSubmitting] = React.useState(false);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  React.useEffect(() => {
+    if (user?.name) {
+      setName(user.name);
+    }
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user]);
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!name.trim()) return;
+    const trimmedEmail = email.trim();
     setSubmitting(true);
-    const now = Date.now();
+    const [firstName, ...rest] = name.trim().split(" ");
+    const lastName = rest.join(" ").trim();
     const profile = {
-      id: generateId(),
-      name: name.trim(),
-      school: school.trim() || undefined,
-      major: major.trim() || undefined,
-      term: term.trim() || undefined,
-      timezone: timezone.trim() || undefined,
-      createdAt: now,
-      updatedAt: now,
+      firstName: firstName || "",
+      lastName: lastName || "",
+      displayName: name.trim(),
+      handle: "",
+      email: trimmedEmail,
+      phone: "",
+      bio: "",
+      timezone: timezone.trim(),
+      locale: (typeof navigator !== "undefined" && navigator.language) || "en-US",
+      school: school.trim(),
+      program: major.trim(),
+      graduationYear: undefined,
+      socials: { github: "", linkedin: "", website: "" },
+      avatarUrl: "",
+      coverUrl: "",
     };
-    setProfile(profile);
-    history.replace("/dashboard");
+
+    try {
+      await saveProfile(profile);
+      setProfile({
+        fullName: name.trim(),
+        email: trimmedEmail,
+        school: school.trim(),
+        program: major.trim(),
+        graduationYear: "",
+        bio: "",
+        timezone: timezone.trim(),
+        locale: (typeof navigator !== "undefined" && navigator.language) || "en-US",
+        github: "",
+        linkedin: "",
+        website: "",
+      });
+      history.replace("/dashboard");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -92,6 +131,15 @@ export default function OnboardingPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your full name"
+              style={inputStyle}
+            />
+          </div>
+          <div style={fieldStyle()}>
+            <label style={{ fontSize: 13, opacity: 0.8 }}>Email</label>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
               style={inputStyle}
             />
           </div>
